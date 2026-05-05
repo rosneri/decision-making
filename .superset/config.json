@@ -1,0 +1,9 @@
+{
+  "setup": [
+    "npm install && ln -s \"$SUPERSET_ROOT_PATH/.env.local\" . && ln -s \"$SUPERSET_ROOT_PATH/.vercel\" ."
+  ],
+  "teardown": [],
+  "run": [
+    "npm run dev"
+  ]
+}
