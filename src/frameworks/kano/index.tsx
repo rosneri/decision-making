@@ -1,50 +1,8 @@
 "use client";
 import { useState } from "react";
-import { z } from "zod";
-
-const CATS = ["must", "performance", "delighter", "indifferent"] as const;
-type Cat = (typeof CATS)[number];
-
-export const meta = {
-  id: "kano",
-  name: "Kano Model",
-  category: "Product & UX",
-  blurb: "Sort features into must-haves, performance, delighters, indifferent.",
-} as const;
-
-export const schema = z.object({
-  framework: z.literal("kano"),
-  category: z.string(),
-  title: z.string(),
-  features: z.array(z.object({
-    name: z.string(),
-    category: z.enum(CATS),
-  })).min(1).max(20),
-  recommendation: z.string(),
-});
-export type Kano = z.infer<typeof schema>;
-
-export const sample: Kano = {
-  framework: "kano",
-  category: meta.category,
-  title: "Which features actually make customers love us?",
-  features: [
-    { name: "login works", category: "must" },
-    { name: "data exports", category: "must" },
-    { name: "faster search", category: "performance" },
-    { name: "rich filters", category: "performance" },
-    { name: "handwritten welcome card", category: "delighter" },
-    { name: "obscure setting toggle", category: "indifferent" },
-  ],
-  recommendation: "Don't waste a quarter polishing indifferents. Fix the must-haves; budget 20% for one delighter.",
-};
-
-const CAT_META: Record<Cat, { label: string; color: string }> = {
-  must: { label: "Must-have", color: "border-ink text-ink" },
-  performance: { label: "Performance", color: "border-ink-muted text-ink-muted" },
-  delighter: { label: "Delighter", color: "border-vermilion text-vermilion" },
-  indifferent: { label: "Indifferent", color: "border-rule text-ink-muted" },
-};
+import { meta, schema, sample, type Kano, CATS, type Cat, CAT_META } from "./data";
+export { meta, schema, sample };
+export type { Kano };
 
 export function View({ data, onUpdate }: { data: Kano; onUpdate?: (d: Kano) => void }) {
   const [s, setS] = useState(data);

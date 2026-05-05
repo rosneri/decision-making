@@ -20,7 +20,6 @@ interface SavedState {
   decisionText: string;
   theme: Theme;
   result: FrameworkResult | null;
-  recNote: string | null;
 }
 
 function loadSavedState(): SavedState | null {
@@ -61,7 +60,7 @@ export function DecisionApp() {
   const [decisionText, setText]   = useState("");
   const [theme, setTheme]         = useState<Theme>("light");
   const [result, setResult]       = useState<FrameworkResult | null>(null);
-  const [recNote, setRecNote]     = useState<string | null>(null);
+  const [serverResultKey, setServerResultKey] = useState<string | null>(null);
   const [recLoading, setRecLoading] = useState(false);
   const [analyzeReady, setAnalyzeReady] = useState(false);
   const [analyzeError, setAnalyzeError] = useState<{ message: string; code: string } | null>(null);
@@ -80,8 +79,10 @@ export function DecisionApp() {
         setRoute(restoredRoute);
         setText(saved.decisionText ?? "");
         setTheme(saved.theme ?? "light");
-        if (saved.result) setResult(saved.result);
-        if (saved.recNote) setRecNote(saved.recNote);
+        if (saved.result) {
+          setResult(saved.result);
+          setServerResultKey(JSON.stringify(saved.result));
+        }
       });
     }
     hydratedRef.current = true;
@@ -90,8 +91,8 @@ export function DecisionApp() {
   // ── Persist whenever state changes (after hydration) ──
   useEffect(() => {
     if (!hydratedRef.current) return;
-    persistState({ route, decisionText, theme, result, recNote });
-  }, [route, decisionText, theme, result, recNote]);
+    persistState({ route, decisionText, theme, result });
+  }, [route, decisionText, theme, result]);
 
   // ── Apply theme to <html> ──
   useEffect(() => {
@@ -102,17 +103,17 @@ export function DecisionApp() {
   const submit = (text: string) => {
     setText(text);
     setRoute("reading");
-    setRecNote(null);
     setAnalyzeReady(false);
     setAnalyzeError(null);
     setResult(null);
+    setServerResultKey(null);
     const id = ++recReqRef.current;
     setRecLoading(true);
     fetchAnalysis(text)
       .then((r: AnalysisResult) => {
         if (id !== recReqRef.current) return;
         setResult(r);
-        setRecNote(r.recommendation);
+        setServerResultKey(JSON.stringify(r));
         setRecLoading(false);
         setAnalyzeReady(true);
       })
@@ -214,10 +215,11 @@ export function DecisionApp() {
 
             <RecommendationCard
               key={decisionText}
-              decisionText={decisionText}
-              result={result}
-              initialNote={recNote}
-              initialLoading={recLoading}
+              note={result.recommendation ?? null}
+              loading={recLoading}
+              error={analyzeError?.message ?? null}
+              dataChanged={serverResultKey !== null && JSON.stringify(result) !== serverResultKey}
+              onRerecommend={() => submit(decisionText)}
             />
 
             <div className="flex gap-3 mt-10 items-center">

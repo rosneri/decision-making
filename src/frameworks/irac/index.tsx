@@ -1,44 +1,8 @@
 "use client";
 import { useState } from "react";
-import { z } from "zod";
-
-const BLOCKS = ["I", "R", "A", "C"] as const;
-type Block = (typeof BLOCKS)[number];
-
-export const meta = {
-  id: "irac",
-  name: "IRAC",
-  category: "Legal & judicial",
-  blurb: "Issue, Rule, Application, Conclusion — the legal-analysis spine.",
-} as const;
-
-export const schema = z.object({
-  framework: z.literal("irac"),
-  category: z.string(),
-  title: z.string(),
-  blocks: z.object({
-    I: z.string(), R: z.string(), A: z.string(), C: z.string(),
-  }),
-  recommendation: z.string(),
-});
-export type Irac = z.infer<typeof schema>;
-
-export const sample: Irac = {
-  framework: "irac",
-  category: meta.category,
-  title: "Can my client take the competing job offer?",
-  blocks: {
-    I: "is the non-compete enforceable in CA?",
-    R: "Cal. Bus. & Prof. § 16600 — void with narrow exceptions",
-    A: "no sale-of-business exception · employee in CA · trade-secret carve-out NPE",
-    C: "likely unenforceable · advise client to proceed",
-  },
-  recommendation: "Proceed with the new offer; document the carve-out limits and brief the client on trade-secret hygiene.",
-};
-
-const META: Record<Block, { word: string }> = {
-  I: { word: "Issue" }, R: { word: "Rule" }, A: { word: "Application" }, C: { word: "Conclusion" },
-};
+import { meta, schema, sample, type Irac, BLOCKS, type Block, META } from "./data";
+export { meta, schema, sample };
+export type { Irac };
 
 export function View({ data, onUpdate }: { data: Irac; onUpdate?: (d: Irac) => void }) {
   const [s, setS] = useState(data);

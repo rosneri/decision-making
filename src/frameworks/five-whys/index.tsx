@@ -1,38 +1,8 @@
 "use client";
 import { useState } from "react";
-import { z } from "zod";
-
-export const meta = {
-  id: "five_whys",
-  name: "5 Whys",
-  category: "Operations & quality",
-  blurb: "Drill from symptom to root cause by asking 'why' five times.",
-} as const;
-
-export const schema = z.object({
-  framework: z.literal("five_whys"),
-  category: z.string(),
-  title: z.string(),
-  problem: z.string(),
-  whys: z.array(z.string()).min(1).max(8),
-  recommendation: z.string(),
-});
-export type FiveWhys = z.infer<typeof schema>;
-
-export const sample: FiveWhys = {
-  framework: "five_whys",
-  category: meta.category,
-  title: "Why did production go down on Tuesday?",
-  problem: "the deploy broke production",
-  whys: [
-    "the migration ran twice",
-    "no idempotency check",
-    "the script was copy-pasted from staging",
-    "we have no shared deploy lib",
-    "nobody owns infra tooling",
-  ],
-  recommendation: "Stop adding migration patches. Assign infra-tooling ownership and ship a shared deploy lib in Q3.",
-};
+import { meta, schema, sample, type FiveWhys } from "./data";
+export { meta, schema, sample };
+export type { FiveWhys };
 
 export function View({ data, onUpdate }: { data: FiveWhys; onUpdate?: (d: FiveWhys) => void }) {
   const [s, setS] = useState(data);

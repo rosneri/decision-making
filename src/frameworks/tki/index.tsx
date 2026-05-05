@@ -1,46 +1,8 @@
 "use client";
 import { useState } from "react";
-import { z } from "zod";
-
-const MODES = ["compete", "collaborate", "compromise", "avoid", "accommodate"] as const;
-type Mode = (typeof MODES)[number];
-
-export const meta = {
-  id: "tki",
-  name: "Thomas-Kilmann Modes",
-  category: "Negotiation & conflict",
-  blurb: "Five conflict modes plotted on assertiveness × cooperativeness.",
-} as const;
-
-export const schema = z.object({
-  framework: z.literal("tki"),
-  category: z.string(),
-  title: z.string(),
-  assertiveness: z.number().min(0).max(10),
-  cooperativeness: z.number().min(0).max(10),
-  recommendation: z.string(),
-});
-export type Tki = z.infer<typeof schema>;
-
-export const sample: Tki = {
-  framework: "tki",
-  category: meta.category,
-  title: "Coworker keeps overriding my decisions in meetings.",
-  assertiveness: 8,
-  cooperativeness: 8,
-  recommendation: "High stakes + ongoing relationship → collaborate. Schedule a 1:1, name the pattern, propose a joint protocol.",
-};
-
-const ANCHORS: Record<Mode, { x: number; y: number; sub: string }> = {
-  compete: { x: 1, y: 9, sub: "I win" },
-  collaborate: { x: 9, y: 9, sub: "we both win" },
-  compromise: { x: 5, y: 5, sub: "split" },
-  avoid: { x: 1, y: 1, sub: "skip it" },
-  accommodate: { x: 9, y: 1, sub: "you win" },
-};
-
-const dist = (a: { x: number; y: number }, b: { x: number; y: number }) =>
-  Math.hypot(a.x - b.x, a.y - b.y);
+import { meta, schema, sample, type Tki, MODES, ANCHORS, dist } from "./data";
+export { meta, schema, sample };
+export type { Tki };
 
 export function View({ data, onUpdate }: { data: Tki; onUpdate?: (d: Tki) => void }) {
   const [s, setS] = useState(data);
