@@ -19,29 +19,30 @@ const sample: DecisionMatrix = {
 };
 
 describe("<DecisionMatrixView />", () => {
-  it("renders title and option rows", () => {
+  it("renders option rows", () => {
     render(<DecisionMatrixView data={sample} />);
-    expect(screen.getByText("Pick a city")).toBeInTheDocument();
-    expect(screen.getByText("Lisbon")).toBeInTheDocument();
-    expect(screen.getByText("Berlin")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("Lisbon")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("Berlin")).toBeInTheDocument();
   });
 
   it("computes weighted totals and marks the winner", () => {
     render(<DecisionMatrixView data={sample} />);
-    // Lisbon: 8*5 + 9*5 = 85; Berlin: 6*5 + 5*5 = 55
+    // totalW=10; Lisbon: (8*5+9*5)/10=8.50; Berlin: (6*5+5*5)/10=5.50
     const rows = screen.getAllByRole("row");
-    expect(within(rows[1]!).getByText("85")).toBeInTheDocument();
-    expect(within(rows[2]!).getByText("55")).toBeInTheDocument();
-    expect(screen.getByText(/winner/i)).toBeInTheDocument();
+    expect(within(rows[1]!).getByText("8.50")).toBeInTheDocument();
+    expect(within(rows[2]!).getByText("5.50")).toBeInTheDocument();
+    // winner row is marked with ▸
+    expect(within(rows[1]!).getByText("▸")).toBeInTheDocument();
   });
 
-  it("recomputes totals when a score slider changes", () => {
+  it("recomputes totals when a score changes", () => {
     render(<DecisionMatrixView data={sample} />);
-    const sliders = screen.getAllByRole("slider");
-    // Layout: [w0, w1, opt0-c0, opt0-c1, opt1-c0, opt1-c1]
-    // Boost Berlin's first score from 6 → 10: total 10*5 + 5*5 = 75
-    fireEvent.change(sliders[4]!, { target: { value: "10" } });
+    // Sliders are weight inputs; spinbuttons are score inputs
+    // spinbutton order: opt0-c0, opt0-c1, opt1-c0, opt1-c1
+    // Boost Berlin's first score from 6 → 10: (10*5+5*5)/10 = 7.50
+    const spinbuttons = screen.getAllByRole("spinbutton");
+    fireEvent.change(spinbuttons[2]!, { target: { value: "10" } });
     const rows = screen.getAllByRole("row");
-    expect(within(rows[2]!).getByText("75")).toBeInTheDocument();
+    expect(within(rows[2]!).getByText("7.50")).toBeInTheDocument();
   });
 });

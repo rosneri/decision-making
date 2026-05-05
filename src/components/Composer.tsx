@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 const EXAMPLES = [
   "Whether to take the new role.",
@@ -39,11 +39,14 @@ export function Composer({ onSubmit, initialText = "" }: Props) {
   const [text, setText]           = useState(initialText);
   const [recording, setRecording] = useState(false);
   const [transcript, setTranscript] = useState("");
-  const [srSupported] = useState(() => {
-    if (typeof window === "undefined") return false;
-    const w = window as unknown as { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown };
-    return !!(w.SpeechRecognition ?? w.webkitSpeechRecognition);
-  });
+  const srSupported = useSyncExternalStore(
+    () => () => {},
+    () => {
+      const w = window as unknown as { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown };
+      return !!(w.SpeechRecognition ?? w.webkitSpeechRecognition);
+    },
+    () => false,
+  );
   const taRef  = useRef<HTMLTextAreaElement>(null);
   const recRef = useRef<SR | null>(null);
 

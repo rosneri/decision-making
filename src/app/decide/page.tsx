@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { FRAMEWORKS, type FrameworkId, type FrameworkResult } from "@/frameworks";
 import { FrameworkRenderer } from "@/components/FrameworkRenderer";
@@ -34,11 +34,14 @@ export default function DecidePage() {
   const [error, setError]         = useState<string | null>(null);
   const [result, setResult]       = useState<FrameworkResult | null>(null);
   const [recording, setRecording] = useState(false);
-  const [supported] = useState(() => {
-    if (typeof window === "undefined") return false;
-    const w = window as unknown as { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown };
-    return !!(w.SpeechRecognition ?? w.webkitSpeechRecognition);
-  });
+  const supported = useSyncExternalStore(
+    () => () => {},
+    () => {
+      const w = window as unknown as { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown };
+      return !!(w.SpeechRecognition ?? w.webkitSpeechRecognition);
+    },
+    () => false,
+  );
   const recRef = useRef<SR | null>(null);
 
   useEffect(() => {

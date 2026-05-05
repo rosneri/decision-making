@@ -17,7 +17,6 @@ export function RecommendationCard({ initialNote, initialLoading, ...ctx }: Prop
   const lastDataKey           = useRef(dataKey(ctx));
   const lastFramework         = useRef(ctx.framework);
   const isFirstRender         = useRef(true);
-  const debounceTimer         = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const doFetch = async () => {
     const id = ++reqRef.current;
@@ -47,17 +46,12 @@ export function RecommendationCard({ initialNote, initialLoading, ...ctx }: Prop
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ctx.framework]);
 
-  // Auto-refetch with 3s debounce when data within the current framework changes
+  // Mark changed when data within the current framework is edited
   useEffect(() => {
     if (isFirstRender.current) return;
     if (ctx.framework === lastFramework.current && dataKey(ctx) !== lastDataKey.current) {
       setDataChanged(true);
-      if (debounceTimer.current) clearTimeout(debounceTimer.current);
-      debounceTimer.current = setTimeout(() => { void doFetch(); }, 3000);
     }
-    return () => {
-      if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(ctx.matrix), JSON.stringify(ctx.costBenefit), JSON.stringify(ctx.swot)]);
 
@@ -132,7 +126,7 @@ export function RecommendationCard({ initialNote, initialLoading, ...ctx }: Prop
           onClick={doFetch}
           className="mt-6 font-serif italic text-[17px] text-vermilion border-b border-vermilion pb-px inline-block bg-transparent border-t-0 border-l-0 border-r-0 p-0 cursor-pointer hover:text-vermilion-deep hover:border-vermilion-deep transition-colors duration-200"
         >
-          Re-read →
+          Re-recommend →
         </button>
       )}
     </aside>
