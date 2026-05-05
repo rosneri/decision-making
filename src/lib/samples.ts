@@ -1,6 +1,6 @@
-import type { FrameworkResult } from "./schemas";
+import type { FrameworkId, FrameworkResult } from "./schemas";
 
-export const SAMPLES: Record<string, FrameworkResult> = {
+export const SAMPLES = {
   decision_matrix: {
     framework: "decision_matrix",
     title: "Choosing a new laptop",
@@ -42,4 +42,4 @@ export const SAMPLES: Record<string, FrameworkResult> = {
     recommendation:
       "Lean into your audience and ship a thin v1 fast. Keep scope small enough to fit nights/weekends until traction justifies more.",
   },
-};
+} satisfies Record<FrameworkId, FrameworkResult>;

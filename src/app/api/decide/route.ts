@@ -1,9 +1,10 @@
 import { generateObject } from "ai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 
-const anthropic = createAnthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY ?? process.env.AI_GATEWAY_API_KEY,
-});
+const apiKey =
+  process.env["ANTHROPIC_API_KEY"] ?? process.env["AI_GATEWAY_API_KEY"];
+
+const anthropic = createAnthropic(apiKey ? { apiKey } : {});
 import { NextResponse } from "next/server";
 import {
   DecisionMatrixSchema,

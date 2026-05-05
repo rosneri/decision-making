@@ -34,6 +34,8 @@ export default function DecidePage() {
     };
     const Ctor = w.SpeechRecognition ?? w.webkitSpeechRecognition;
     if (!Ctor) return;
+    // One-time feature detection on mount; SSR cannot read window.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSupported(true);
     const r = new Ctor();
     r.continuous = true;
@@ -42,7 +44,8 @@ export default function DecidePage() {
     r.onresult = (e) => {
       let chunk = "";
       for (let i = 0; i < e.results.length; i++) {
-        chunk += e.results[i][0].transcript;
+        const alt = e.results[i]?.[0];
+        if (alt) chunk += alt.transcript;
       }
       setText((prev) => (prev ? prev.trim() + " " : "") + chunk.trim());
     };

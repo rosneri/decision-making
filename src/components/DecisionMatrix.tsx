@@ -114,7 +114,7 @@ export function DecisionMatrixView({ data }: { data: DecisionMatrix }) {
                     <div className="h-2 w-16 bg-neutral-200 dark:bg-neutral-800 rounded shrink-0">
                       <div
                         className="h-2 rounded bg-emerald-500"
-                        style={{ width: `${(totals[oi] / max) * 100}%` }}
+                        style={{ width: `${((totals[oi] ?? 0) / max) * 100}%` }}
                       />
                     </div>
                     <span className="text-xs">{totals[oi]}</span>
