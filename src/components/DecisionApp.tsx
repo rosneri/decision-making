@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { ChatFiller } from "./ChatFiller";
 import { Composer } from "./Composer";
 import { ReadingInterstitial } from "./ReadingInterstitial";
 import { RecommendationCard } from "./RecommendationCard";
@@ -50,6 +51,13 @@ export function DecisionApp() {
   const [recLoading, setRecLoading] = useState(false);
   const [analyzeReady, setAnalyzeReady] = useState(false);
   const [analyzeError, setAnalyzeError] = useState<{ message: string; code: string } | null>(null);
+  const [chatOpen, setChatOpen] = useState(false);
+  // Bumped each time the chat patches the result; used as a key on the
+  // active framework view so it remounts and picks up the new data.
+  // Framework views currently store their data in useState(data) and ignore
+  // later prop changes — remounting is the cheapest way to make external
+  // edits visible without rewriting every view.
+  const [viewVersion, setViewVersion] = useState(0);
   const [hydrated, setHydrated] = useState(false);
   const recReqRef = useRef(0);
 
@@ -198,11 +206,22 @@ export function DecisionApp() {
               </p>
               {(() => {
                 const help = HELP[result.framework];
-                return help ? <FrameworkHelpPanel help={help} /> : null;
+                const chatButton = (
+                  <button
+                    onClick={() => setChatOpen(true)}
+                    className="font-serif text-sm font-medium text-vermilion hover:text-paper hover:bg-vermilion border border-vermilion rounded-sm px-3 py-1.5 cursor-pointer inline-flex items-center gap-2 transition-colors duration-200 bg-transparent"
+                  >
+                    <span aria-hidden>✎</span>
+                    Fill by chatting
+                  </button>
+                );
+                return help
+                  ? <FrameworkHelpPanel help={help} trailing={chatButton} />
+                  : <div className="mt-4">{chatButton}</div>;
               })()}
             </div>
 
-            <ActiveView data={result} onUpdate={setResult} />
+            <ActiveView key={`${result.framework}:${viewVersion}`} data={result} onUpdate={setResult} />
 
             <RecommendationCard
               key={decisionText}
@@ -213,7 +232,7 @@ export function DecisionApp() {
               onRerecommend={rerecommend}
             />
 
-            <div className="flex gap-3 mt-10 items-center">
+            <div className="flex gap-3 mt-10 items-center flex-wrap">
               <button className="font-serif text-base font-medium px-[22px] py-3 rounded-sm bg-vermilion text-paper hover:bg-vermilion-deep transition-colors duration-200">
                 <span className="sm:hidden">Keep</span><span className="hidden sm:inline">Keep this</span>
               </button>
@@ -235,6 +254,20 @@ export function DecisionApp() {
           </main>
         );
       })()}
+
+      {route === "result" && result && meta && chatOpen && (
+        <ChatFiller
+          frameworkId={result.framework}
+          frameworkName={meta.name}
+          decisionText={decisionText}
+          data={result}
+          onUpdate={(next) => {
+            setResult(next);
+            setViewVersion((v) => v + 1);
+          }}
+          onClose={() => setChatOpen(false)}
+        />
+      )}
 
       {route === "result" && !result && (
         <main className="max-w-[1080px] mx-auto px-4 sm:px-10 py-14 text-center space-y-4">
