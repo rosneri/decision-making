@@ -28,6 +28,18 @@ export const ANALYZE_ERRORS = {
     code: "DM-ANALYZE-006",
     message: "The model service is unavailable. Try again in a moment.",
   },
+  NO_API_KEY: {
+    code: "DM-ANALYZE-007",
+    message: "Server is missing its model API key. Contact the operator.",
+  },
+  AUTH: {
+    code: "DM-ANALYZE-008",
+    message: "The model service rejected the request. Contact the operator.",
+  },
+  RATE_LIMIT: {
+    code: "DM-ANALYZE-009",
+    message: "Too many requests. Wait a moment and try again.",
+  },
   UNKNOWN: {
     code: "DM-ANALYZE-999",
     message: "Something went wrong. Try again.",
