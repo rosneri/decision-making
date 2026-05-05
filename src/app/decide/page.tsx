@@ -92,7 +92,7 @@ export default function DecidePage() {
   };
 
   return (
-    <main className="min-h-screen px-6 py-12 max-w-4xl mx-auto">
+    <main className="min-h-screen px-6 py-12 max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-8">
         <Link href="/" className="text-sm text-neutral-500 hover:underline">
           ← back

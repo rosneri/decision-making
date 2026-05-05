@@ -50,19 +50,21 @@ export function DecisionMatrixView({ data }: { data: DecisionMatrix }) {
             <tr>
               <th className="text-left px-3 py-2">Option</th>
               {matrix.criteria.map((c, i) => (
-                <th key={i} className="px-3 py-2 text-center min-w-[140px]">
-                  <div className="font-medium">{c.name}</div>
-                  <div className="flex items-center gap-2 mt-1 justify-center">
+                <th key={i} className="px-2 py-2 text-center min-w-[110px]">
+                  <div className="font-medium text-xs leading-tight">
+                    {c.name}
+                  </div>
+                  <div className="flex items-center gap-1.5 mt-1 justify-center">
                     <input
                       type="range"
                       min={1}
                       max={10}
                       value={c.weight}
                       onChange={(e) => setWeight(i, Number(e.target.value))}
-                      className="w-20"
+                      className="w-14"
                     />
-                    <span className="text-xs text-neutral-500">
-                      w {c.weight}
+                    <span className="text-[10px] text-neutral-500 tabular-nums">
+                      w{c.weight}
                     </span>
                   </div>
                 </th>
@@ -89,8 +91,8 @@ export function DecisionMatrixView({ data }: { data: DecisionMatrix }) {
                   )}
                 </td>
                 {o.scores.map((s, ci) => (
-                  <td key={ci} className="px-3 py-2">
-                    <div className="flex items-center gap-2">
+                  <td key={ci} className="px-2 py-2">
+                    <div className="flex items-center gap-1.5">
                       <input
                         type="range"
                         min={0}
@@ -99,23 +101,23 @@ export function DecisionMatrixView({ data }: { data: DecisionMatrix }) {
                         onChange={(e) =>
                           setScore(oi, ci, Number(e.target.value))
                         }
-                        className="flex-1"
+                        className="flex-1 min-w-0"
                       />
-                      <span className="text-xs w-6 text-right tabular-nums">
+                      <span className="text-[10px] w-4 text-right tabular-nums">
                         {s}
                       </span>
                     </div>
                   </td>
                 ))}
-                <td className="px-3 py-2 text-right font-mono">
+                <td className="px-2 py-2 text-right font-mono whitespace-nowrap">
                   <div className="flex items-center gap-2 justify-end">
-                    <div className="h-2 w-24 bg-neutral-200 dark:bg-neutral-800 rounded">
+                    <div className="h-2 w-16 bg-neutral-200 dark:bg-neutral-800 rounded shrink-0">
                       <div
                         className="h-2 rounded bg-emerald-500"
                         style={{ width: `${(totals[oi] / max) * 100}%` }}
                       />
                     </div>
-                    {totals[oi]}
+                    <span className="text-xs">{totals[oi]}</span>
                   </div>
                 </td>
               </tr>
