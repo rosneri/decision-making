@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { Card, MicroLabel } from "@/components/ui";
 import { meta, schema, sample, type Pythagorean } from "./data";
 export { meta, schema, sample };
 export type { Pythagorean };
@@ -17,7 +18,7 @@ export function View({ data, onUpdate }: { data: Pythagorean; onUpdate?: (d: Pyt
   const luck = s.actualWins - expWins;
 
   return (
-    <div className="border border-ink bg-paper">
+    <Card>
       <div className="p-4 bg-paper-deep border-b border-rule font-code text-[12px] text-ink-muted">
         expected W% = PF<sup>{s.exponent}</sup> ÷ (PF<sup>{s.exponent}</sup> + PA<sup>{s.exponent}</sup>)
       </div>
@@ -29,23 +30,27 @@ export function View({ data, onUpdate }: { data: Pythagorean; onUpdate?: (d: Pyt
           { l: "Losses", k: "actualLosses" as const, v: s.actualLosses },
         ].map((f) => (
           <label key={f.k} className="p-3 block">
-            <span className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">{f.l}</span>
-            <input type="number" min={0} value={f.v}
+            <MicroLabel>{f.l}</MicroLabel>
+            <input
+              type="number"
+              min={0}
+              value={f.v}
               onChange={(e) => upd({ ...s, [f.k]: Math.max(0, Number(e.target.value) || 0) })}
               data-testid={`pyth-${f.k}`}
-              className="block w-full mt-1 font-serif font-medium text-[20px] bg-transparent border-b border-rule outline-none text-ink" />
+              className="block w-full mt-1 font-serif font-medium text-[20px] bg-transparent border-b border-rule outline-none text-ink"
+            />
           </label>
         ))}
       </div>
       <div className="p-4 border-t border-rule grid grid-cols-2 gap-4">
         <div>
-          <span className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">Actual</span>
+          <MicroLabel>Actual</MicroLabel>
           <div className="font-serif font-medium text-[24px] text-ink mt-1">
             {s.actualWins} – {s.actualLosses} · .{(actualPct * 1000).toFixed(0).padStart(3, "0")}
           </div>
         </div>
         <div className="bg-vermilion/5 border-l border-vermilion pl-4">
-          <span className="font-code text-[10px] tracking-[0.22em] uppercase text-vermilion font-medium">Expected</span>
+          <MicroLabel accent bold>Expected</MicroLabel>
           <div className="font-serif font-medium text-[24px] text-vermilion mt-1" data-testid="pyth-expected">
             {expWins.toFixed(1)} – {(games - expWins).toFixed(1)} · .{(expWPct * 1000).toFixed(0).padStart(3, "0")}
           </div>
@@ -54,6 +59,6 @@ export function View({ data, onUpdate }: { data: Pythagorean; onUpdate?: (d: Pyt
       <div className="p-3 border-t border-rule font-code text-[11px] text-ink-muted text-center" data-testid="pyth-luck">
         luck = {luck > 0 ? "+" : ""}{luck.toFixed(1)} wins
       </div>
-    </div>
+    </Card>
   );
 }

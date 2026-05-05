@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { Card, MicroLabel, InlineText, InlineNumber, AddButton, RemoveButton, ScoreBar } from "@/components/ui";
 import { meta, schema, sample, type Rice, score } from "./data";
 export { meta, schema, sample };
 export type { Rice };
@@ -17,55 +18,53 @@ export function View({ data, onUpdate }: { data: Rice; onUpdate?: (d: Rice) => v
   const winner = scored.reduce((b, x) => x.score > b.score ? x : b, scored[0]!);
   const max = Math.max(...scored.map((x) => x.score));
 
+  const headCell = "px-3 py-3 border-b border-rule";
+
   return (
-    <div className="border-t-2 border-ink border-b border-b-ink">
+    <Card variant="ruled">
       <table className="w-full border-collapse" data-testid="rice-table">
         <thead>
           <tr>
-            <th className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted px-3 py-3 text-left border-b border-rule">Feature</th>
+            <th className={`${headCell} text-left`}><MicroLabel>Feature</MicroLabel></th>
             {(["Reach", "Impact", "Conf", "Effort"] as const).map((h) => (
-              <th key={h} className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted px-3 py-3 text-center border-b border-rule">{h}</th>
+              <th key={h} className={`${headCell} text-center`}><MicroLabel>{h}</MicroLabel></th>
             ))}
-            <th className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted px-3 py-3 text-right border-b border-rule">Score</th>
+            <th className={`${headCell} text-right`}><MicroLabel>Score</MicroLabel></th>
             <th className="border-b border-rule w-8" />
           </tr>
         </thead>
         <tbody>
           {scored.map((x) => {
             const isWinner = x.i === winner.i;
+            const cell = "px-3 py-3 border-b border-rule";
             return (
               <tr key={x.i} data-testid={`rice-row-${x.i}`}>
-                <td className="px-3 py-3 border-b border-rule">
+                <td className={cell}>
                   <div className="flex items-center gap-2">
                     {isWinner && <span className="text-vermilion">★</span>}
-                    <input value={x.feature} onChange={(e) => set(x.i, { feature: e.target.value })}
-                      className="font-serif italic text-[15px] bg-transparent border-none outline-none flex-1 text-ink" />
+                    <InlineText value={x.feature} onChange={(v) => set(x.i, { feature: v })} italic size="base" />
                   </div>
                 </td>
-                <td className="px-3 py-3 border-b border-rule text-center">
-                  <input type="number" min={0} value={x.reach} onChange={(e) => set(x.i, { reach: Number(e.target.value) || 0 })}
-                    className="font-code text-[13px] w-20 text-center bg-transparent border-none outline-none text-ink" />
+                <td className={`${cell} text-center`}>
+                  <InlineNumber value={x.reach} onChange={(v) => set(x.i, { reach: v })} min={0} width="w-20" size="sm" />
                 </td>
-                <td className="px-3 py-3 border-b border-rule text-center">
-                  <input type="number" min={0} max={5} step={0.5} value={x.impact} onChange={(e) => set(x.i, { impact: Number(e.target.value) || 0 })}
-                    className="font-code text-[13px] w-12 text-center bg-transparent border-none outline-none text-ink" />
+                <td className={`${cell} text-center`}>
+                  <InlineNumber value={x.impact} onChange={(v) => set(x.i, { impact: v })} min={0} max={5} step={0.5} width="w-12" size="sm" />
                 </td>
-                <td className="px-3 py-3 border-b border-rule text-center">
-                  <input type="number" min={0} max={1} step={0.05} value={x.confidence} onChange={(e) => set(x.i, { confidence: Math.max(0, Math.min(1, Number(e.target.value) || 0)) })}
-                    className="font-code text-[13px] w-14 text-center bg-transparent border-none outline-none text-ink" />
+                <td className={`${cell} text-center`}>
+                  <InlineNumber value={x.confidence} onChange={(v) => set(x.i, { confidence: v })} min={0} max={1} step={0.05} width="w-14" size="sm" />
                 </td>
-                <td className="px-3 py-3 border-b border-rule text-center">
-                  <input type="number" min={0.1} step={0.5} value={x.effort} onChange={(e) => set(x.i, { effort: Math.max(0.1, Number(e.target.value) || 0.1) })}
-                    className="font-code text-[13px] w-12 text-center bg-transparent border-none outline-none text-ink" />
+                <td className={`${cell} text-center`}>
+                  <InlineNumber value={x.effort} onChange={(v) => set(x.i, { effort: Math.max(0.1, v) })} min={0.1} step={0.5} width="w-12" size="sm" />
                 </td>
-                <td className={`px-3 py-3 border-b border-rule text-right font-code text-[15px] font-medium ${isWinner ? "text-vermilion" : "text-ink"}`}
-                  data-testid={`rice-score-${x.i}`}>
+                <td
+                  className={`${cell} text-right font-code text-[15px] font-medium ${isWinner ? "text-vermilion" : "text-ink"}`}
+                  data-testid={`rice-score-${x.i}`}
+                >
                   {Math.round(x.score).toLocaleString()}
                 </td>
                 <td className="border-b border-rule text-right pr-1">
-                  {s.items.length > 1 && (
-                    <button onClick={() => rm(x.i)} aria-label="remove" className="text-ink-muted hover:text-vermilion">×</button>
-                  )}
+                  {s.items.length > 1 && <RemoveButton onClick={() => rm(x.i)} ariaLabel="remove" />}
                 </td>
               </tr>
             );
@@ -76,19 +75,16 @@ export function View({ data, onUpdate }: { data: Rice; onUpdate?: (d: Rice) => v
         score = (R × I × C) ÷ E
       </div>
       <div className="p-3 space-y-1">
-        <div className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">Ranked ↓</div>
+        <MicroLabel as="div">Ranked ↓</MicroLabel>
         {[...scored].sort((a, b) => b.score - a.score).map((x, n) => (
           <div key={x.i} className="flex items-center gap-2">
             <span className="font-code text-[11px] text-ink-muted w-6">{n + 1}</span>
-            <div className="h-1 bg-rule flex-1 max-w-[180px] relative">
-              <div className={`absolute inset-y-0 left-0 ${x.i === winner.i ? "bg-vermilion" : "bg-ink"}`}
-                style={{ width: `${(x.score / max) * 100}%` }} />
-            </div>
+            <ScoreBar value={x.score} max={max} highlight={x.i === winner.i} />
             <span className="font-serif text-[13px] italic text-ink-muted">{x.feature}</span>
           </div>
         ))}
       </div>
-      <button onClick={add} className="font-serif italic text-[13px] text-ink-muted hover:text-vermilion px-3 py-2 border-t border-rule w-full text-left">+ another item</button>
-    </div>
+      <AddButton onClick={add} className="px-3 py-2 border-t border-rule w-full text-left">+ another item</AddButton>
+    </Card>
   );
 }

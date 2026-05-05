@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { Card, MicroLabel, InlineText, RemoveButton, AddButton } from "@/components/ui";
 import { meta, schema, sample, type Scorecard } from "./data";
 export { meta, schema, sample };
 export type { Scorecard };
@@ -15,42 +16,50 @@ export function View({ data, onUpdate }: { data: Scorecard; onUpdate?: (d: Score
   const rmComp = (i: number) => upd({ ...s, competencies: s.competencies.filter((_, j) => j !== i) });
 
   return (
-    <div className="border border-ink bg-paper">
+    <Card>
       <div className="p-4 bg-vermilion/5 border-b border-vermilion">
-        <span className="font-code text-[10px] tracking-[0.22em] uppercase text-vermilion font-medium">Mission</span>
-        <input value={s.mission} onChange={(e) => upd({ ...s, mission: e.target.value })}
-          data-testid="scorecard-mission"
-          className="block w-full mt-1 font-serif italic text-[16px] bg-transparent border-none outline-none text-ink" />
+        <MicroLabel accent bold>Mission</MicroLabel>
+        <InlineText
+          value={s.mission}
+          onChange={(v) => upd({ ...s, mission: v })}
+          testId="scorecard-mission"
+          italic
+          size="lg"
+          className="block w-full mt-1"
+        />
       </div>
       <div className="p-4 border-b border-rule">
-        <span className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">Outcomes · 12 months</span>
+        <MicroLabel>Outcomes · 12 months</MicroLabel>
         <ul className="mt-2 space-y-1">
           {s.outcomes.map((o, i) => (
             <li key={i} className="flex items-center gap-2 group border-b border-rule pb-1">
               <span className="font-code text-[11px] text-vermilion w-6">{i + 1}.</span>
-              <input value={o} onChange={(e) => setOut(i, e.target.value)}
-                className="flex-1 font-serif text-[14px] bg-transparent border-none outline-none text-ink" />
-              <button onClick={() => rmOut(i)} aria-label="remove outcome"
-                className="opacity-0 group-hover:opacity-100 text-ink-muted hover:text-vermilion">×</button>
+              <InlineText value={o} onChange={(v) => setOut(i, v)} size="sm" />
+              <RemoveButton onClick={() => rmOut(i)} ariaLabel="remove outcome" showOnHover />
             </li>
           ))}
         </ul>
-        <button onClick={addOut} className="mt-2 font-serif italic text-[13px] text-ink-muted hover:text-vermilion">+ outcome</button>
+        <AddButton onClick={addOut} className="mt-2">+ outcome</AddButton>
       </div>
       <div className="p-4">
-        <span className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">Competencies</span>
+        <MicroLabel>Competencies</MicroLabel>
         <div className="mt-2 flex gap-2 flex-wrap items-center">
           {s.competencies.map((c, i) => (
             <span key={i} className="border border-rule px-2 py-1 flex items-center gap-1 group">
-              <input value={c} onChange={(e) => setComp(i, e.target.value)}
-                className="font-serif italic text-[13px] bg-transparent border-none outline-none w-28" />
-              <button onClick={() => rmComp(i)} aria-label="remove competency"
-                className="opacity-0 group-hover:opacity-100 text-ink-muted hover:text-vermilion">×</button>
+              <InlineText
+                value={c}
+                onChange={(v) => setComp(i, v)}
+                italic
+                size="sm"
+                fullWidth={false}
+                className="w-28"
+              />
+              <RemoveButton onClick={() => rmComp(i)} ariaLabel="remove competency" showOnHover />
             </span>
           ))}
-          <button onClick={addComp} className="font-serif italic text-[13px] text-ink-muted hover:text-vermilion">+ add</button>
+          <AddButton onClick={addComp}>+ add</AddButton>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

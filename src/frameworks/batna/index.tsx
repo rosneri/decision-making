@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { Card, MicroLabel, InlineText } from "@/components/ui";
 import { meta, schema, sample, type Batna } from "./data";
 export { meta, schema, sample };
 export type { Batna };
@@ -16,34 +17,45 @@ export function View({ data, onUpdate }: { data: Batna; onUpdate?: (d: Batna) =>
   const span = max - min || 1;
   const pct = (v: number) => ((v - min) / span) * 100;
 
+  const numCls = "block w-full mt-1 font-serif text-[18px] bg-transparent border-b border-rule outline-none focus:border-vermilion py-1";
+
   return (
-    <div className="border border-ink bg-paper">
+    <Card>
       <div className="grid grid-cols-2 divide-x divide-rule border-b border-rule">
         {[
-          { side: "yours" as const, k: "yourBatna" as const, label: "Your BATNA", val: s.yourBatna },
-          { side: "theirs" as const, k: "theirBatna" as const, label: "Their BATNA", val: s.theirBatna },
+          { k: "yourBatna" as const, label: "Your BATNA", val: s.yourBatna },
+          { k: "theirBatna" as const, label: "Their BATNA", val: s.theirBatna },
         ].map((c) => (
           <div key={c.k} className="p-4">
-            <span className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">{c.label}</span>
-            <input value={c.val.label} onChange={(e) => upd({ ...s, [c.k]: { ...c.val, label: e.target.value } })}
-              className="block w-full mt-1 font-serif text-[15px] bg-transparent border-none outline-none text-ink" />
+            <MicroLabel>{c.label}</MicroLabel>
+            <InlineText
+              value={c.val.label}
+              onChange={(v) => upd({ ...s, [c.k]: { ...c.val, label: v } })}
+              className="block w-full mt-1"
+            />
             <div className="flex items-baseline gap-1 mt-2">
               <span className="font-code text-[11px] text-ink-muted">{s.unit}</span>
-              <input type="number" value={c.val.value}
+              <input
+                type="number"
+                value={c.val.value}
                 onChange={(e) => upd({ ...s, [c.k]: { ...c.val, value: Number(e.target.value) || 0 } })}
                 data-testid={`batna-${c.k}-value`}
-                className="font-serif font-medium text-[24px] text-vermilion w-24 bg-transparent border-b border-rule outline-none focus:border-vermilion" />
+                className="font-serif font-medium text-[24px] text-vermilion w-24 bg-transparent border-b border-rule outline-none focus:border-vermilion"
+              />
             </div>
           </div>
         ))}
       </div>
       <div className="p-6">
-        <span className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">Salary band</span>
+        <MicroLabel>Salary band</MicroLabel>
         <div className="relative h-16 mt-3 border-2 border-ink" data-testid="batna-band">
           {zopaExists && (
-            <div className="absolute inset-y-0 bg-vermilion/20 border-l border-r border-vermilion grid place-items-center"
-              style={{ left: `${pct(lo)}%`, width: `${pct(hi) - pct(lo)}%` }} data-testid="batna-zopa">
-              <span className="font-code text-[10px] tracking-[0.22em] uppercase text-vermilion font-medium">ZOPA</span>
+            <div
+              className="absolute inset-y-0 bg-vermilion/20 border-l border-r border-vermilion grid place-items-center"
+              style={{ left: `${pct(lo)}%`, width: `${pct(hi) - pct(lo)}%` }}
+              data-testid="batna-zopa"
+            >
+              <MicroLabel accent bold>ZOPA</MicroLabel>
             </div>
           )}
           {!zopaExists && (
@@ -56,19 +68,27 @@ export function View({ data, onUpdate }: { data: Batna; onUpdate?: (d: Batna) =>
         </div>
         <div className="grid grid-cols-2 gap-4 mt-10">
           <label>
-            <span className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">Anchor first at</span>
-            <input type="number" value={s.yourAnchor} onChange={(e) => upd({ ...s, yourAnchor: Number(e.target.value) || 0 })}
+            <MicroLabel>Anchor first at</MicroLabel>
+            <input
+              type="number"
+              value={s.yourAnchor}
+              onChange={(e) => upd({ ...s, yourAnchor: Number(e.target.value) || 0 })}
               data-testid="batna-anchor"
-              className="block w-full mt-1 font-serif text-[18px] bg-transparent border-b border-rule outline-none focus:border-vermilion py-1" />
+              className={numCls}
+            />
           </label>
           <label>
-            <span className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">Target</span>
-            <input type="number" value={s.yourTarget} onChange={(e) => upd({ ...s, yourTarget: Number(e.target.value) || 0 })}
+            <MicroLabel>Target</MicroLabel>
+            <input
+              type="number"
+              value={s.yourTarget}
+              onChange={(e) => upd({ ...s, yourTarget: Number(e.target.value) || 0 })}
               data-testid="batna-target"
-              className="block w-full mt-1 font-serif text-[18px] bg-transparent border-b border-rule outline-none focus:border-vermilion py-1" />
+              className={numCls}
+            />
           </label>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

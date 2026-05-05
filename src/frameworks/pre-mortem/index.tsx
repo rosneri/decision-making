@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { Card, MicroLabel, InlineText, Range, AddButton, RemoveButton } from "@/components/ui";
 import { meta, schema, sample, type PreMortem } from "./data";
 export { meta, schema, sample };
 export type { PreMortem };
@@ -13,19 +14,24 @@ export function View({ data, onUpdate }: { data: PreMortem; onUpdate?: (d: PreMo
   const rm = (i: number) => upd({ ...s, risks: s.risks.filter((_, j) => j !== i) });
 
   return (
-    <div className="border border-ink bg-paper">
+    <Card>
       <div className="p-4 bg-paper-deep border-b border-rule">
-        <span className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">Scenario</span>
-        <input value={s.scenario} onChange={(e) => upd({ ...s, scenario: e.target.value })}
-          className="block w-full mt-1 font-serif italic text-[16px] text-ink bg-transparent border-none outline-none" />
+        <MicroLabel>Scenario</MicroLabel>
+        <InlineText
+          value={s.scenario}
+          onChange={(v) => upd({ ...s, scenario: v })}
+          italic
+          size="lg"
+          className="block w-full mt-1"
+        />
       </div>
       <table className="w-full">
         <thead>
           <tr>
-            <th className="text-left px-3 py-2 font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted border-b border-rule">Postmortem cause</th>
-            <th className="text-center px-3 py-2 font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted border-b border-rule">Lik</th>
-            <th className="text-center px-3 py-2 font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted border-b border-rule">Imp</th>
-            <th className="text-center px-3 py-2 font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted border-b border-rule w-16">!</th>
+            <th className="text-left px-3 py-2 border-b border-rule"><MicroLabel>Postmortem cause</MicroLabel></th>
+            <th className="text-center px-3 py-2 border-b border-rule"><MicroLabel>Lik</MicroLabel></th>
+            <th className="text-center px-3 py-2 border-b border-rule"><MicroLabel>Imp</MicroLabel></th>
+            <th className="text-center px-3 py-2 border-b border-rule w-16"><MicroLabel>!</MicroLabel></th>
             <th className="border-b border-rule" />
           </tr>
         </thead>
@@ -36,16 +42,25 @@ export function View({ data, onUpdate }: { data: PreMortem; onUpdate?: (d: PreMo
             return (
               <tr key={i} className="border-b border-rule" data-testid={`risk-row-${i}`}>
                 <td className="px-3 py-2">
-                  <input value={r.cause} onChange={(e) => set(i, { cause: e.target.value })}
-                    className={`font-serif italic text-[14px] bg-transparent border-none outline-none w-full ${danger ? "text-vermilion" : "text-ink"}`} />
+                  <InlineText
+                    value={r.cause}
+                    onChange={(v) => set(i, { cause: v })}
+                    italic
+                    size="sm"
+                    className={danger ? "text-vermilion" : ""}
+                  />
                 </td>
                 {(["likelihood", "impact"] as const).map((k) => (
                   <td key={k} className="px-3 py-2 text-center">
-                    <input type="range" min={1} max={5} value={r[k]}
-                      onChange={(e) => set(i, { [k]: Number(e.target.value) })}
-                      data-testid={`risk-${i}-${k}`}
-                      aria-label={`${k} for ${r.cause}`}
-                      className="w-20" />
+                    <Range
+                      value={r[k]}
+                      onChange={(v) => set(i, { [k]: v })}
+                      min={1}
+                      max={5}
+                      testId={`risk-${i}-${k}`}
+                      ariaLabel={`${k} for ${r.cause}`}
+                      className="w-20"
+                    />
                     <div className="font-code text-[11px] text-ink-muted">{r[k]}</div>
                   </td>
                 ))}
@@ -53,14 +68,14 @@ export function View({ data, onUpdate }: { data: PreMortem; onUpdate?: (d: PreMo
                   {danger && <span className="text-vermilion font-medium" data-testid={`risk-${i}-danger`}>!</span>}
                 </td>
                 <td className="px-3 py-2 text-right">
-                  <button onClick={() => rm(i)} aria-label="remove" className="text-ink-muted hover:text-vermilion">×</button>
+                  <RemoveButton onClick={() => rm(i)} ariaLabel="remove" />
                 </td>
               </tr>
             );
           })}
         </tbody>
       </table>
-      <button onClick={add} className="font-serif italic text-[13px] text-ink-muted hover:text-vermilion px-3 py-2 w-full text-left">+ another cause</button>
-    </div>
+      <AddButton onClick={add} className="px-3 py-2 w-full text-left">+ another cause</AddButton>
+    </Card>
   );
 }
