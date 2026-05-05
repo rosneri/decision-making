@@ -1,6 +1,7 @@
 "use client";
 
 import { startTransition, useEffect, useRef, useState } from "react";
+import { ChatFiller } from "./ChatFiller";
 import { Composer } from "./Composer";
 import { ReadingInterstitial } from "./ReadingInterstitial";
 import { RecommendationCard } from "./RecommendationCard";
@@ -64,6 +65,7 @@ export function DecisionApp() {
   const [recLoading, setRecLoading] = useState(false);
   const [analyzeReady, setAnalyzeReady] = useState(false);
   const [analyzeError, setAnalyzeError] = useState<{ message: string; code: string } | null>(null);
+  const [chatOpen, setChatOpen] = useState(false);
   const recReqRef = useRef(0);
   const hydratedRef = useRef(false);
 
@@ -258,8 +260,16 @@ export function DecisionApp() {
               onRerecommend={rerecommend}
             />
 
-            <div className="flex gap-3 mt-10 items-center">
-              <button className="font-serif text-base font-medium px-[22px] py-3 rounded-sm bg-vermilion text-paper hover:bg-vermilion-deep transition-colors duration-200">
+            <div className="flex gap-3 mt-10 items-center flex-wrap">
+              <button
+                onClick={() => setChatOpen(true)}
+                className="font-serif text-base font-medium px-[22px] py-3 rounded-sm bg-vermilion text-paper hover:bg-vermilion-deep transition-colors duration-200 inline-flex items-center gap-2"
+              >
+                <span aria-hidden>✎</span>
+                <span className="sm:hidden">Chat fill</span>
+                <span className="hidden sm:inline">Fill by chatting</span>
+              </button>
+              <button className="font-serif text-base font-medium px-[22px] py-3 rounded-sm border border-rule text-ink hover:border-ink transition-colors duration-200">
                 <span className="sm:hidden">Keep</span><span className="hidden sm:inline">Keep this</span>
               </button>
               <button
@@ -277,6 +287,17 @@ export function DecisionApp() {
                 </button>
               </div>
             </div>
+
+            {chatOpen && (
+              <ChatFiller
+                frameworkId={result.framework}
+                frameworkName={meta.name}
+                decisionText={decisionText}
+                data={result}
+                onUpdate={(next) => setResult(next)}
+                onClose={() => setChatOpen(false)}
+              />
+            )}
           </main>
         );
       })()}
