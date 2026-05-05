@@ -7,6 +7,9 @@ import * as decisionMatrix from "./decision-matrix";
 import * as eisenhower from "./eisenhower";
 import * as swot from "./swot";
 import * as costBenefit from "./cost-benefit";
+import { getMetrics as decisionMatrixMetrics } from "./decision-matrix/metrics";
+import { getMetrics as costBenefitMetrics } from "./cost-benefit/metrics";
+import { getMetrics as regretMinMetrics } from "./regret-min/data";
 
 // The remaining frameworks each ship a `data.ts` (server-safe — meta, schema,
 // sample, type) plus an `index.tsx` (client — exports `View`). Importing meta
@@ -327,3 +330,20 @@ export const VIEWS = Object.fromEntries(
 export const SCHEMAS = Object.fromEntries(
   ALL.map((m) => [m.meta.id, m.schema])
 ) as unknown as Record<FrameworkId, z.ZodTypeAny>;
+
+// Per-framework metrics extractor: pure functions that derive a small
+// summary row (Winner, Pick, Net, …) from a result. Frameworks without an
+// entry simply render no metrics strip.
+export interface ResultMetric {
+  k: string;
+  v: string;
+  testId?: string;
+}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type MetricsFn = (d: any) => ResultMetric[];
+
+export const METRICS: Partial<Record<FrameworkId, MetricsFn>> = {
+  decision_matrix: decisionMatrixMetrics,
+  cost_benefit: costBenefitMetrics,
+  regret_min: regretMinMetrics,
+};

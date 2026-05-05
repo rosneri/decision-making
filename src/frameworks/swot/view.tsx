@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { ResultPanel } from "@/components/ResultPanel";
+import { useFrameworkData } from "@/components/DecisionContext";
 import type { Swot } from "./schema";
 
 interface Props {
@@ -19,9 +18,7 @@ const QUADRANTS: { key: QuadKey; roman: string; name: string; gloss: string; cls
 ];
 
 export function View({ data, onUpdate }: Props) {
-  const [state, setState] = useState(data);
-
-  const update = (next: Swot) => { setState(next); onUpdate?.(next); };
+  const [state, update] = useFrameworkData<Swot>(data, onUpdate);
 
   const updateItem = (key: QuadKey, idx: number, text: string) =>
     update({ ...state, [key]: state[key].map((t, i) => i === idx ? text : t) });
@@ -33,8 +30,7 @@ export function View({ data, onUpdate }: Props) {
     update({ ...state, [key]: [...state[key], ""] });
 
   return (
-    <div className="border border-ink bg-paper">
-    <div className="grid grid-cols-2 relative">
+    <div className="border border-ink grid grid-cols-2 bg-paper relative">
       {/* Horizontal axis labels (outside) */}
       <span className="absolute font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted bg-paper px-2 top-[-7px] left-1/2 -translate-x-1/2 whitespace-nowrap">Helpful</span>
       <span className="absolute font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted bg-paper px-2 bottom-[-7px] left-1/2 -translate-x-1/2 whitespace-nowrap">Harmful</span>
@@ -80,8 +76,6 @@ export function View({ data, onUpdate }: Props) {
           </button>
         </div>
       ))}
-    </div>
-      <ResultPanel body={state.recommendation} />
     </div>
   );
 }

@@ -3,8 +3,10 @@
 import { startTransition, useEffect, useRef, useState } from "react";
 import { Composer } from "./Composer";
 import { ReadingInterstitial } from "./ReadingInterstitial";
-import { RerecommendProvider } from "./ResultPanel";
-import { FRAMEWORKS, VIEWS, type FrameworkResult } from "@/frameworks";
+import { DecisionProvider } from "./DecisionContext";
+import { RecommendationCard } from "./RecommendationCard";
+import { ResultStrip } from "./ResultStrip";
+import { FRAMEWORKS, METRICS, VIEWS, type FrameworkResult } from "@/frameworks";
 import type { AnalysisResult } from "./analyze-utils";
 import { AnalyzeError, fetchAnalysis } from "./analyze-utils";
 
@@ -237,27 +239,37 @@ export function DecisionApp() {
               </p>
             </div>
 
-            <RerecommendProvider
+            <DecisionProvider
               value={{
-                loading: recLoading,
-                error: !!analyzeError,
-                show:
-                  recLoading ||
-                  !!analyzeError ||
-                  (serverResultKey !== null && JSON.stringify(result) !== serverResultKey),
-                onRerecommend: rerecommend,
-                recommendation: result.recommendation,
+                result,
+                updateResult: (d) =>
+                  setResult((prev) =>
+                    prev ? { ...d, recommendation: prev.recommendation } : d,
+                  ),
               }}
             >
+              {/* Views that have adopted useFrameworkData will read/update via
+                  the context above; the rest fall back to these props. */}
               <ActiveView
                 data={result}
-                onUpdate={(d) =>
+                onUpdate={(d: FrameworkResult) =>
                   setResult((prev) =>
-                    prev ? { ...d, recommendation: prev.recommendation } : d
+                    prev ? { ...d, recommendation: prev.recommendation } : d,
                   )
                 }
               />
-            </RerecommendProvider>
+            </DecisionProvider>
+
+            <ResultStrip metrics={METRICS[result.framework]?.(result) ?? []} />
+
+            <RecommendationCard
+              key={decisionText}
+              note={result.recommendation ?? null}
+              loading={recLoading}
+              error={analyzeError?.message ?? null}
+              dataChanged={serverResultKey !== null && JSON.stringify(result) !== serverResultKey}
+              onRerecommend={rerecommend}
+            />
 
             <div className="flex gap-3 mt-10 items-center">
               <button className="font-serif text-base font-medium px-[22px] py-3 rounded-sm bg-vermilion text-paper hover:bg-vermilion-deep transition-colors duration-200">

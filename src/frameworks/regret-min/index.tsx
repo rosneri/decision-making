@@ -1,22 +1,19 @@
 "use client";
-import { useState } from "react";
 import { RangeField } from "@/components/ui/Range";
-import { ResultPanel } from "@/components/ResultPanel";
-import { meta, schema, sample, type RegretMin } from "./data";
+import { useFrameworkData } from "@/components/DecisionContext";
+import { meta, schema, sample, bestOption, type RegretMin } from "./data";
 export { meta, schema, sample };
 export type { RegretMin };
 
 export function View({ data, onUpdate }: { data: RegretMin; onUpdate?: (d: RegretMin) => void }) {
-  const [s, setS] = useState(data);
-  const upd = (n: RegretMin) => { setS(n); onUpdate?.(n); };
+  const [s, upd] = useFrameworkData<RegretMin>(data, onUpdate);
   const set = (i: number, patch: Partial<RegretMin["options"][number]>) =>
     upd({ ...s, options: s.options.map((o, j) => j === i ? { ...o, ...patch } : o) });
   const add = () => upd({ ...s, options: [...s.options, { name: "Option", regretIfTaken: 5, regretIfNotTaken: 5, eightyYrThought: "" }] });
   const rm = (i: number) => upd({ ...s, options: s.options.filter((_, j) => j !== i) });
 
-  // Pick option that minimizes max regret across both branches
   const scored = s.options.map((o, i) => ({ ...o, i, asymmetry: o.regretIfNotTaken - o.regretIfTaken }));
-  const best = scored.reduce((a, x) => x.asymmetry > a.asymmetry ? x : a, scored[0]!);
+  const best = bestOption(s);
 
   return (
     <div className="border border-ink bg-paper">
@@ -59,13 +56,6 @@ export function View({ data, onUpdate }: { data: RegretMin; onUpdate?: (d: Regre
         );
       })}
       <button onClick={add} className="font-serif italic text-[13px] text-ink-muted hover:text-vermilion px-4 py-2 w-full text-left">+ option</button>
-      <ResultPanel
-        body={s.recommendation}
-        metrics={[
-          { k: "Pick", v: best.name, testId: "regret-best" },
-          { k: "Asymmetry", v: (best.asymmetry > 0 ? "+" : "") + best.asymmetry },
-        ]}
-      />
     </div>
   );
 }

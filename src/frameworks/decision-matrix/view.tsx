@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { ResultPanel } from "@/components/ResultPanel";
+import { useFrameworkData } from "@/components/DecisionContext";
 import type { DecisionMatrix } from "./schema";
 
 interface Props {
@@ -10,12 +9,7 @@ interface Props {
 }
 
 export function View({ data, onUpdate }: Props) {
-  const [state, setState] = useState(data);
-
-  const update = (next: DecisionMatrix) => {
-    setState(next);
-    onUpdate?.(next);
-  };
+  const [state, update] = useFrameworkData<DecisionMatrix>(data, onUpdate);
 
   const totalW = state.criteria.reduce((s, c) => s + c.weight, 0) || 1;
   const totals = state.options.map((o) =>
@@ -157,13 +151,6 @@ export function View({ data, onUpdate }: Props) {
       >
         + another option
       </button>
-      <ResultPanel
-        body={state.recommendation}
-        metrics={[
-          { k: "Winner", v: state.options[winner]?.name ?? "—" },
-          { k: "Score", v: (totals[winner] ?? 0).toFixed(2) },
-        ]}
-      />
     </div>
   );
 }
