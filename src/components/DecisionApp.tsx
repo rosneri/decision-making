@@ -66,6 +66,12 @@ export function DecisionApp() {
   const [analyzeReady, setAnalyzeReady] = useState(false);
   const [analyzeError, setAnalyzeError] = useState<{ message: string; code: string } | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
+  // Bumped each time the chat patches the result; used as a key on the
+  // active framework view so it remounts and picks up the new data.
+  // Framework views currently store their data in useState(data) and ignore
+  // later prop changes — remounting is the cheapest way to make external
+  // edits visible without rewriting every view.
+  const [viewVersion, setViewVersion] = useState(0);
   const recReqRef = useRef(0);
   const hydratedRef = useRef(false);
 
@@ -258,7 +264,7 @@ export function DecisionApp() {
               </div>
             </div>
 
-            <ActiveView data={result} onUpdate={setResult} />
+            <ActiveView key={`${result.framework}:${viewVersion}`} data={result} onUpdate={setResult} />
 
             <RecommendationCard
               key={decisionText}
@@ -298,7 +304,10 @@ export function DecisionApp() {
           frameworkName={meta.name}
           decisionText={decisionText}
           data={result}
-          onUpdate={(next) => setResult(next)}
+          onUpdate={(next) => {
+            setResult(next);
+            setViewVersion((v) => v + 1);
+          }}
           onClose={() => setChatOpen(false)}
         />
       )}
