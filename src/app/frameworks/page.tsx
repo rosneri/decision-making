@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { FRAMEWORKS } from "@/lib/schemas";
-import { SAMPLES } from "@/lib/samples";
+import { FRAMEWORKS, SAMPLES } from "@/frameworks";
 import { FrameworkRenderer } from "@/components/FrameworkRenderer";
 
 export default function FrameworksPage() {

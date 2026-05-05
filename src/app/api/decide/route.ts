@@ -11,7 +11,7 @@ import {
   EisenhowerSchema,
   FrameworkSchema,
   SwotSchema,
-} from "@/lib/schemas";
+} from "@/frameworks";
 
 export const maxDuration = 60;
 

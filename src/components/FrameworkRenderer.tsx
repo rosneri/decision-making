@@ -1,18 +1,11 @@
 "use client";
 
-import type { FrameworkResult } from "@/lib/schemas";
-import { DecisionMatrixView } from "./DecisionMatrix";
-import { EisenhowerView } from "./EisenhowerMatrix";
-import { SwotView } from "./SwotAnalysis";
+import { type FrameworkResult, VIEWS } from "@/frameworks";
 
 export function FrameworkRenderer({ result }: { result: FrameworkResult }) {
   return (
     <div className="space-y-6">
-      {result.framework === "decision_matrix" && (
-        <DecisionMatrixView data={result} />
-      )}
-      {result.framework === "eisenhower" && <EisenhowerView data={result} />}
-      {result.framework === "swot" && <SwotView data={result} />}
+      {renderView(result)}
 
       <div className="rounded-lg border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 p-5">
         <div className="flex items-center justify-between mb-2">
@@ -31,4 +24,21 @@ export function FrameworkRenderer({ result }: { result: FrameworkResult }) {
       </div>
     </div>
   );
+}
+
+function renderView(result: FrameworkResult) {
+  switch (result.framework) {
+    case "decision_matrix": {
+      const V = VIEWS.decision_matrix;
+      return <V data={result} />;
+    }
+    case "eisenhower": {
+      const V = VIEWS.eisenhower;
+      return <V data={result} />;
+    }
+    case "swot": {
+      const V = VIEWS.swot;
+      return <V data={result} />;
+    }
+  }
 }

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FRAMEWORKS } from "@/lib/schemas";
+import { FRAMEWORKS } from "@/frameworks";
 
 export default function Home() {
   return (

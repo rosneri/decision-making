@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { FRAMEWORKS, type FrameworkId, type FrameworkResult } from "@/lib/schemas";
+import { FRAMEWORKS, type FrameworkId, type FrameworkResult } from "@/frameworks";
 import { FrameworkRenderer } from "@/components/FrameworkRenderer";
 
 type SR = {

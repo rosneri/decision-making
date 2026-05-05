@@ -1,7 +1,46 @@
 "use client";
 
 import { useState } from "react";
-import type { Swot } from "@/lib/schemas";
+import { z } from "zod";
+
+export const meta = {
+  id: "swot",
+  name: "SWOT Analysis",
+  category: "Strategy & business",
+  blurb:
+    "Map strengths, weaknesses, opportunities, threats. Best for strategic / open-ended decisions.",
+} as const;
+
+export const schema = z.object({
+  framework: z.literal("swot"),
+  category: z
+    .string()
+    .describe(
+      "The category this framework belongs to, e.g. 'Strategy & business'"
+    ),
+  title: z.string(),
+  strengths: z.array(z.string()).min(1).max(6),
+  weaknesses: z.array(z.string()).min(1).max(6),
+  opportunities: z.array(z.string()).min(1).max(6),
+  threats: z.array(z.string()).min(1).max(6),
+  recommendation: z
+    .string()
+    .describe("Strategic recommendation given the SWOT, 2-4 sentences"),
+});
+
+export type Swot = z.infer<typeof schema>;
+
+export const sample: Swot = {
+  framework: "swot",
+  category: meta.category,
+  title: "Launching a side project",
+  strengths: ["Strong domain expertise", "Existing audience", "Low overhead"],
+  weaknesses: ["Limited time outside day job", "No co-founder"],
+  opportunities: ["Growing market", "AI tooling cuts dev time", "No major incumbent"],
+  threats: ["Competitors well funded", "Platform policy changes"],
+  recommendation:
+    "Lean into your audience and ship a thin v1 fast. Keep scope small enough to fit nights/weekends until traction justifies more.",
+};
 
 const QUADS = [
   {
@@ -32,7 +71,7 @@ const QUADS = [
   },
 ] as const;
 
-export function SwotView({ data }: { data: Swot }) {
+export function View({ data }: { data: Swot }) {
   const [state, setState] = useState(data);
 
   const update = (key: (typeof QUADS)[number]["key"], i: number, v: string) => {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/react";
-import { DecisionMatrixView } from "@/components/DecisionMatrix";
-import type { DecisionMatrix } from "@/lib/schemas";
+import { View as DecisionMatrixView } from "@/frameworks/decision-matrix";
+import type { DecisionMatrix } from "@/frameworks";
 
 const sample: DecisionMatrix = {
   framework: "decision_matrix",

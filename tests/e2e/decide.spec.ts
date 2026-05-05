@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { SAMPLES } from "../../src/lib/samples";
+import { SAMPLES } from "../../src/frameworks";
 
 test.describe("/decide", () => {
   test("submit is disabled until text is entered", async ({ page }) => {

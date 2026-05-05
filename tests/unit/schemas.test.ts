@@ -5,7 +5,7 @@ import {
   FRAMEWORKS,
   FrameworkSchema,
   SwotSchema,
-} from "@/lib/schemas";
+} from "@/frameworks";
 
 describe("DecisionMatrixSchema", () => {
   it("accepts a valid matrix", () => {
