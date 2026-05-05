@@ -8,11 +8,11 @@ import { ReadingInterstitial } from "./ReadingInterstitial";
 import { DecisionProvider } from "./DecisionContext";
 import { RecommendationCard } from "./RecommendationCard";
 import { ResultStrip } from "./ResultStrip";
-import { FRAMEWORKS, METRICS, VIEWS, type FrameworkResult } from "@/frameworks";
+import { FRAMEWORKS, METRICS, VIEWS, type FrameworkId, type FrameworkResult } from "@/frameworks";
 import { HELP } from "@/frameworks/help";
 import { FrameworkHelpPanel } from "./FrameworkHelpPanel";
 import { SiteHeader } from "./SiteHeader";
-import type { AnalysisResult } from "./analyze-utils";
+import type { AnalysisResult, FrameworkAlternative } from "./analyze-utils";
 import { AnalyzeError, fetchAnalysis } from "./analyze-utils";
 
 type Route = "compose" | "reading" | "result";
@@ -24,7 +24,7 @@ const STORAGE_KEY = "dm-app-state-v2";
 interface SavedState {
   route: Route;
   decisionText: string;
-  result: FrameworkResult | null;
+  result: AnalysisResult | null;
 }
 
 function loadSavedState(): SavedState | null {
@@ -48,7 +48,7 @@ export function DecisionApp() {
 
   const [route, setRoute]         = useState<Route>("compose");
   const [decisionText, setText]   = useState("");
-  const [result, setResult]       = useState<FrameworkResult | null>(null);
+  const [result, setResult]       = useState<AnalysisResult | null>(null);
   const [serverResultKey, setServerResultKey] = useState<string | null>(null);
   const [recLoading, setRecLoading] = useState(false);
   const [analyzeReady, setAnalyzeReady] = useState(false);
@@ -163,6 +163,45 @@ export function DecisionApp() {
       });
   };
 
+  // ── Switch to one of the AI's alternative frameworks ──
+  const switchFramework = (alt: FrameworkAlternative) => {
+    if (!result) return;
+    const previousMeta = FRAMEWORKS.find((f) => f.id === result.framework);
+    const carryOverAlts: FrameworkAlternative[] = [
+      ...(previousMeta
+        ? [{ id: result.framework as FrameworkId, name: previousMeta.name, reason: "the previous pick" }]
+        : []),
+      ...(result.altFrameworks ?? []).filter((a) => a.id !== alt.id),
+    ];
+    setRoute("reading");
+    setAnalyzeReady(false);
+    setAnalyzeError(null);
+    setResult(null);
+    setServerResultKey(null);
+    const reqId = ++recReqRef.current;
+    setRecLoading(true);
+    fetchAnalysis(decisionText, { frameworkId: alt.id })
+      .then((r: AnalysisResult) => {
+        if (reqId !== recReqRef.current) return;
+        const merged: AnalysisResult = { ...r, altFrameworks: carryOverAlts };
+        setResult(merged);
+        setServerResultKey(JSON.stringify(merged));
+        setRecLoading(false);
+        setAnalyzeReady(true);
+      })
+      .catch((err: unknown) => {
+        if (reqId !== recReqRef.current) return;
+        console.error("[switchFramework] failed:", err);
+        if (err instanceof AnalyzeError) {
+          setAnalyzeError({ message: err.message, code: err.code });
+        } else {
+          setAnalyzeError({ message: "Couldn't switch framework. Try again.", code: "DM-UI-000" });
+        }
+        setRecLoading(false);
+        setAnalyzeReady(true);
+      });
+  };
+
   const meta = result ? FRAMEWORKS.find((f) => f.id === result.framework) : undefined;
 
   const runningHead =
@@ -213,12 +252,32 @@ export function DecisionApp() {
               })()}
             </div>
 
+            {result.altFrameworks && result.altFrameworks.length > 0 && (
+              <div className="mb-10 -mt-4">
+                <span className="folio block mb-2">Or try a different angle</span>
+                <div className="flex gap-2 flex-wrap">
+                  {result.altFrameworks.map((alt) => (
+                    <button
+                      key={alt.id}
+                      // eslint-disable-next-line react-hooks/refs -- switchFramework reads a ref but only at click time
+                      onClick={() => switchFramework(alt)}
+                      title={alt.reason}
+                      className="font-serif text-sm text-ink hover:text-paper hover:bg-ink border border-rule hover:border-ink rounded-sm px-3 py-1.5 cursor-pointer transition-colors duration-200 bg-transparent text-left"
+                    >
+                      <span className="font-medium">{alt.name}</span>
+                      <span className="italic text-ink-muted ml-1.5">— {alt.reason}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <DecisionProvider
               value={{
                 result,
                 updateResult: (d) =>
                   setResult((prev) =>
-                    prev ? { ...d, recommendation: prev.recommendation } : d,
+                    prev ? { ...d, recommendation: prev.recommendation, ...(prev.altFrameworks ? { altFrameworks: prev.altFrameworks } : {}) } : d,
                   ),
               }}
             >
@@ -227,7 +286,7 @@ export function DecisionApp() {
                 data={result}
                 onUpdate={(d: FrameworkResult) =>
                   setResult((prev) =>
-                    prev ? { ...d, recommendation: prev.recommendation } : d,
+                    prev ? { ...d, recommendation: prev.recommendation, ...(prev.altFrameworks ? { altFrameworks: prev.altFrameworks } : {}) } : d,
                   )
                 }
               />

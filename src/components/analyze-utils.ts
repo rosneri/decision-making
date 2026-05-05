@@ -1,7 +1,8 @@
-import type { FrameworkResult } from "@/frameworks";
+import type { FrameworkId, FrameworkResult } from "@/frameworks";
 import { ANALYZE_ERRORS, type ApiErrorBody } from "@/lib/errors";
 
-export type AnalysisResult = FrameworkResult;
+export type FrameworkAlternative = { id: FrameworkId; name: string; reason: string };
+export type AnalysisResult = FrameworkResult & { altFrameworks?: FrameworkAlternative[] };
 
 function safeStringify(v: unknown): string {
   if (v == null) return "";
@@ -22,13 +23,16 @@ export class AnalyzeError extends Error {
   }
 }
 
-export async function fetchAnalysis(decisionText: string): Promise<AnalysisResult> {
+export async function fetchAnalysis(
+  decisionText: string,
+  opts?: { frameworkId?: FrameworkId },
+): Promise<AnalysisResult> {
   let res: Response;
   try {
     res = await fetch("/api/analyze", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ decisionText }),
+      body: JSON.stringify({ decisionText, frameworkId: opts?.frameworkId }),
     });
   } catch (e) {
     throw new AnalyzeError(
