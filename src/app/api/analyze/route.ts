@@ -1,53 +1,53 @@
 import { generateObject } from "ai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { NextResponse } from "next/server";
-import { z } from "zod";
+import { FRAMEWORKS, FrameworkSchema } from "@/frameworks";
 
 const apiKey = process.env["ANTHROPIC_API_KEY"] ?? process.env["AI_GATEWAY_API_KEY"];
 const anthropic = createAnthropic(apiKey ? { apiKey } : {});
 
 export const maxDuration = 60;
 
-const matrixSchema = z.object({
-  framework: z.literal("decision_matrix"),
-  title: z.string(),
-  criteria: z.array(z.object({ name: z.string(), weight: z.number().min(1).max(10) })).min(2).max(6),
-  options: z.array(z.object({ name: z.string(), scores: z.array(z.number().min(0).max(10)) })).min(2).max(6),
-  recommendation: z.string(),
-});
+function buildSystemPrompt(): string {
+  const grouped = new Map<string, typeof FRAMEWORKS[number][]>();
+  for (const f of FRAMEWORKS) {
+    const list = grouped.get(f.category) ?? [];
+    list.push(f);
+    grouped.set(f.category, list);
+  }
+  const lines: string[] = [];
+  for (const [category, items] of grouped) {
+    lines.push(`\n${category}:`);
+    for (const f of items) {
+      lines.push(`  - "${f.id}" — ${f.blurb}`);
+    }
+  }
+  return `You are an expert decision-analysis tool with a library of ${FRAMEWORKS.length} frameworks. Given a decision the user is weighing, you must:
 
-const costBenefitSchema = z.object({
-  framework: z.literal("cost_benefit"),
-  title: z.string(),
-  benefits: z.array(z.object({ text: z.string(), weight: z.number().min(1).max(9) })).min(1).max(8),
-  costs: z.array(z.object({ text: z.string(), weight: z.number().min(1).max(9) })).min(1).max(8),
-  recommendation: z.string(),
-});
+1. Pick the SINGLE most appropriate framework from the list below. Do NOT default to "decision_matrix" — only choose it when the user is genuinely comparing 2+ named alternatives across multiple weighted criteria. Most decisions fit a more specific framework. Examples:
+   - "Why does X take so long?" → first_principles or five_whys
+   - "Imagine the launch failed, why?" → pre_mortem
+   - "Salary negotiation walkaway?" → batna
+   - "Which feature ships next?" → rice
+   - "Take the moonshot or the safe job?" → regret_min (not decision_matrix)
+   - "Should I quit my PhD?" → sunk_cost
+   - "How do I think about this layoff?" → stoic
+   - "Why did production go down?" → five_whys
+   - "Pick a city / job offer / tool with criteria" → decision_matrix
 
-const swotSchema = z.object({
-  framework: z.literal("swot"),
-  title: z.string(),
-  strengths: z.array(z.string()).min(1).max(6),
-  weaknesses: z.array(z.string()).min(1).max(6),
-  opportunities: z.array(z.string()).min(1).max(6),
-  threats: z.array(z.string()).min(1).max(6),
-  recommendation: z.string(),
-});
+2. Generate realistic, insightful data that fully populates the chosen framework's schema.
 
-const analysisSchema = z.discriminatedUnion("framework", [
-  matrixSchema,
-  costBenefitSchema,
-  swotSchema,
-]);
+3. Set "category" to the exact category string of the chosen framework (e.g. "Analysis & evaluation", "Mental models", "Speed & prioritization").
 
-const SYSTEM = `You are an expert decision-analysis tool. Given a decision the user is weighing, you must:
-1. Choose the most appropriate framework: "decision_matrix" (comparing discrete options across multiple criteria), "cost_benefit" (weighing pros vs cons of a single course of action), or "swot" (strategic position analysis with strengths/weaknesses/opportunities/threats).
-2. Generate realistic, insightful data for that framework based on what the user wrote.
-3. Write an initial recommendation: a short, calm, second-person note — like a thoughtful older friend. Two short paragraphs, ~90-130 words. No bullet points, no headings, no exclamation marks, no emoji. Do not use the word "framework". Begin the first paragraph with a strong opening word (it will get a drop cap).
+4. Set "title" to a short summary of the user's decision.
 
-Choose "decision_matrix" when there are 2+ named options to compare.
-Choose "cost_benefit" when evaluating whether to do one thing (a single yes/no or go/no-go).
-Choose "swot" when the question is about strategic position, competitive landscape, or a venture/project.`;
+5. Write "recommendation" as a calm, second-person note — like a thoughtful older friend. Two short paragraphs, ~90-130 words. No bullet points, no headings, no exclamation marks, no emoji. Do not use the word "framework". Begin the first paragraph with a strong opening word (it will get a drop cap).
+
+The frameworks, by category:
+${lines.join("\n")}`;
+}
+
+const SYSTEM = buildSystemPrompt();
 
 export async function POST(req: Request) {
   const { decisionText } = await req.json() as { decisionText?: string };
@@ -58,10 +58,10 @@ export async function POST(req: Request) {
   try {
     const { object } = await generateObject({
       model: anthropic("claude-sonnet-4-6"),
-      schema: analysisSchema,
+      schema: FrameworkSchema,
       system: SYSTEM,
-      prompt: `The user is weighing this decision:\n\n"${decisionText}"\n\nGenerate the analysis now.`,
-      maxOutputTokens: 1200,
+      prompt: `The user is weighing this decision:\n\n"${decisionText}"\n\nChoose the most fitting framework and generate the analysis now.`,
+      maxOutputTokens: 2400,
     });
 
     return NextResponse.json(object);

@@ -1,11 +1,6 @@
-import type { DecisionMatrix } from "@/frameworks/decision-matrix/schema";
-import type { CostBenefit } from "@/frameworks/cost-benefit/schema";
-import type { Swot } from "@/frameworks/swot/schema";
+import type { FrameworkResult } from "@/frameworks";
 
-export type AnalysisResult =
-  | (Omit<DecisionMatrix, "category"> & { framework: "decision_matrix" })
-  | (Omit<CostBenefit,    "category"> & { framework: "cost_benefit" })
-  | (Omit<Swot,           "category"> & { framework: "swot" });
+export type AnalysisResult = FrameworkResult;
 
 export async function fetchAnalysis(decisionText: string): Promise<AnalysisResult> {
   const res = await fetch("/api/analyze", {

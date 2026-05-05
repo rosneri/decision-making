@@ -15,7 +15,7 @@ export function RecommendationCard({ initialNote, initialLoading, ...ctx }: Prop
   const [dataChanged, setDataChanged] = useState(false);
   const reqRef                = useRef(0);
   const lastDataKey           = useRef(dataKey(ctx));
-  const lastFramework         = useRef(ctx.framework);
+  const lastFramework         = useRef(ctx.result.framework);
   const isFirstRender         = useRef(true);
 
   const doFetch = async () => {
@@ -26,7 +26,7 @@ export function RecommendationCard({ initialNote, initialLoading, ...ctx }: Prop
       const text = await fetchRecommendation(ctx);
       if (id !== reqRef.current) return;
       setNote(text);
-      lastFramework.current = ctx.framework;
+      lastFramework.current = ctx.result.framework;
       lastDataKey.current   = dataKey(ctx);
       setDataChanged(false);
     } catch (e) {
@@ -40,20 +40,20 @@ export function RecommendationCard({ initialNote, initialLoading, ...ctx }: Prop
   // Auto-refetch when framework changes (clear intent to see a different analysis)
   useEffect(() => {
     if (isFirstRender.current) { isFirstRender.current = false; return; }
-    if (ctx.framework !== lastFramework.current) {
+    if (ctx.result.framework !== lastFramework.current) {
       void doFetch();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ctx.framework]);
+  }, [ctx.result.framework]);
 
   // Mark changed when data within the current framework is edited
   useEffect(() => {
     if (isFirstRender.current) return;
-    if (ctx.framework === lastFramework.current && dataKey(ctx) !== lastDataKey.current) {
+    if (ctx.result.framework === lastFramework.current && dataKey(ctx) !== lastDataKey.current) {
       setDataChanged(true);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(ctx.matrix), JSON.stringify(ctx.costBenefit), JSON.stringify(ctx.swot)]);
+  }, [JSON.stringify(ctx.result)]);
 
   const paragraphs = (note ?? "").split(/\n\s*\n/).filter(Boolean);
   const firstChar  = paragraphs[0]?.trim().charAt(0) ?? "";
@@ -136,5 +136,5 @@ export function RecommendationCard({ initialNote, initialLoading, ...ctx }: Prop
 }
 
 function dataKey(ctx: RecContext): string {
-  return JSON.stringify({ m: ctx.matrix, cb: ctx.costBenefit, s: ctx.swot });
+  return JSON.stringify(ctx.result);
 }
