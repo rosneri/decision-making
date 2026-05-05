@@ -5,6 +5,7 @@ import { createContext, useContext, type ReactNode } from "react";
 interface Metric {
   k: string;
   v: string;
+  testId?: string;
 }
 
 interface Props {
@@ -61,7 +62,10 @@ export function ResultPanel({ body, label = "Recommendation", metrics }: Props) 
                 <span className="font-code text-[11px] tracking-[0.22em] uppercase text-ink-muted">
                   {m.k}
                 </span>
-                <span className="font-code text-[11px] tracking-[0.06em] uppercase font-medium text-ink">
+                <span
+                  data-testid={m.testId}
+                  className="font-code text-[11px] tracking-[0.06em] uppercase font-medium text-ink"
+                >
                   {m.v}
                 </span>
               </span>

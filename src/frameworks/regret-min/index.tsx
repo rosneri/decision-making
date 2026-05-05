@@ -62,7 +62,7 @@ export function View({ data, onUpdate }: { data: RegretMin; onUpdate?: (d: Regre
       <ResultPanel
         body={s.recommendation}
         metrics={[
-          { k: "Pick", v: best.name },
+          { k: "Pick", v: best.name, testId: "regret-best" },
           { k: "Asymmetry", v: (best.asymmetry > 0 ? "+" : "") + best.asymmetry },
         ]}
       />
