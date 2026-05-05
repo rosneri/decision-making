@@ -1,4 +1,4 @@
-import { generateObject } from "ai";
+import { generateObject, NoObjectGeneratedError } from "ai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -55,7 +55,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "decisionText is required" }, { status: 400 });
   }
 
-  const model = anthropic("claude-sonnet-4-6");
+  // Haiku 4.5 is fast and reliable for structured output. Sonnet 4.6's extended
+  // thinking eats output budget and frequently truncates the JSON before zod
+  // can parse it.
+  const model = anthropic("claude-haiku-4-5");
   const ids = FRAMEWORKS.map((f) => f.id) as [FrameworkId, ...FrameworkId[]];
 
   try {
@@ -69,7 +72,7 @@ export async function POST(req: Request) {
       schema: selectorSchema,
       system: SELECTOR_SYSTEM,
       prompt: `Decision:\n\n"${decisionText}"\n\nReturn the best-fit framework id.`,
-      maxOutputTokens: 200,
+      maxOutputTokens: 800,
     });
     const id = selection.object.framework;
     const meta = FRAMEWORKS.find((f) => f.id === id);
@@ -101,20 +104,25 @@ export async function POST(req: Request) {
           schema,
           system: GENERATOR_SYSTEM,
           prompt: stage2Prompt(extra),
-          maxOutputTokens: 2400,
+          maxOutputTokens: 8000,
         });
         return NextResponse.json(generated.object);
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Unknown error";
-        errors.push(`attempt ${attempt}: ${message}`);
-        console.warn(`[/api/analyze] stage-2 attempt ${attempt}/${MAX_ATTEMPTS} failed:`, message);
+        // Surface raw model output + finish reason so we can see what failed.
+        let detail = err instanceof Error ? err.message : "Unknown error";
+        if (NoObjectGeneratedError.isInstance(err)) {
+          detail = `NoObjectGenerated finishReason=${err.finishReason} cause=${err.cause instanceof Error ? err.cause.message : String(err.cause)} text=${(err.text ?? "").slice(0, 500)}`;
+          console.warn(`[/api/analyze] stage-2 attempt ${attempt} raw text:`, err.text);
+        }
+        errors.push(`attempt ${attempt}: ${detail}`);
+        console.warn(`[/api/analyze] stage-2 attempt ${attempt}/${MAX_ATTEMPTS} failed:`, detail);
       }
     }
 
     // All retries exhausted — surface the failure.
-    console.error("[/api/analyze] stage-2 exhausted all retries:", errors.join(" | "));
+    console.error("[/api/analyze] stage-2 exhausted all retries:", errors.join(" || "));
     return NextResponse.json(
-      { error: `Failed to generate ${meta.name} after ${MAX_ATTEMPTS} attempts: ${errors[errors.length - 1] ?? "unknown"}` },
+      { error: `Failed to generate ${meta.name} after ${MAX_ATTEMPTS} attempts. Last: ${errors[errors.length - 1] ?? "unknown"}` },
       { status: 502 }
     );
   } catch (err) {
