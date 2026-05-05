@@ -32,5 +32,5 @@ export const sample: SunkCost = {
     { name: "Finish", forwardCost: "+$80k cost · +3 yrs", forwardBenefit: "PhD title · soft job market", expectedValue: 30 },
     { name: "Quit", forwardCost: "0", forwardBenefit: "industry job · $140k/yr starting", expectedValue: 90 },
   ],
-  recommendation: "Sunk is sunk. Forward EV strongly favors quitting. Decide forward, not backward.",
+  recommendation: "Sunk is sunk. Forward expected value strongly favors quitting. Decide forward, not backward.",
 };

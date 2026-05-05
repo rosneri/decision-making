@@ -132,6 +132,42 @@ export function DecisionApp() {
       });
   };
 
+  // ── Re-recommend (regenerate just the note for the current data) ──
+  const rerecommend = () => {
+    if (!result) return;
+    const id = ++recReqRef.current;
+    setRecLoading(true);
+    setAnalyzeError(null);
+    fetch("/api/recommend", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ decisionText, result }),
+    })
+      .then(async (res) => {
+        if (id !== recReqRef.current) return;
+        const body = await res.json().catch(() => null) as { recommendation?: string; error?: { message?: string; code?: string } } | null;
+        if (!res.ok || !body?.recommendation) {
+          const message = body?.error?.message ?? "Couldn't regenerate the note.";
+          const code = body?.error?.code ?? "DM-UI-000";
+          setAnalyzeError({ message, code });
+          setRecLoading(false);
+          return;
+        }
+        setResult((prev) => prev ? { ...prev, recommendation: body.recommendation! } : prev);
+        setServerResultKey((prevKey) => {
+          // Recompute so the "data changed" indicator resets to current state.
+          return prevKey === null ? null : JSON.stringify({ ...result, recommendation: body.recommendation });
+        });
+        setRecLoading(false);
+      })
+      .catch((err: unknown) => {
+        if (id !== recReqRef.current) return;
+        const message = err instanceof Error ? err.message : "Unknown error";
+        setAnalyzeError({ message, code: "DM-UI-000" });
+        setRecLoading(false);
+      });
+  };
+
   const meta = result ? FRAMEWORKS.find((f) => f.id === result.framework) : undefined;
 
   const runningHead =
@@ -219,7 +255,7 @@ export function DecisionApp() {
               loading={recLoading}
               error={analyzeError?.message ?? null}
               dataChanged={serverResultKey !== null && JSON.stringify(result) !== serverResultKey}
-              onRerecommend={() => submit(decisionText)}
+              onRerecommend={rerecommend}
             />
 
             <div className="flex gap-3 mt-10 items-center">

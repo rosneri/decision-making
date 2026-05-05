@@ -39,7 +39,7 @@ export function View({ data, onUpdate }: { data: SunkCost; onUpdate?: (d: SunkCo
                   <input value={o.forwardBenefit} onChange={(e) => set(i, { forwardBenefit: e.target.value })}
                     className="block w-full font-serif italic text-[12px] text-ink-muted bg-transparent border-none outline-none" />
                   <label className="block mt-2">
-                    <span className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">EV</span>
+                    <span className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">Expected value</span>
                     <input type="number" value={o.expectedValue} onChange={(e) => set(i, { expectedValue: Number(e.target.value) || 0 })}
                       data-testid={`sunk-ev-${i}`}
                       className="block w-full font-code text-[15px] font-medium bg-transparent border-b border-rule outline-none text-ink" />
