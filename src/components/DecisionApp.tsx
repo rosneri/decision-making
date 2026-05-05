@@ -201,21 +201,23 @@ export function DecisionApp() {
             <div className="mb-10">
               <span className="folio folio-accent block mb-1">{meta.category}</span>
               <h2 className="font-serif text-[40px] font-medium tracking-[-0.008em] leading-[1.1] text-ink mt-1">{meta.name}</h2>
-              <div className="flex items-end justify-between gap-4 mt-2">
-                <p className="font-serif italic text-ink-muted text-[17px] max-w-[60ch] flex-1 min-w-0 m-0">
-                  {meta.blurb}&nbsp;·&nbsp;on <em>&ldquo;{decisionText}&rdquo;</em>
-                </p>
-                <button
-                  onClick={() => setChatOpen(true)}
-                  className="shrink-0 self-end font-serif italic text-[15px] text-vermilion hover:text-vermilion-deep border-b border-vermilion hover:border-vermilion-deep bg-transparent border-t-0 border-l-0 border-r-0 cursor-pointer transition-colors duration-200 inline-flex items-center gap-1.5 pb-0.5"
-                >
-                  <span aria-hidden>✎</span>
-                  Fill by chatting
-                </button>
-              </div>
+              <p className="font-serif italic text-ink-muted text-[17px] mt-2 max-w-[60ch]">
+                {meta.blurb}&nbsp;·&nbsp;on <em>&ldquo;{decisionText}&rdquo;</em>
+              </p>
               {(() => {
                 const help = HELP[result.framework];
-                return help ? <FrameworkHelpPanel help={help} /> : null;
+                const chatButton = (
+                  <button
+                    onClick={() => setChatOpen(true)}
+                    className="font-serif text-sm font-medium text-vermilion hover:text-paper hover:bg-vermilion border border-vermilion rounded-sm px-3 py-1.5 cursor-pointer inline-flex items-center gap-2 transition-colors duration-200 bg-transparent"
+                  >
+                    <span aria-hidden>✎</span>
+                    Fill by chatting
+                  </button>
+                );
+                return help
+                  ? <FrameworkHelpPanel help={help} trailing={chatButton} />
+                  : <div className="mt-4">{chatButton}</div>;
               })()}
             </div>
 
