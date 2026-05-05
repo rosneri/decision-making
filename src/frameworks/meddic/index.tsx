@@ -16,7 +16,14 @@ export const schema = z.object({
   framework: z.literal("meddic"),
   category: z.string(),
   title: z.string(),
-  cells: z.record(z.enum(KEYS), z.object({ answer: z.string(), confirmed: z.boolean() })),
+  cells: z.object({
+    metrics: z.object({ answer: z.string(), confirmed: z.boolean() }),
+    economic_buyer: z.object({ answer: z.string(), confirmed: z.boolean() }),
+    decision_criteria: z.object({ answer: z.string(), confirmed: z.boolean() }),
+    decision_process: z.object({ answer: z.string(), confirmed: z.boolean() }),
+    identify_pain: z.object({ answer: z.string(), confirmed: z.boolean() }),
+    champion: z.object({ answer: z.string(), confirmed: z.boolean() }),
+  }),
   recommendation: z.string(),
 });
 export type Meddic = z.infer<typeof schema>;

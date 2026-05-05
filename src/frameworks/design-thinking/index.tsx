@@ -16,7 +16,13 @@ export const schema = z.object({
   framework: z.literal("design_thinking"),
   category: z.string(),
   title: z.string(),
-  notes: z.record(z.enum(STAGES), z.string()),
+  notes: z.object({
+    empathize: z.string(),
+    define: z.string(),
+    ideate: z.string(),
+    prototype: z.string(),
+    test: z.string(),
+  }),
   current: z.enum(STAGES),
   recommendation: z.string(),
 });

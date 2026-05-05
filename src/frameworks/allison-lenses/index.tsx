@@ -16,10 +16,11 @@ export const schema = z.object({
   framework: z.literal("allison_lenses"),
   category: z.string(),
   title: z.string(),
-  lenses: z.record(z.enum(LENSES), z.object({
-    explanation: z.string(),
-    weight: z.number().int().min(1).max(5),
-  })),
+  lenses: z.object({
+    rational: z.object({ explanation: z.string(), weight: z.number().int().min(1).max(5) }),
+    organizational: z.object({ explanation: z.string(), weight: z.number().int().min(1).max(5) }),
+    political: z.object({ explanation: z.string(), weight: z.number().int().min(1).max(5) }),
+  }),
   recommendation: z.string(),
 });
 export type AllisonLenses = z.infer<typeof schema>;

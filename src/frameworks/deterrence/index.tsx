@@ -16,10 +16,11 @@ export const schema = z.object({
   framework: z.literal("deterrence"),
   category: z.string(),
   title: z.string(),
-  conditions: z.record(z.enum(COND), z.object({
-    state: z.enum(["yes", "weak", "no"]),
-    note: z.string(),
-  })),
+  conditions: z.object({
+    capability: z.object({ state: z.enum(["yes", "weak", "no"]), note: z.string() }),
+    credibility: z.object({ state: z.enum(["yes", "weak", "no"]), note: z.string() }),
+    communication: z.object({ state: z.enum(["yes", "weak", "no"]), note: z.string() }),
+  }),
   recommendation: z.string(),
 });
 export type Deterrence = z.infer<typeof schema>;

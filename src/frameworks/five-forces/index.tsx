@@ -16,10 +16,13 @@ export const schema = z.object({
   framework: z.literal("five_forces"),
   category: z.string(),
   title: z.string(),
-  forces: z.record(z.enum(FORCES), z.object({
-    level: z.number().int().min(1).max(5),
-    note: z.string(),
-  })),
+  forces: z.object({
+    rivalry: z.object({ level: z.number().int().min(1).max(5), note: z.string() }),
+    newEntrants: z.object({ level: z.number().int().min(1).max(5), note: z.string() }),
+    suppliers: z.object({ level: z.number().int().min(1).max(5), note: z.string() }),
+    buyers: z.object({ level: z.number().int().min(1).max(5), note: z.string() }),
+    substitutes: z.object({ level: z.number().int().min(1).max(5), note: z.string() }),
+  }),
   recommendation: z.string(),
 });
 export type FiveForces = z.infer<typeof schema>;

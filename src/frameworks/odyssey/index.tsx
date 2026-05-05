@@ -16,11 +16,11 @@ export const schema = z.object({
   plans: z.array(z.object({
     title: z.string(),
     note: z.string(),
-    trajectory: z.array(z.number().min(0).max(10)).length(6),
+    trajectory: z.array(z.number().min(0).max(10)).min(2).max(12),
     resources: z.number().int().min(1).max(5),
     likeability: z.number().int().min(1).max(5),
     confidence: z.number().int().min(1).max(5),
-  })).length(3),
+  })).min(2).max(5),
   preferred: z.number().int().min(0).max(2),
   recommendation: z.string(),
 });

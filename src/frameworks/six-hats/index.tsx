@@ -16,7 +16,14 @@ export const schema = z.object({
   framework: z.literal("six_hats"),
   category: z.string(),
   title: z.string(),
-  hats: z.record(z.enum(HATS), z.array(z.string())),
+  hats: z.object({
+    white: z.array(z.string()),
+    red: z.array(z.string()),
+    black: z.array(z.string()),
+    yellow: z.array(z.string()),
+    green: z.array(z.string()),
+    blue: z.array(z.string()),
+  }),
   active: z.enum(HATS),
   recommendation: z.string(),
 });

@@ -16,7 +16,12 @@ export const schema = z.object({
   framework: z.literal("ooda"),
   category: z.string(),
   title: z.string(),
-  notes: z.record(z.enum(STAGES), z.string()),
+  notes: z.object({
+    observe: z.string(),
+    orient: z.string(),
+    decide: z.string(),
+    act: z.string(),
+  }),
   current: z.enum(STAGES),
   recommendation: z.string(),
 });

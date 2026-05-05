@@ -16,8 +16,20 @@ export const schema = z.object({
   framework: z.literal("markkula"),
   category: z.string(),
   title: z.string(),
-  scores: z.record(z.enum(LENSES), z.number().int().min(0).max(5)),
-  notes: z.record(z.enum(LENSES), z.string()),
+  scores: z.object({
+    utilitarian: z.number().int().min(0).max(5),
+    rights: z.number().int().min(0).max(5),
+    justice: z.number().int().min(0).max(5),
+    commonGood: z.number().int().min(0).max(5),
+    virtue: z.number().int().min(0).max(5),
+  }),
+  notes: z.object({
+    utilitarian: z.string(),
+    rights: z.string(),
+    justice: z.string(),
+    commonGood: z.string(),
+    virtue: z.string(),
+  }),
   recommendation: z.string(),
 });
 export type Markkula = z.infer<typeof schema>;

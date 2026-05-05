@@ -17,10 +17,12 @@ export const schema = z.object({
   category: z.string(),
   title: z.string(),
   commander: z.string(),
-  sections: z.record(z.enum(SECTIONS), z.object({
-    chief: z.string(),
-    note: z.string(),
-  })),
+  sections: z.object({
+    operations: z.object({ chief: z.string(), note: z.string() }),
+    planning: z.object({ chief: z.string(), note: z.string() }),
+    logistics: z.object({ chief: z.string(), note: z.string() }),
+    finance: z.object({ chief: z.string(), note: z.string() }),
+  }),
   recommendation: z.string(),
 });
 export type Ics = z.infer<typeof schema>;
