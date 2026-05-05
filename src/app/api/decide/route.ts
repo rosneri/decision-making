@@ -82,6 +82,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ result });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("[/api/decide] failed:", message);
+    return NextResponse.json(
+      { error: { code: "DM-DECIDE-001", message: "We couldn't analyze that. Try again.", detail: message } },
+      { status: 500 },
+    );
   }
 }

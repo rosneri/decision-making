@@ -83,8 +83,17 @@ export default function DecidePage() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ text, framework: framework === "auto" ? undefined : framework }),
       });
-      const data = await res.json() as { result?: FrameworkResult; error?: string };
-      if (!res.ok) throw new Error(data.error ?? "Request failed");
+      const data = await res.json() as {
+        result?: FrameworkResult;
+        error?: string | { code?: string; message?: string; detail?: string };
+      };
+      if (!res.ok) {
+        const e = data.error;
+        const message = typeof e === "string"
+          ? e
+          : (e && typeof e === "object" && typeof e.message === "string" ? e.message : "Request failed");
+        throw new Error(message);
+      }
       setResult(data.result ?? null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to analyze");

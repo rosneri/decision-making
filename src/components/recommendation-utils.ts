@@ -55,8 +55,17 @@ export async function fetchRecommendation(ctx: RecContext): Promise<string> {
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ prompt: buildPrompt(ctx) }),
   });
-  const data = await res.json() as { text?: string; error?: string };
-  if (!res.ok) throw new Error(data.error ?? `API error ${res.status}`);
+  const data = await res.json() as {
+    text?: string;
+    error?: string | { code?: string; message?: string; detail?: string };
+  };
+  if (!res.ok) {
+    const e = data.error;
+    const message = typeof e === "string"
+      ? e
+      : (e && typeof e === "object" && typeof e.message === "string" ? e.message : `API error ${res.status}`);
+    throw new Error(message);
+  }
   const text = data.text?.trim() ?? "";
   if (!text) throw new Error("Empty response from API");
   return text;
