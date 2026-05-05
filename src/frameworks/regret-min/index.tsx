@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { RangeField } from "@/components/ui/Range";
 import { meta, schema, sample, type RegretMin } from "./data";
 export { meta, schema, sample };
 export type { RegretMin };
@@ -35,24 +36,23 @@ export function View({ data, onUpdate }: { data: RegretMin; onUpdate?: (d: Regre
               placeholder="At 80 you say: …"
               className="block w-full mt-1 font-serif italic text-[14px] text-ink-muted bg-transparent border-b border-rule outline-none focus:border-vermilion" />
             <div className="grid grid-cols-2 gap-4 mt-3">
-              <label>
-                <span className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">Regret if taken</span>
-                <input type="range" min={1} max={10} value={o.regretIfTaken}
-                  onChange={(e) => set(o.i, { regretIfTaken: Number(e.target.value) })}
-                  data-testid={`regret-${o.i}-taken`}
-                  aria-label={`regret if taken for ${o.name}`}
-                  className="block w-full" />
-                <span className="font-code text-[11px] text-ink-muted">{o.regretIfTaken}/10</span>
-              </label>
-              <label>
-                <span className="font-code text-[10px] tracking-[0.22em] uppercase text-vermilion font-medium">Regret if NOT taken</span>
-                <input type="range" min={1} max={10} value={o.regretIfNotTaken}
-                  onChange={(e) => set(o.i, { regretIfNotTaken: Number(e.target.value) })}
-                  data-testid={`regret-${o.i}-not`}
-                  aria-label={`regret if not taken for ${o.name}`}
-                  className="block w-full" />
-                <span className="font-code text-[11px] text-vermilion">{o.regretIfNotTaken}/10</span>
-              </label>
+              <RangeField
+                label="Regret if taken"
+                min={1} max={10}
+                value={o.regretIfTaken}
+                onChange={(v) => set(o.i, { regretIfTaken: v })}
+                ariaLabel={`regret if taken for ${o.name}`}
+                testId={`regret-${o.i}-taken`}
+              />
+              <RangeField
+                label="Regret if NOT taken"
+                accent
+                min={1} max={10}
+                value={o.regretIfNotTaken}
+                onChange={(v) => set(o.i, { regretIfNotTaken: v })}
+                ariaLabel={`regret if not taken for ${o.name}`}
+                testId={`regret-${o.i}-not`}
+              />
             </div>
           </div>
         );
