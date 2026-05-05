@@ -3,6 +3,7 @@ import { createAnthropic } from "@ai-sdk/anthropic";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { FRAMEWORKS, SAMPLES, SCHEMAS, type FrameworkId } from "@/frameworks";
+import { buildError } from "@/lib/errors";
 
 const apiKey = process.env["ANTHROPIC_API_KEY"] ?? process.env["AI_GATEWAY_API_KEY"];
 const anthropic = createAnthropic(apiKey ? { apiKey } : {});
@@ -52,7 +53,7 @@ const GENERATOR_SYSTEM = `You are an expert decision-analysis tool. Generate rea
 export async function POST(req: Request) {
   const { decisionText } = await req.json() as { decisionText?: string };
   if (!decisionText || typeof decisionText !== "string") {
-    return NextResponse.json({ error: "decisionText is required" }, { status: 400 });
+    return NextResponse.json(buildError("INVALID_INPUT", "decisionText missing"), { status: 400 });
   }
 
   // Haiku 4.5 is fast and reliable for structured output. Sonnet 4.6's extended
@@ -77,7 +78,8 @@ export async function POST(req: Request) {
     const id = selection.object.framework;
     const meta = FRAMEWORKS.find((f) => f.id === id);
     if (!meta) {
-      return NextResponse.json({ error: `Unknown framework: ${id}` }, { status: 500 });
+      console.error("[/api/analyze] unknown framework returned by selector:", id);
+      return NextResponse.json(buildError("UNKNOWN_FRAMEWORK", `id=${id}`), { status: 500 });
     }
 
     // Stage 2 — generate the framework data against that single specific schema.
@@ -119,15 +121,15 @@ export async function POST(req: Request) {
       }
     }
 
-    // All retries exhausted — surface the failure.
+    // All retries exhausted — surface the failure with a code.
     console.error("[/api/analyze] stage-2 exhausted all retries:", errors.join(" || "));
-    return NextResponse.json(
-      { error: `Failed to generate ${meta.name} after ${MAX_ATTEMPTS} attempts. Last: ${errors[errors.length - 1] ?? "unknown"}` },
-      { status: 502 }
-    );
+    const last = errors[errors.length - 1] ?? "unknown";
+    const code = last.includes("finishReason=length") ? "TRUNCATED" : "SCHEMA_FAIL";
+    return NextResponse.json(buildError(code, `${meta.name} | ${last}`), { status: 502 });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     console.error("[/api/analyze] failed:", message, err);
-    return NextResponse.json({ error: message }, { status: 500 });
+    // Selector-stage failure or any other unexpected throw.
+    return NextResponse.json(buildError("UPSTREAM", message), { status: 500 });
   }
 }

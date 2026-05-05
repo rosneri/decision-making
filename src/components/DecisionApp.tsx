@@ -6,7 +6,7 @@ import { ReadingInterstitial } from "./ReadingInterstitial";
 import { RecommendationCard } from "./RecommendationCard";
 import { FRAMEWORKS, VIEWS, type FrameworkResult } from "@/frameworks";
 import type { AnalysisResult } from "./analyze-utils";
-import { fetchAnalysis } from "./analyze-utils";
+import { AnalyzeError, fetchAnalysis } from "./analyze-utils";
 
 type Route = "compose" | "reading" | "result";
 type Theme = "light" | "dark";
@@ -64,7 +64,7 @@ export function DecisionApp() {
   const [recNote, setRecNote]     = useState<string | null>(null);
   const [recLoading, setRecLoading] = useState(false);
   const [analyzeReady, setAnalyzeReady] = useState(false);
-  const [analyzeError, setAnalyzeError] = useState<string | null>(null);
+  const [analyzeError, setAnalyzeError] = useState<{ message: string; code: string } | null>(null);
   const recReqRef = useRef(0);
   const hydratedRef = useRef(false);
 
@@ -118,9 +118,14 @@ export function DecisionApp() {
       })
       .catch((err: unknown) => {
         if (id !== recReqRef.current) return;
-        const message = err instanceof Error ? err.message : "Unknown error";
         console.error("[analyze] failed after retries:", err);
-        setAnalyzeError(message);
+        if (err instanceof AnalyzeError) {
+          setAnalyzeError({ message: err.message, code: err.code });
+        } else {
+          const message = err instanceof Error ? err.message : "Unknown error";
+          setAnalyzeError({ message: "Something went wrong. Try again.", code: "DM-UI-000" });
+          void message;
+        }
         setRecLoading(false);
         setAnalyzeReady(true); // advance anyway so the user isn't stuck
       });
@@ -240,13 +245,13 @@ export function DecisionApp() {
 
       {route === "result" && !result && (
         <main className="max-w-[1080px] mx-auto px-4 sm:px-10 py-14 text-center space-y-4">
-          <p className="font-serif italic text-ink-muted">
-            {analyzeError ? "The analysis failed." : "No analysis to show."}
+          <p className="font-serif italic text-ink-muted text-[18px]">
+            {analyzeError?.message ?? "No analysis to show."}
           </p>
           {analyzeError && (
-            <pre className="font-code text-[12px] text-vermilion bg-paper-deep border border-rule rounded-sm p-3 max-w-[60ch] mx-auto whitespace-pre-wrap text-left">
-              {analyzeError}
-            </pre>
+            <p className="font-code text-[10px] tracking-[0.18em] uppercase text-ink-muted/70">
+              error · {analyzeError.code}
+            </p>
           )}
           <div className="flex gap-3 justify-center">
             {decisionText && (
