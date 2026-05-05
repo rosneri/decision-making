@@ -50,3 +50,12 @@ export const META: Record<Key, { letter: string; word: string }> = {
   identify_pain: { letter: "I", word: "Identify Pain" },
   champion: { letter: "C", word: "Champion" },
 };
+
+export function getMetrics(d: Meddic) {
+  const cells = Object.values(d.cells) as { answer: string; confirmed: boolean }[];
+  const confirmed = cells.filter((c) => c.confirmed).length;
+  return [
+    { k: "Confirmed", v: `${confirmed}/6` },
+    { k: "Verdict", v: confirmed === 6 ? "Forecastable" : "Gaps" },
+  ];
+}

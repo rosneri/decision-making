@@ -45,3 +45,8 @@ export const META: Record<Role, { letter: string; word: string }> = {
   input: { letter: "I", word: "Input" },
   decide: { letter: "D", word: "Decide" },
 };
+
+export function getMetrics(d: Rapid) {
+  const decider = d.assignments.find((a) => a.role === "decide");
+  return [{ k: "Decider", v: decider?.who ?? "—" }];
+}

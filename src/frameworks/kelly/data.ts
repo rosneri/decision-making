@@ -30,3 +30,12 @@ export const sample: Kelly = {
   fraction: 0.5,
   recommendation: "Full Kelly says ~32%. Cut to half-Kelly to absorb a losing streak. Wager ~$1,625.",
 };
+
+export function getMetrics(d: Kelly) {
+  const f = (d.oddsToOne * d.pWin - (1 - d.pWin)) / (d.oddsToOne || 1);
+  const wager = Math.max(0, f * d.fraction * d.bankroll);
+  return [
+    { k: "Kelly f*", v: `${(Math.max(0, f) * 100).toFixed(1)}%` },
+    { k: "Wager", v: `$${wager.toFixed(0)}` },
+  ];
+}

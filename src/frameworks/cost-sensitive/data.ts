@@ -33,3 +33,10 @@ export const sample: CostSensitive = {
   threshold: 0.32,
   recommendation: "False negatives cost ~250× a false positive — flag aggressively. Threshold ≈ 0.32 maximizes $.",
 };
+
+export function getMetrics(d: CostSensitive) {
+  return [
+    { k: "Threshold", v: d.threshold.toFixed(2) },
+    { k: "Base rate", v: `${(d.baseRate * 100).toFixed(1)}%` },
+  ];
+}

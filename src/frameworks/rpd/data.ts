@@ -38,3 +38,11 @@ export const sample: Rpd = {
 
 export const cycleState = (v: "yes" | "no" | "unknown"): "yes" | "no" | "unknown" =>
   v === "yes" ? "no" : v === "no" ? "unknown" : "yes";
+
+export function getMetrics(d: Rpd) {
+  const blocking = d.checks.filter((c) => c.state === "no").length;
+  return [
+    { k: "Course", v: d.course ? (d.course.length > 50 ? d.course.slice(0, 50) + "…" : d.course) : "—" },
+    { k: "Verdict", v: blocking === 0 ? "Execute" : "Hold" },
+  ];
+}

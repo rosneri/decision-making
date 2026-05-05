@@ -30,3 +30,10 @@ export const sample: Jtbd = {
   competitors: ["coffee", "granola", "skipping it"],
   recommendation: "Compete on convenience and energy, not protein content. The granola aisle is the real rival.",
 };
+
+export function getMetrics(d: Jtbd) {
+  return [
+    { k: "Job", v: d.want ? (d.want.length > 50 ? d.want.slice(0, 50) + "…" : d.want) : "—" },
+    { k: "Rivals", v: String(d.competitors.length) },
+  ];
+}

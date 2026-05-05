@@ -28,3 +28,12 @@ export const sample: LearnedHand = {
   loss: 300000,
   recommendation: "B ($2.4k) < PL ($18k). The precaution was cheap; failing to take it is negligent under Hand.",
 };
+
+export function getMetrics(d: LearnedHand) {
+  const pl = d.probability * d.loss;
+  return [
+    { k: "B", v: `$${d.burden.value.toFixed(0)}` },
+    { k: "PL", v: `$${pl.toFixed(0)}` },
+    { k: "Verdict", v: d.burden.value < pl ? "Negligent" : "Not negligent" },
+  ];
+}

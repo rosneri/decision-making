@@ -46,3 +46,11 @@ export const META: Record<Section, { label: string }> = {
   logistics: { label: "Logistics" },
   finance: { label: "Finance" },
 };
+
+export function getMetrics(d: Ics) {
+  const filled = (Object.values(d.sections) as { chief: string; note: string }[]).filter((s) => s.chief.trim()).length;
+  return [
+    { k: "IC", v: d.commander || "—" },
+    { k: "Chiefs", v: `${filled}/4` },
+  ];
+}

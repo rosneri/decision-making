@@ -46,3 +46,7 @@ export const STAGE_META: Record<Stage, { letter: string; label: string; note: st
   decide: { letter: "D", label: "Decide", note: "pick the move" },
   act: { letter: "A", label: "Act", note: "ship the response" },
 };
+
+export function getMetrics(d: Ooda) {
+  return [{ k: "Stage", v: STAGE_META[d.current].label }];
+}

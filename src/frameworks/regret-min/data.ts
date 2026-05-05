@@ -32,3 +32,16 @@ export const sample: RegretMin = {
   ],
   recommendation: "Moonshot has 6× regret-asymmetry. Take it; the floor is recoverable, the ceiling isn't.",
 };
+
+export function bestOption(d: RegretMin) {
+  const scored = d.options.map((o, i) => ({ ...o, i, asymmetry: o.regretIfNotTaken - o.regretIfTaken }));
+  return scored.reduce((a, x) => x.asymmetry > a.asymmetry ? x : a, scored[0]!);
+}
+
+export function getMetrics(d: RegretMin) {
+  const best = bestOption(d);
+  return [
+    { k: "Pick", v: best.name, testId: "regret-best" },
+    { k: "Asymmetry", v: (best.asymmetry > 0 ? "+" : "") + best.asymmetry },
+  ];
+}

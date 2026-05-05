@@ -35,3 +35,12 @@ export const sample: Qaly = {
   ],
   recommendation: "Fund: vaccination, cessation, screening (all <$50k/QALY). Skip MRI for non-specific back pain.",
 };
+
+export function getMetrics(d: Qaly) {
+  const ratios = d.interventions.map((i) => ({ name: i.name, ratio: i.cost / (i.qalyGained || 1e-9) }));
+  const fund = ratios.filter((r) => r.ratio <= d.wtpPerQaly).length;
+  return [
+    { k: "WTP", v: `$${d.wtpPerQaly.toLocaleString()}` },
+    { k: "Fund", v: `${fund}/${d.interventions.length}` },
+  ];
+}

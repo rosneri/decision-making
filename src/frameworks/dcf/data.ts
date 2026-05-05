@@ -32,3 +32,15 @@ export const sample: Dcf = {
   askingPrice: 80,
   recommendation: "PV sums to ~$210M against $80M asking — significant margin of safety. Buy if fundamentals hold.",
 };
+
+export function getMetrics(d: Dcf) {
+  let pv = 0;
+  d.fcf.forEach((c, i) => { pv += c / Math.pow(1 + d.discountRate, i + 1); });
+  pv += d.terminalValue / Math.pow(1 + d.discountRate, d.fcf.length);
+  const margin = pv - d.askingPrice;
+  return [
+    { k: "PV", v: `${d.unit}${pv.toFixed(0)}` },
+    { k: "Asking", v: `${d.unit}${d.askingPrice}` },
+    { k: "Margin", v: (margin > 0 ? "+" : "") + `${d.unit}${margin.toFixed(0)}` },
+  ];
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useFrameworkData } from "@/components/DecisionContext";
 import { MicroLabel, InlineNumber, RemoveButton } from "@/components/ui";
 import type { CostBenefit } from "./schema";
 
@@ -100,16 +101,11 @@ function StackItem({
 }
 
 export function View({ data, onUpdate }: Props) {
-  const [state, setState] = useState(data);
+  const [state, update] = useFrameworkData<CostBenefit>(data, onUpdate);
   const [newBen, setNewBen] = useState("");
   const [newBenW, setNewBenW] = useState(3);
   const [newCost, setNewCost] = useState("");
   const [newCostW, setNewCostW] = useState(3);
-
-  const update = (next: CostBenefit) => {
-    setState(next);
-    onUpdate?.(next);
-  };
 
   const benTotal  = state.benefits.reduce((s, x) => s + x.weight, 0);
   const costTotal = state.costs.reduce((s, x) => s + x.weight, 0);

@@ -33,3 +33,15 @@ export const sample: StructuredInterview = {
   ],
   recommendation: "Aria leads on average and is strongest on the most predictive dimensions (collab, ownership). Hire.",
 };
+
+export function getMetrics(d: StructuredInterview) {
+  const scored = d.candidates.map((c) => ({
+    name: c.name,
+    avg: c.scores.reduce((s, x) => s + x, 0) / (c.scores.length || 1),
+  }));
+  const top = scored.reduce((b, c) => (c.avg > b.avg ? c : b), scored[0]!);
+  return [
+    { k: "Top", v: top.name },
+    { k: "Avg", v: top.avg.toFixed(2) },
+  ];
+}

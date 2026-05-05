@@ -42,3 +42,15 @@ export const sample: Pugh = {
 };
 
 export const cycle = (v: Val): Val => v === "+" ? "S" : v === "S" ? "-" : "+";
+
+export function getMetrics(d: Pugh) {
+  const scores = d.concepts.map((_, ci) =>
+    d.criteria.reduce((s, c) => s + (c.scores[ci] === "+" ? 1 : c.scores[ci] === "-" ? -1 : 0), 0),
+  );
+  const best = scores.reduce((bi, s, i) => (s > (scores[bi] ?? -Infinity) ? i : bi), 0);
+  const allLose = scores.every((s) => s <= 0);
+  return [
+    { k: "Winner", v: allLose ? d.datum : (d.concepts[best] ?? "—") },
+    { k: "Net", v: (scores[best] ?? 0) > 0 ? `+${scores[best]}` : String(scores[best] ?? 0) },
+  ];
+}

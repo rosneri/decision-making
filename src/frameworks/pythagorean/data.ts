@@ -32,3 +32,15 @@ export const sample: Pythagorean = {
   exponent: 2,
   recommendation: "Expected ~9.6 wins; actual is 12. They're +2.4 above expectation — expect regression. Don't pay them like a 12-win team.",
 };
+
+export function getMetrics(d: Pythagorean) {
+  const games = d.actualWins + d.actualLosses;
+  const exp = d.exponent;
+  const expected = games * Math.pow(d.pointsFor, exp) / (Math.pow(d.pointsFor, exp) + Math.pow(d.pointsAgainst, exp) || 1);
+  const delta = d.actualWins - expected;
+  return [
+    { k: "Expected", v: expected.toFixed(1) },
+    { k: "Actual", v: String(d.actualWins) },
+    { k: "Δ", v: (delta >= 0 ? "+" : "") + delta.toFixed(1) },
+  ];
+}

@@ -40,3 +40,10 @@ export const ANCHORS: Record<Mode, { x: number; y: number; sub: string }> = {
 
 export const dist = (a: { x: number; y: number }, b: { x: number; y: number }) =>
   Math.hypot(a.x - b.x, a.y - b.y);
+
+export function getMetrics(d: Tki) {
+  const point = { x: d.cooperativeness, y: d.assertiveness };
+  const entries = Object.entries(ANCHORS) as [Mode, { x: number; y: number; sub: string }][];
+  const closest = entries.reduce((b, e) => (dist(point, e[1]) < dist(point, b[1]) ? e : b), entries[0]!);
+  return [{ k: "Mode", v: closest[0] }];
+}

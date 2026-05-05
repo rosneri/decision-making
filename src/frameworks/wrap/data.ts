@@ -46,3 +46,11 @@ export const META: Record<Step, { word: string; desc: string }> = {
   A: { word: "Attain distance", desc: "view from a friend's seat" },
   P: { word: "Prepare to be wrong", desc: "tripwires + pre-mortem" },
 };
+
+export function getMetrics(d: Wrap) {
+  const done = (Object.values(d.steps) as { done: boolean; notes: string }[]).filter((s) => s.done).length;
+  return [
+    { k: "Step", v: META[d.current].word },
+    { k: "Progress", v: `${done}/4` },
+  ];
+}

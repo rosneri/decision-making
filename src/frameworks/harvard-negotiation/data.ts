@@ -39,3 +39,11 @@ export const META: Record<Section, { label: string; sub: string; accent: boolean
   options: { label: "Options", sub: "mutual gain ideas", accent: true },
   criteria: { label: "Objective criteria", sub: "external standards", accent: false },
 };
+
+export function getMetrics(d: Harvard) {
+  return [
+    { k: "Interests", v: String(d.interests.length) },
+    { k: "Options", v: String(d.options.length) },
+    { k: "Criteria", v: String(d.criteria.length) },
+  ];
+}

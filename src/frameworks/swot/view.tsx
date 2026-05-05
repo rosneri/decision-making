@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useFrameworkData } from "@/components/DecisionContext";
 import { QuadrantBoard, EditableList, type Quadrant } from "@/components/ui";
 import type { Swot } from "./schema";
 
@@ -19,9 +19,7 @@ const QUADRANTS: (Quadrant & { key: QuadKey })[] = [
 ];
 
 export function View({ data, onUpdate }: Props) {
-  const [state, setState] = useState(data);
-
-  const update = (next: Swot) => { setState(next); onUpdate?.(next); };
+  const [state, update] = useFrameworkData<Swot>(data, onUpdate);
 
   const updateItem = (key: QuadKey, idx: number, text: string) =>
     update({ ...state, [key]: state[key].map((t, i) => i === idx ? text : t) });

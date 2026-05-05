@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useFrameworkData } from "@/components/DecisionContext";
 import { Card, MicroLabel, Range, InlineText, InlineNumber, AddButton, RemoveButton } from "@/components/ui";
 import type { DecisionMatrix } from "./schema";
 
@@ -10,12 +10,7 @@ interface Props {
 }
 
 export function View({ data, onUpdate }: Props) {
-  const [state, setState] = useState(data);
-
-  const update = (next: DecisionMatrix) => {
-    setState(next);
-    onUpdate?.(next);
-  };
+  const [state, update] = useFrameworkData<DecisionMatrix>(data, onUpdate);
 
   const totalW = state.criteria.reduce((s, c) => s + c.weight, 0) || 1;
   const totals = state.options.map((o) =>

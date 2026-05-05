@@ -5,8 +5,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ChatFiller } from "./ChatFiller";
 import { Composer } from "./Composer";
 import { ReadingInterstitial } from "./ReadingInterstitial";
+import { DecisionProvider } from "./DecisionContext";
 import { RecommendationCard } from "./RecommendationCard";
-import { FRAMEWORKS, VIEWS, type FrameworkResult } from "@/frameworks";
+import { ResultStrip } from "./ResultStrip";
+import { FRAMEWORKS, METRICS, VIEWS, type FrameworkResult } from "@/frameworks";
 import { HELP } from "@/frameworks/help";
 import { FrameworkHelpPanel } from "./FrameworkHelpPanel";
 import { SiteHeader } from "./SiteHeader";
@@ -211,7 +213,27 @@ export function DecisionApp() {
               })()}
             </div>
 
-            <ActiveView key={`${result.framework}:${viewVersion}`} data={result} onUpdate={setResult} />
+            <DecisionProvider
+              value={{
+                result,
+                updateResult: (d) =>
+                  setResult((prev) =>
+                    prev ? { ...d, recommendation: prev.recommendation } : d,
+                  ),
+              }}
+            >
+              <ActiveView
+                key={`${result.framework}:${viewVersion}`}
+                data={result}
+                onUpdate={(d: FrameworkResult) =>
+                  setResult((prev) =>
+                    prev ? { ...d, recommendation: prev.recommendation } : d,
+                  )
+                }
+              />
+            </DecisionProvider>
+
+            <ResultStrip metrics={METRICS[result.framework]?.(result) ?? []} />
 
             <RecommendationCard
               key={decisionText}

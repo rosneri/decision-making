@@ -1,20 +1,19 @@
 "use client";
-import { useState } from "react";
-import { Card, MicroLabel, RangeField, InlineText, AddButton, RemoveButton } from "@/components/ui";
-import { meta, schema, sample, type RegretMin } from "./data";
+import { useFrameworkData } from "@/components/DecisionContext";
+import { Card, RangeField, InlineText, AddButton, RemoveButton } from "@/components/ui";
+import { meta, schema, sample, bestOption, type RegretMin } from "./data";
 export { meta, schema, sample };
 export type { RegretMin };
 
 export function View({ data, onUpdate }: { data: RegretMin; onUpdate?: (d: RegretMin) => void }) {
-  const [s, setS] = useState(data);
-  const upd = (n: RegretMin) => { setS(n); onUpdate?.(n); };
+  const [s, upd] = useFrameworkData<RegretMin>(data, onUpdate);
   const set = (i: number, patch: Partial<RegretMin["options"][number]>) =>
     upd({ ...s, options: s.options.map((o, j) => j === i ? { ...o, ...patch } : o) });
   const add = () => upd({ ...s, options: [...s.options, { name: "Option", regretIfTaken: 5, regretIfNotTaken: 5, eightyYrThought: "" }] });
   const rm = (i: number) => upd({ ...s, options: s.options.filter((_, j) => j !== i) });
 
   const scored = s.options.map((o, i) => ({ ...o, i, asymmetry: o.regretIfNotTaken - o.regretIfTaken }));
-  const best = scored.reduce((a, x) => x.asymmetry > a.asymmetry ? x : a, scored[0]!);
+  const best = bestOption(s);
 
   return (
     <Card>
@@ -66,10 +65,6 @@ export function View({ data, onUpdate }: { data: RegretMin; onUpdate?: (d: Regre
         );
       })}
       <AddButton onClick={add} className="px-4 py-2 w-full text-left">+ option</AddButton>
-      <div className="p-4 border-t border-rule bg-paper-deep">
-        <MicroLabel>Lowest 80-year regret</MicroLabel>
-        <span className="ml-2 font-serif font-medium text-vermilion text-[15px]" data-testid="regret-best">{best.name}</span>
-      </div>
     </Card>
   );
 }

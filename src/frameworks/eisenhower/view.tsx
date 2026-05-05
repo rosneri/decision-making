@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useFrameworkData } from "@/components/DecisionContext";
 import { QuadrantBoard, InlineText, RemoveButton, AddButton, type Quadrant } from "@/components/ui";
 import type { Eisenhower } from "./schema";
 
@@ -24,12 +24,7 @@ const QUADRANTS: EQuadrant[] = [
 ];
 
 export function View({ data, onUpdate }: Props) {
-  const [state, setState] = useState(data);
-
-  const update = (next: Eisenhower) => {
-    setState(next);
-    onUpdate?.(next);
-  };
+  const [state, update] = useFrameworkData<Eisenhower>(data, onUpdate);
 
   const updateTask = (idx: number, patch: Partial<Task>) =>
     update({ ...state, tasks: state.tasks.map((t, i) => (i === idx ? { ...t, ...patch } : t)) });

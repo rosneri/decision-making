@@ -7,6 +7,9 @@ import * as decisionMatrix from "./decision-matrix";
 import * as eisenhower from "./eisenhower";
 import * as swot from "./swot";
 import * as costBenefit from "./cost-benefit";
+import { getMetrics as decisionMatrixMetrics } from "./decision-matrix/metrics";
+import { getMetrics as costBenefitMetrics } from "./cost-benefit/metrics";
+import { getMetrics as regretMinMetrics } from "./regret-min/data";
 
 // The remaining frameworks each ship a `data.ts` (server-safe — meta, schema,
 // sample, type) plus an `index.tsx` (client — exports `View`). Importing meta
@@ -327,3 +330,76 @@ export const VIEWS = Object.fromEntries(
 export const SCHEMAS = Object.fromEntries(
   ALL.map((m) => [m.meta.id, m.schema])
 ) as unknown as Record<FrameworkId, z.ZodTypeAny>;
+
+// Per-framework metrics extractor: pure functions that derive a small
+// summary row (Winner, Pick, Net, …) from a result. Frameworks without an
+// entry simply render no metrics strip.
+export interface ResultMetric {
+  k: string;
+  v: string;
+  testId?: string;
+}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type MetricsFn = (d: any) => ResultMetric[];
+
+export const METRICS: Partial<Record<FrameworkId, MetricsFn>> = {
+  decision_matrix: decisionMatrixMetrics,
+  cost_benefit: costBenefitMetrics,
+  regret_min: regretMinMetrics,
+  ach: achData.getMetrics,
+  adr: adrData.getMetrics,
+  algo_impact: algoImpactData.getMetrics,
+  allison_lenses: allisonLensesData.getMetrics,
+  batna: batnaData.getMetrics,
+  budget_503020: budget503020Data.getMetrics,
+  cost_sensitive: costSensitiveData.getMetrics,
+  cross_validation: crossValidationData.getMetrics,
+  dcf: dcfData.getMetrics,
+  design_thinking: designThinkingData.getMetrics,
+  deterrence: deterrenceData.getMetrics,
+  doughnut: doughnutData.getMetrics,
+  first_principles: firstPrinciplesData.getMetrics,
+  five_forces: fiveForcesData.getMetrics,
+  five_whys: fiveWhysData.getMetrics,
+  grade: gradeData.getMetrics,
+  harvard_negotiation: harvardNegotiationData.getMetrics,
+  ics: icsData.getMetrics,
+  ignatian: ignatianData.getMetrics,
+  inversion: inversionData.getMetrics,
+  irac: iracData.getMetrics,
+  jtbd: jtbdData.getMetrics,
+  kano: kanoData.getMetrics,
+  kelly: kellyData.getMetrics,
+  lca: lcaData.getMetrics,
+  lean: leanData.getMetrics,
+  learned_hand: learnedHandData.getMetrics,
+  markkula: markkulaData.getMetrics,
+  meddic: meddicData.getMetrics,
+  model_card: modelCardData.getMetrics,
+  monte_carlo: monteCarloData.getMetrics,
+  odyssey: odysseyData.getMetrics,
+  ooda: oodaData.getMetrics,
+  pdca: pdcaData.getMetrics,
+  pre_mortem: preMortemData.getMetrics,
+  pugh: pughData.getMetrics,
+  pythagorean: pythagoreanData.getMetrics,
+  qaly: qalyData.getMetrics,
+  rapid: rapidData.getMetrics,
+  reference_class: referenceClassData.getMetrics,
+  ria: riaData.getMetrics,
+  rice: riceData.getMetrics,
+  rpd: rpdData.getMetrics,
+  scorecard: scorecardData.getMetrics,
+  sdm: sdmData.getMetrics,
+  six_hats: sixHatsData.getMetrics,
+  stoic: stoicData.getMetrics,
+  stp: stpData.getMetrics,
+  structured_interview: structuredInterviewData.getMetrics,
+  sunk_cost: sunkCostData.getMetrics,
+  tit_for_tat: titForTatData.getMetrics,
+  tki: tkiData.getMetrics,
+  veil_of_ignorance: veilOfIgnoranceData.getMetrics,
+  wardley: wardleyData.getMetrics,
+  wpa: wpaData.getMetrics,
+  wrap: wrapData.getMetrics,
+};

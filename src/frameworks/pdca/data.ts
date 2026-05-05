@@ -45,3 +45,10 @@ export const META: Record<Phase, { word: string; note: string }> = {
   C: { word: "Check", note: "measure" },
   A: { word: "Act", note: "adopt or adjust" },
 };
+
+export function getMetrics(d: Pdca) {
+  return [
+    { k: "Cycle", v: `#${d.cycleNumber}` },
+    { k: "Phase", v: META[d.current].word },
+  ];
+}

@@ -37,3 +37,9 @@ export const sample: Odyssey = {
   preferred: 1,
   recommendation: "Plan B has the steepest likeability gradient. Talk to 3 people doing it before committing.",
 };
+
+export function getMetrics(d: Odyssey) {
+  return [
+    { k: "Preferred", v: d.plans[d.preferred]?.title ?? "—" },
+  ];
+}

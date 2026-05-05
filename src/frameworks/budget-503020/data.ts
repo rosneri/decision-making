@@ -30,3 +30,13 @@ export const sample: Budget = {
   actuals: { needs: 2688, wants: 1536, save: 576 },
   recommendation: "Wants are 32% (target 30%); save/debt is 12% (target 20%). Move ~$400/mo from wants to savings.",
 };
+
+export function getMetrics(d: Budget) {
+  const inc = d.income || 1;
+  const pct = (n: number) => `${Math.round((n / inc) * 100)}%`;
+  return [
+    { k: "Needs", v: pct(d.actuals.needs) },
+    { k: "Wants", v: pct(d.actuals.wants) },
+    { k: "Save", v: pct(d.actuals.save) },
+  ];
+}

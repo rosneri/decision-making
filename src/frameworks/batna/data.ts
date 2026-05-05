@@ -32,3 +32,12 @@ export const sample: Batna = {
   yourAnchor: 185,
   recommendation: "Anchor at 185, target 170. Below 145, walk; above 180, they walk.",
 };
+
+export function getMetrics(d: Batna) {
+  const zopa = Math.max(0, d.theirBatna.value - d.yourBatna.value);
+  return [
+    { k: "Walkaway", v: `${d.unit}${d.yourBatna.value}` },
+    { k: "Their walkaway", v: `${d.unit}${d.theirBatna.value}` },
+    { k: "ZOPA", v: zopa > 0 ? `${d.unit}${zopa}` : "none" },
+  ];
+}

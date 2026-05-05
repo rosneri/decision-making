@@ -37,3 +37,12 @@ export const sample: Rice = {
 };
 
 export const score = (x: Rice["items"][number]) => (x.reach * x.impact * x.confidence) / x.effort;
+
+export function getMetrics(d: Rice) {
+  const scored = d.items.map((x) => ({ name: x.feature, s: score(x) }));
+  const top = scored.reduce((b, x) => (x.s > b.s ? x : b), scored[0]!);
+  return [
+    { k: "Top feature", v: top.name },
+    { k: "RICE", v: top.s.toFixed(0) },
+  ];
+}

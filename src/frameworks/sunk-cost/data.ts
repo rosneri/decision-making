@@ -34,3 +34,11 @@ export const sample: SunkCost = {
   ],
   recommendation: "Sunk is sunk. Forward expected value strongly favors quitting. Decide forward, not backward.",
 };
+
+export function getMetrics(d: SunkCost) {
+  const top = d.options.reduce((b, o) => (o.expectedValue > b.expectedValue ? o : b), d.options[0]!);
+  return [
+    { k: "Forward pick", v: top.name },
+    { k: "EV", v: top.expectedValue.toFixed(0) },
+  ];
+}

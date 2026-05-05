@@ -41,3 +41,12 @@ export const META: Record<Lens, { roman: string; label: string; q: string }> = {
   organizational: { roman: "II", label: "Organizational", q: "what bureaucratic routine?" },
   political: { roman: "III", label: "Governmental Politics", q: "who won the internal fight?" },
 };
+
+export function getMetrics(d: AllisonLenses) {
+  const entries = Object.entries(d.lenses) as [Lens, { explanation: string; weight: number }][];
+  const top = entries.reduce((b, e) => (e[1].weight > b[1].weight ? e : b), entries[0]!);
+  return [
+    { k: "Dominant lens", v: META[top[0]].label },
+    { k: "Weight", v: String(top[1].weight) },
+  ];
+}

@@ -36,3 +36,12 @@ export const sample: Doughnut = {
 };
 
 export type Side = "shortfalls" | "overshoots";
+
+export function getMetrics(d: Doughnut) {
+  const breaches = [...d.shortfalls, ...d.overshoots].filter((x) => x.severity >= 3).length;
+  const total = d.shortfalls.length + d.overshoots.length;
+  return [
+    { k: "Breaches ≥3", v: `${breaches}/${total}` },
+    { k: "Verdict", v: breaches === 0 ? "In bounds" : "Out of bounds" },
+  ];
+}

@@ -34,3 +34,13 @@ export function strategy(them: ("C" | "D")[]): ("C" | "D")[] {
   // start cooperating, then mirror their previous move
   return them.map((_, i) => i === 0 ? "C" : them[i - 1]!);
 }
+
+export function getMetrics(d: TitForTat) {
+  const defects = d.rounds.filter((r) => r.them === "D").length;
+  const tail = d.rounds.slice(-3);
+  const recentD = tail.filter((r) => r.them === "D").length;
+  return [
+    { k: "Their defects", v: `${defects}/${d.rounds.length}` },
+    { k: "Reply", v: recentD >= 3 ? "Exit" : "Mirror" },
+  ];
+}

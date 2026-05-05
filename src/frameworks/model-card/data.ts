@@ -51,3 +51,12 @@ export const FIELDS: Array<{ k: keyof ModelCard["fields"]; label: string; accent
   { k: "ethicalConcerns", label: "Ethical concerns", accent: true },
   { k: "caveats", label: "Caveats" },
 ];
+
+export function getMetrics(d: ModelCard) {
+  const fields = Object.values(d.fields) as string[];
+  const filled = fields.filter((f) => f.trim().length > 0).length;
+  return [
+    { k: "Model", v: d.modelName || "—" },
+    { k: "Filled", v: `${filled}/6` },
+  ];
+}

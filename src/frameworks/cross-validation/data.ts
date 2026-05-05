@@ -38,3 +38,13 @@ export const stats = (xs: number[]) => {
   const v = xs.reduce((a, b) => a + (b - m) ** 2, 0) / xs.length;
   return { mean: m, std: Math.sqrt(v) };
 };
+
+export function getMetrics(d: CrossValidation) {
+  const scored = d.models.map((m) => ({ name: m.name, ...stats(m.foldScores) }));
+  const best = scored.reduce((b, m) => (m.mean - m.std > b.mean - b.std ? m : b), scored[0]!);
+  return [
+    { k: "Pick", v: best.name },
+    { k: "Mean", v: best.mean.toFixed(3) },
+    { k: "Std", v: best.std.toFixed(3) },
+  ];
+}
