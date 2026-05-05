@@ -244,9 +244,18 @@ export function DecisionApp() {
             <div className="mb-10">
               <span className="folio folio-accent block mb-1">{meta.category}</span>
               <h2 className="font-serif text-[40px] font-medium tracking-[-0.008em] leading-[1.1] text-ink mt-1">{meta.name}</h2>
-              <p className="font-serif italic text-ink-muted text-[17px] mt-2 max-w-[60ch]">
-                {meta.blurb}&nbsp;·&nbsp;on <em>&ldquo;{decisionText}&rdquo;</em>
-              </p>
+              <div className="flex items-end justify-between gap-4 mt-2">
+                <p className="font-serif italic text-ink-muted text-[17px] max-w-[60ch] flex-1 min-w-0 m-0">
+                  {meta.blurb}&nbsp;·&nbsp;on <em>&ldquo;{decisionText}&rdquo;</em>
+                </p>
+                <button
+                  onClick={() => setChatOpen(true)}
+                  className="shrink-0 self-end font-serif italic text-[15px] text-vermilion hover:text-vermilion-deep border-b border-vermilion hover:border-vermilion-deep bg-transparent border-t-0 border-l-0 border-r-0 cursor-pointer transition-colors duration-200 inline-flex items-center gap-1.5 pb-0.5"
+                >
+                  <span aria-hidden>✎</span>
+                  Fill by chatting
+                </button>
+              </div>
             </div>
 
             <ActiveView data={result} onUpdate={setResult} />
@@ -261,15 +270,7 @@ export function DecisionApp() {
             />
 
             <div className="flex gap-3 mt-10 items-center flex-wrap">
-              <button
-                onClick={() => setChatOpen(true)}
-                className="font-serif text-base font-medium px-[22px] py-3 rounded-sm bg-vermilion text-paper hover:bg-vermilion-deep transition-colors duration-200 inline-flex items-center gap-2"
-              >
-                <span aria-hidden>✎</span>
-                <span className="sm:hidden">Chat fill</span>
-                <span className="hidden sm:inline">Fill by chatting</span>
-              </button>
-              <button className="font-serif text-base font-medium px-[22px] py-3 rounded-sm border border-rule text-ink hover:border-ink transition-colors duration-200">
+              <button className="font-serif text-base font-medium px-[22px] py-3 rounded-sm bg-vermilion text-paper hover:bg-vermilion-deep transition-colors duration-200">
                 <span className="sm:hidden">Keep</span><span className="hidden sm:inline">Keep this</span>
               </button>
               <button

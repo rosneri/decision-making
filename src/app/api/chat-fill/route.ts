@@ -46,9 +46,9 @@ Rules:
 - Keep "reply" short — 1 to 3 sentences. No bullet lists, no headings, no markdown, no emoji.
 - Refer to fields by plain English (e.g. "what's your best alternative if this falls through?"), never by JSON keys.
 - Look at the framework data the user already has. Find the weakest, vaguest, or most-placeholder-looking part and ask about THAT next. If a field is filled in but generic, push for specifics.
-- When the user gives you new information, return the FULL updated framework data in "updatedData" — copy every existing field, then revise the parts the user just informed. Preserve required array lengths and value ranges. The "framework" and "category" fields must stay exactly as provided.
-- If the user's message is just chit-chat, a clarification question, or doesn't add usable signal, return updatedData = null and either answer them briefly or steer back to the next question.
-- The "recommendation" field should ONLY change if the underlying data changed enough that the prior recommendation is misleading; if you do rewrite it, keep the same calm two-paragraph older-friend tone.
+- When the user gives you new information, set "updatedDataJson" to a JSON string containing the FULL updated framework data — copy every existing field from the current data, then revise the parts the user just informed. Preserve required array lengths and value ranges. The "framework" and "category" fields must stay exactly as provided. Make sure the JSON is parseable (escape inner quotes, no trailing commas, no comments).
+- If the user's message is just chit-chat, a clarification question, or doesn't add usable signal, set "updatedDataJson" to an empty string ("") and either answer them briefly or steer back to the next question.
+- The "recommendation" field inside the framework data should ONLY change if the underlying data changed enough that the prior recommendation is misleading; if you do rewrite it, keep the same calm two-paragraph older-friend tone.
 - Set "done" = true ONLY when the user explicitly says they're finished, or every part of the framework feels specific and grounded in their own words. Otherwise keep it false and ask the next question.`;
 
 function buildKickoffPrompt(meta: { name: string; blurb: string }, decisionText: string, currentData: unknown): string {
@@ -78,14 +78,15 @@ export async function POST(req: Request) {
     return NextResponse.json(buildError("UNKNOWN_FRAMEWORK", `id=${id}`), { status: 400 });
   }
 
-  // Per-turn schema: a structured response that may carry an updated framework.
-  // We use z.unknown() for updatedData and validate against the framework
-  // schema ourselves — embedding the discriminated framework schema directly
-  // forces the model to re-emit the discriminator under more pressure than is
-  // necessary for a chat turn.
+  // Per-turn schema: a flat object the model can reliably emit. We carry the
+  // updated framework as a JSON string instead of a typed sub-schema — the
+  // discriminated-union shape varies per framework and z.unknown() gives the
+  // model no shape hint, so a JSON string is dramatically more reliable.
   const turnSchema = z.object({
     reply: z.string().min(1).max(800),
-    updatedData: z.unknown().nullable(),
+    updatedDataJson: z
+      .string()
+      .describe("JSON-stringified full framework data, or empty string if no update."),
     done: z.boolean(),
   });
 
@@ -98,38 +99,54 @@ export async function POST(req: Request) {
         ...body.messages.map((m: ChatMessage) => ({ role: m.role, content: m.content })),
       ];
 
-  try {
-    const generated = await generateObject({
-      model,
-      schema: turnSchema,
-      system: SYSTEM,
-      messages: messagesForModel,
-      maxOutputTokens: 4000,
-    });
+  const MAX_ATTEMPTS = 2;
+  const errors: string[] = [];
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      const generated = await generateObject({
+        model,
+        schema: turnSchema,
+        system: SYSTEM,
+        messages: messagesForModel,
+        maxOutputTokens: 4000,
+      });
 
-    let validatedData: FrameworkResult | null = null;
-    if (generated.object.updatedData !== null) {
-      const parsed = dataSchema.safeParse(generated.object.updatedData);
-      if (parsed.success) {
-        validatedData = parsed.data as FrameworkResult;
-      } else {
-        // Don't fail the turn — just drop the bad patch and let the user retry.
-        console.warn("[/api/chat-fill] dropped invalid updatedData:", parsed.error.message);
+      let validatedData: FrameworkResult | null = null;
+      const raw = generated.object.updatedDataJson?.trim();
+      if (raw && raw !== "null") {
+        try {
+          const obj = JSON.parse(raw) as unknown;
+          const parsed = dataSchema.safeParse(obj);
+          if (parsed.success) {
+            validatedData = parsed.data as FrameworkResult;
+          } else {
+            console.warn("[/api/chat-fill] dropped invalid updatedDataJson:", parsed.error.message);
+          }
+        } catch (jsonErr) {
+          console.warn("[/api/chat-fill] updatedDataJson was not valid JSON:", jsonErr);
+        }
+      }
+
+      return NextResponse.json({
+        reply: generated.object.reply,
+        updatedData: validatedData,
+        done: generated.object.done,
+      });
+    } catch (err) {
+      let detail = err instanceof Error ? err.message : "Unknown error";
+      if (NoObjectGeneratedError.isInstance(err)) {
+        detail = `NoObjectGenerated finishReason=${err.finishReason} text=${(err.text ?? "").slice(0, 300)}`;
+      }
+      errors.push(`attempt ${attempt}: ${detail}`);
+      console.warn(`[/api/chat-fill] attempt ${attempt}/${MAX_ATTEMPTS} failed:`, detail);
+      // Auth / rate-limit / network: don't burn the second attempt.
+      const { key, status } = classify(err);
+      if (key !== "UNKNOWN" || attempt === MAX_ATTEMPTS) {
+        const code = key === "UNKNOWN" ? "SCHEMA_FAIL" : key;
+        return NextResponse.json(buildError(code, errors.join(" || ")), { status });
       }
     }
-
-    return NextResponse.json({
-      reply: generated.object.reply,
-      updatedData: validatedData,
-      done: generated.object.done,
-    });
-  } catch (err) {
-    let detail = err instanceof Error ? err.message : "Unknown error";
-    if (NoObjectGeneratedError.isInstance(err)) {
-      detail = `NoObjectGenerated finishReason=${err.finishReason} text=${(err.text ?? "").slice(0, 300)}`;
-    }
-    console.error("[/api/chat-fill] failed:", detail);
-    const { key, status } = classify(err);
-    return NextResponse.json(buildError(key === "UNKNOWN" ? "SCHEMA_FAIL" : key, detail), { status });
   }
+  // Unreachable — the loop always returns — but TS wants it.
+  return NextResponse.json(buildError("SCHEMA_FAIL", errors.join(" || ")), { status: 502 });
 }
