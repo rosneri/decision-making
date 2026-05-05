@@ -39,24 +39,64 @@ function classify(err: unknown): { key: "AUTH" | "RATE_LIMIT" | "UPSTREAM" | "UN
   return { key: "UNKNOWN", status: 500 };
 }
 
-const SYSTEM = `You are a warm, focused interviewer helping the user populate a decision-making framework through a back-and-forth conversation. You always speak in second person and stay calm and brief.
+const SYSTEM = `You are a form-filling assistant. Your job is NOT to chat about the user's situation, NOT to give advice, and NOT to summarize. Your single job is to walk the user through the framework's fields one at a time and collect a concrete value for each.
 
-Rules:
-- Ask EXACTLY ONE focused question per turn. Never bundle two questions.
-- Keep "reply" short — 1 to 3 sentences. No bullet lists, no headings, no markdown, no emoji.
-- Refer to fields by plain English (e.g. "what's your best alternative if this falls through?"), never by JSON keys.
-- Look at the framework data the user already has. Find the weakest, vaguest, or most-placeholder-looking part and ask about THAT next. If a field is filled in but generic, push for specifics.
-- When the user gives you new information, set "updatedDataJson" to a JSON string containing the FULL updated framework data — copy every existing field from the current data, then revise the parts the user just informed. Preserve required array lengths and value ranges. The "framework" and "category" fields must stay exactly as provided. Make sure the JSON is parseable (escape inner quotes, no trailing commas, no comments).
-- If the user's message is just chit-chat, a clarification question, or doesn't add usable signal, set "updatedDataJson" to an empty string ("") and either answer them briefly or steer back to the next question.
-- The "recommendation" field inside the framework data should ONLY change if the underlying data changed enough that the prior recommendation is misleading; if you do rewrite it, keep the same calm two-paragraph older-friend tone.
-- Set "done" = true ONLY when the user explicitly says they're finished, or every part of the framework feels specific and grounded in their own words. Otherwise keep it false and ask the next question.`;
+Each turn:
+1. Look at the framework's schema and the current data. Find the SINGLE most important field that is still missing, generic, or clearly placeholder.
+2. Write a "reply" that:
+   - Names the specific field in plain English, including any item/option context (e.g. "For the option 'Take the new role'…").
+   - Briefly explains what that field represents (one short clause is enough — what it captures, what a high vs low value means, what units it's in).
+   - States the exact answer format you need: a number in a given range, a short text, a list of N items, one of an enum's values, true/false, etc.
+   - Ends with the question itself, phrased so the user can answer in one sentence.
+3. Apply any value the user just gave you to "updatedDataJson" (a JSON string of the FULL framework data with that one field updated). Copy every existing field; never drop or shorten arrays the schema requires. Preserve "framework" and "category" exactly. JSON must be parseable.
+4. If the user's message did NOT supply a usable value (chit-chat, a clarifying question of their own, or a refusal), set "updatedDataJson" to "" and either answer their clarifying question in one sentence then re-ask the same field, or rephrase the field question more clearly.
+5. NEVER ask multiple questions in one turn. NEVER discuss the case in general. NEVER offer advice or opinions. NEVER touch the "recommendation" field — leave it as-is.
+6. Set "done" = true ONLY when every field has a concrete, specific value (no placeholders, no generic stand-ins). Otherwise keep it false.
 
-function buildKickoffPrompt(meta: { name: string; blurb: string }, decisionText: string, currentData: unknown): string {
-  return `Decision the user is wrestling with:\n"${decisionText}"\n\nFramework: ${meta.name} — ${meta.blurb}\n\nThe framework has been pre-filled with the AI's first guess. Here it is:\n${JSON.stringify(currentData, null, 2)}\n\nThis is the OPENING turn. Briefly (one sentence) acknowledge that you'll help them refine this together, then ask the single most useful first question to make the framework reflect their real situation. Set updatedData = null and done = false.`;
+Style:
+- Plain, direct, second person. 1-3 sentences total.
+- No markdown, no bullet lists, no emoji, no headings.
+- Reference fields by their meaning, not their JSON key. "How much would you regret it?" not "regret_score".
+
+Example of a good reply (Regret Minimization, asking about regret_if_chosen for an option named "Take the new role"):
+"For the option 'Take the new role', I need a regret score from 1 to 10 — where 1 is 'I'd barely think about it again' and 10 is 'I'd be devastated I picked this'. How much would you regret choosing it?"`;
+
+function fieldList(jsonSchema: unknown): string {
+  // Best-effort: turn the JSON Schema into a compact bullet list of fields
+  // with their types/constraints, so the model has explicit knowledge of
+  // what each field expects (range, enum, length, etc).
+  try {
+    const root = jsonSchema as { properties?: Record<string, unknown>; required?: string[] };
+    if (!root || typeof root !== "object" || !root.properties) return "";
+    const lines: string[] = [];
+    for (const [key, raw] of Object.entries(root.properties)) {
+      const prop = raw as Record<string, unknown>;
+      const bits: string[] = [];
+      if (typeof prop["type"] === "string") bits.push(String(prop["type"]));
+      if (Array.isArray(prop["enum"])) bits.push(`one of: ${(prop["enum"] as unknown[]).join(", ")}`);
+      if (typeof prop["minimum"] === "number" || typeof prop["maximum"] === "number") {
+        bits.push(`range ${prop["minimum"] ?? "?"}–${prop["maximum"] ?? "?"}`);
+      }
+      if (typeof prop["minItems"] === "number" || typeof prop["maxItems"] === "number") {
+        bits.push(`length ${prop["minItems"] ?? "?"}–${prop["maxItems"] ?? "?"}`);
+      }
+      if (typeof prop["description"] === "string") bits.push(String(prop["description"]));
+      lines.push(`- ${key} (${bits.join("; ") || "any"})`);
+    }
+    return lines.join("\n");
+  } catch {
+    return "";
+  }
 }
 
-function buildTurnPrompt(meta: { name: string; blurb: string }, decisionText: string, currentData: unknown): string {
-  return `Decision: "${decisionText}"\nFramework: ${meta.name} — ${meta.blurb}\n\nCurrent framework data:\n${JSON.stringify(currentData, null, 2)}\n\nThe full conversation so far is in the messages above. Read the user's most recent message, decide whether it gives you new information about the framework, and respond per the rules.`;
+function buildKickoffPrompt(meta: { name: string; blurb: string }, decisionText: string, currentData: unknown, schemaJson: unknown): string {
+  const fields = fieldList(schemaJson);
+  return `Decision the user is wrestling with:\n"${decisionText}"\n\nFramework: ${meta.name} — ${meta.blurb}\n\nFramework fields and their constraints:\n${fields || "(no field metadata available — infer from the current data)"}\n\nThe framework has been pre-filled with an AI's first guess. Current data:\n${JSON.stringify(currentData, null, 2)}\n\nThis is the OPENING turn. Do NOT greet the user, do NOT explain your role, do NOT summarize the framework. Pick the SINGLE most important field whose current value is generic, placeholder, or empty, and ask about it directly using the format described in the system prompt. Set updatedDataJson to "" and done to false.`;
+}
+
+function buildTurnPrompt(meta: { name: string; blurb: string }, decisionText: string, currentData: unknown, schemaJson: unknown): string {
+  const fields = fieldList(schemaJson);
+  return `Decision: "${decisionText}"\nFramework: ${meta.name} — ${meta.blurb}\n\nFramework fields and their constraints:\n${fields || "(no field metadata available — infer from the current data)"}\n\nCurrent framework data (already includes any patches from previous turns):\n${JSON.stringify(currentData, null, 2)}\n\nThe full conversation so far is in the messages above. Read the user's MOST RECENT message:\n- If it gives a concrete value for the field you just asked about, write the FULL updated framework JSON into updatedDataJson with that one field changed.\n- Then move on to the NEXT most important still-generic field and ask the next question per the system rules.\n- If the user did not supply a usable value, leave updatedDataJson as "" and re-ask or clarify.`;
 }
 
 export async function POST(req: Request) {
@@ -92,10 +132,18 @@ export async function POST(req: Request) {
 
   const model = anthropic("claude-haiku-4-5");
 
+  // Best-effort JSON Schema for field constraints; fall back to undefined if it throws.
+  let schemaJson: unknown;
+  try {
+    schemaJson = z.toJSONSchema(dataSchema);
+  } catch {
+    schemaJson = undefined;
+  }
+
   const messagesForModel: { role: "user" | "assistant"; content: string }[] = body.kickoff
-    ? [{ role: "user", content: buildKickoffPrompt(meta, body.decisionText, body.currentData) }]
+    ? [{ role: "user", content: buildKickoffPrompt(meta, body.decisionText, body.currentData, schemaJson) }]
     : [
-        { role: "user", content: buildTurnPrompt(meta, body.decisionText, body.currentData) },
+        { role: "user", content: buildTurnPrompt(meta, body.decisionText, body.currentData, schemaJson) },
         ...body.messages.map((m: ChatMessage) => ({ role: m.role, content: m.content })),
       ];
 
