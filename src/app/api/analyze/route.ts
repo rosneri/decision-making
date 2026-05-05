@@ -1,7 +1,6 @@
-import { generateObject, NoObjectGeneratedError } from "ai";
+import { generateObject, generateText, NoObjectGeneratedError } from "ai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import { FRAMEWORKS, SAMPLES, SCHEMAS, type FrameworkId } from "@/frameworks";
 import { buildError } from "@/lib/errors";
 
@@ -81,29 +80,32 @@ export async function POST(req: Request) {
   const model = anthropic("claude-haiku-4-5");
   const ids = FRAMEWORKS.map((f) => f.id) as [FrameworkId, ...FrameworkId[]];
 
-  // Stage 1 — pick a framework id from the small enum. Wrapped separately so a
-  // selector-stage failure gets its own code instead of bundling into UPSTREAM.
+  // Stage 1 — pick a framework id. Plain text generation + manual validation
+  // is more reliable than generateObject with a 61-element z.enum.
   let id: FrameworkId;
-  let reason: string;
+  let reason = "best fit for the user's decision";
   try {
-    const selectorSchema = z.object({
-      framework: z.enum(ids),
-      reason: z.string().describe("One sentence on why this framework fits"),
-    });
-    const selection = await generateObject({
+    const result = await generateText({
       model,
-      schema: selectorSchema,
       system: SELECTOR_SYSTEM,
-      prompt: `Decision:\n\n"${decisionText}"\n\nReturn the best-fit framework id.`,
-      maxOutputTokens: 800,
+      prompt: `Decision:\n\n"${decisionText}"\n\nReply with ONLY the framework id on its own line (lowercase_snake_case, exactly as listed above), then on the next line a one-sentence reason. No JSON, no markdown, no other text. Example output:\n\nfirst_principles\nThe user is questioning a deeply-held assumption.`,
+      maxOutputTokens: 200,
     });
-    id = selection.object.framework;
-    reason = selection.object.reason;
+    const lines = result.text.trim().split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+    const candidate = (lines[0] ?? "").toLowerCase().replace(/[^a-z0-9_]/g, "");
+    if (!ids.includes(candidate as FrameworkId)) {
+      console.error("[/api/analyze] stage-1 returned unknown id:", candidate, "raw:", result.text);
+      return NextResponse.json(
+        buildError("UNKNOWN_FRAMEWORK", `selector returned: ${result.text.slice(0, 200)}`),
+        { status: 502 },
+      );
+    }
+    id = candidate as FrameworkId;
+    if (lines[1]) reason = lines[1];
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     console.error("[/api/analyze] stage-1 failed:", message, err);
     const { key, status } = classify(err);
-    // If we recognised auth/rate/upstream, use that; otherwise blame the selector.
     const code = key === "UNKNOWN" ? "SELECTOR_FAILED" : key;
     return NextResponse.json(buildError(code, message), { status });
   }
