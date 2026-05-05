@@ -1,26 +1,172 @@
 @import "tailwindcss";
 
+/* Dark mode keyed to data-theme attribute on <html> */
+@custom-variant dark (&:is([data-theme=dark] *));
+
+/* ===== Legacy vars (kept for Tailwind @theme ref) ===== */
 :root {
   --background: #ffffff;
   --foreground: #171717;
 }
 
+/* ===== Design system raw CSS vars (dark-mode-switchable) ===== */
+:root {
+  --paper:          #F4EFE6;
+  --paper-deep:     #EAE3D4;
+  --ink:            #1B1A17;
+  --ink-muted:      #5C564C;
+  --rule:           #C8BFAE;
+  --vermilion:      #C8412A;
+  --vermilion-deep: #9C2E1C;
+  --shadow-letter:  0 1px 0 rgba(27,26,23,0.04), 0 18px 40px -24px rgba(27,26,23,0.18);
+  --ease-dm:        cubic-bezier(0.2, 0, 0, 1);
+}
+
+[data-theme="dark"] {
+  --paper:          #16161A;
+  --paper-deep:     #1F1F24;
+  --ink:            #E9E3D4;
+  --ink-muted:      #8B847A;
+  --rule:           #34323A;
+  --vermilion:      #E0664E;
+  --vermilion-deep: #B84A33;
+  --shadow-letter:  0 1px 0 rgba(0,0,0,0.4), 0 18px 40px -20px rgba(0,0,0,0.6);
+}
+
+/* ===== Tailwind theme ===== */
 @theme inline {
+  /* Legacy */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  /* Design system colors (reference CSS vars so they're dark-mode-aware) */
+  --color-paper:          var(--paper);
+  --color-paper-deep:     var(--paper-deep);
+  --color-ink:            var(--ink);
+  --color-ink-muted:      var(--ink-muted);
+  --color-rule:           var(--rule);
+  --color-vermilion:      var(--vermilion);
+  --color-vermilion-deep: var(--vermilion-deep);
+
+  /* Design system fonts */
+  --font-serif: var(--font-spectral), 'Iowan Old Style', Charter, Georgia, serif;
+  --font-code:  var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Animation shorthands */
+  --animate-page-in:    pageIn 500ms cubic-bezier(0.2,0,0,1) both;
+  --animate-fade-phase: fadePhase 500ms cubic-bezier(0.2,0,0,1) both;
+  --animate-arrive:     arrive 700ms cubic-bezier(0.2,0,0,1) both;
+  --animate-stack-in:   stackIn 320ms cubic-bezier(0.2,0,0,1) both;
+  --animate-caret:      caretBlink 1s step-end infinite;
+  --animate-mic-pulse:  micPulse 2s ease-out infinite;
+  --animate-wave:       waveBar 1.2s ease-in-out infinite;
+  --animate-dot-pulse:  dotPulse 1.4s ease-in-out infinite;
+  --animate-toast-in:   toastIn 300ms cubic-bezier(0.2,0,0,1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ===== Global base ===== */
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-serif);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--vermilion);
+  color: var(--paper);
+}
+
+/* ===== Keyframes ===== */
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadePhase {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes arrive {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes stackIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes caretBlink { 50% { opacity: 0; } }
+@keyframes micPulse {
+  0%   { box-shadow: 0 0 0 0    color-mix(in oklab, var(--vermilion) 40%, transparent); }
+  70%  { box-shadow: 0 0 0 18px color-mix(in oklab, var(--vermilion) 0%,  transparent); }
+  100% { box-shadow: 0 0 0 0    color-mix(in oklab, var(--vermilion) 0%,  transparent); }
+}
+@keyframes waveBar {
+  0%, 100% { transform: scaleY(0.4); }
+  50%      { transform: scaleY(1.2); }
+}
+@keyframes dotPulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.4); }
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* ===== Component atoms ===== */
+@layer components {
+  .folio {
+    @apply font-code text-[11px] font-medium tracking-[0.22em] uppercase text-ink-muted;
+  }
+  .folio-accent {
+    @apply text-vermilion;
+  }
+
+  /* Animated caret (voice transcript) */
+  .dm-caret {
+    @apply inline-block w-0.5 h-[22px] bg-vermilion align-[-3px] ml-0.5;
+    animation: var(--animate-caret);
+  }
+
+  /* Dot loader */
+  .dm-dot {
+    @apply w-1 h-1 rounded-full bg-vermilion opacity-30;
+    animation: var(--animate-dot-pulse);
+  }
+
+  /* Wave bars inside mic button */
+  .dm-wave-bar {
+    @apply w-0.5 bg-current rounded-sm;
+    animation: var(--animate-wave);
+  }
+
+  /* Score bar fill */
+  .score-bar-fill {
+    @apply absolute inset-0 origin-left;
+    transition: transform 400ms cubic-bezier(0.2,0,0,1);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ===== Paper grain texture ===== */
+.paper-grain { position: relative; }
+.paper-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='4'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+[data-theme="dark"] .paper-grain::after { mix-blend-mode: screen; opacity: 0.05; }
+
+/* ===== Scrollbar ===== */
+.dm-scrollbar::-webkit-scrollbar { width: 6px; }
+.dm-scrollbar::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 3px; }
+
+/* ===== Reduced motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  .dm-caret, .dm-dot, .dm-wave-bar { animation: none !important; }
 }

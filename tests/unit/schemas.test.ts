@@ -110,8 +110,9 @@ describe("FrameworkSchema (discriminated union)", () => {
 });
 
 describe("FRAMEWORKS", () => {
-  it("exposes the three frameworks with stable ids", () => {
+  it("exposes the four frameworks with stable ids", () => {
     expect(FRAMEWORKS.map((f) => f.id).sort()).toEqual([
+      "cost_benefit",
       "decision_matrix",
       "eisenhower",
       "swot",

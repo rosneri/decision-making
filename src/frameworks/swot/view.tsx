@@ -3,95 +3,81 @@
 import { useState } from "react";
 import type { Swot } from "./schema";
 
-const QUADS = [
-  {
-    key: "strengths",
-    label: "Strengths",
-    sub: "Internal · Positive",
-    color:
-      "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-900",
-  },
-  {
-    key: "weaknesses",
-    label: "Weaknesses",
-    sub: "Internal · Negative",
-    color: "bg-rose-50 dark:bg-rose-950/30 border-rose-300 dark:border-rose-900",
-  },
-  {
-    key: "opportunities",
-    label: "Opportunities",
-    sub: "External · Positive",
-    color: "bg-sky-50 dark:bg-sky-950/30 border-sky-300 dark:border-sky-900",
-  },
-  {
-    key: "threats",
-    label: "Threats",
-    sub: "External · Negative",
-    color:
-      "bg-amber-50 dark:bg-amber-950/30 border-amber-300 dark:border-amber-900",
-  },
-] as const;
+interface Props {
+  data: Swot;
+  onUpdate?: (d: Swot) => void;
+}
 
-export function View({ data }: { data: Swot }) {
+type QuadKey = "strengths" | "weaknesses" | "opportunities" | "threats";
+
+const QUADRANTS: { key: QuadKey; roman: string; name: string; gloss: string; cls: string; placeholder: string }[] = [
+  { key: "strengths",     roman: "I",   name: "Strengths",     gloss: "internal · helpful", cls: "border-b border-b-rule border-r border-r-rule", placeholder: "What you bring." },
+  { key: "weaknesses",    roman: "II",  name: "Weaknesses",    gloss: "internal · harmful", cls: "border-b border-b-rule",                        placeholder: "What you lack." },
+  { key: "opportunities", roman: "III", name: "Opportunities", gloss: "external · helpful", cls: "border-r border-r-rule",                        placeholder: "What's open to you." },
+  { key: "threats",       roman: "IV",  name: "Threats",       gloss: "external · harmful", cls: "",                                              placeholder: "What could go wrong." },
+];
+
+export function View({ data, onUpdate }: Props) {
   const [state, setState] = useState(data);
 
-  const update = (key: (typeof QUADS)[number]["key"], i: number, v: string) => {
-    setState((s) => ({
-      ...s,
-      [key]: s[key].map((item, idx) => (idx === i ? v : item)),
-    }));
-  };
+  const update = (next: Swot) => { setState(next); onUpdate?.(next); };
 
-  const add = (key: (typeof QUADS)[number]["key"]) => {
-    setState((s) => ({ ...s, [key]: [...s[key], ""] }));
-  };
+  const updateItem = (key: QuadKey, idx: number, text: string) =>
+    update({ ...state, [key]: state[key].map((t, i) => i === idx ? text : t) });
 
-  const remove = (key: (typeof QUADS)[number]["key"], i: number) => {
-    setState((s) => ({ ...s, [key]: s[key].filter((_, idx) => idx !== i) }));
-  };
+  const removeItem = (key: QuadKey, idx: number) =>
+    update({ ...state, [key]: state[key].filter((_, i) => i !== idx) });
+
+  const addItem = (key: QuadKey) =>
+    update({ ...state, [key]: [...state[key], ""] });
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold">{state.title}</h2>
-        <p className="text-sm text-neutral-500 mt-1">
-          SWOT Analysis — edit, add, or remove items in each quadrant.
-        </p>
-      </div>
+    <div className="border border-ink grid grid-cols-2 bg-paper relative">
+      {/* Horizontal axis labels (outside) */}
+      <span className="absolute font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted bg-paper px-2 top-[-7px] left-1/2 -translate-x-1/2 whitespace-nowrap">Helpful</span>
+      <span className="absolute font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted bg-paper px-2 bottom-[-7px] left-1/2 -translate-x-1/2 whitespace-nowrap">Harmful</span>
+      {/* Internal / External labels on the horizontal center rule, rotated vertical */}
+      <span className="absolute font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted bg-paper px-2 top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 -rotate-90 origin-center whitespace-nowrap">Internal</span>
+      <span className="absolute font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted bg-paper px-2 top-1/2 right-0 translate-x-1/2 -translate-y-1/2 rotate-90 origin-center whitespace-nowrap">External</span>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {QUADS.map((q) => (
-          <div key={q.key} className={`rounded-lg border p-4 ${q.color}`}>
-            <div className="flex items-baseline justify-between mb-3">
-              <div className="font-semibold">{q.label}</div>
-              <div className="text-xs text-neutral-500">{q.sub}</div>
-            </div>
-            <ul className="space-y-2">
-              {state[q.key].map((item, i) => (
-                <li key={i} className="flex gap-2 items-center">
-                  <input
-                    value={item}
-                    onChange={(e) => update(q.key, i, e.target.value)}
-                    className="flex-1 text-sm bg-white/70 dark:bg-black/30 rounded px-2 py-1 border border-neutral-200 dark:border-neutral-800"
-                  />
-                  <button
-                    onClick={() => remove(q.key, i)}
-                    className="text-xs text-neutral-500 hover:text-rose-600"
-                  >
-                    ✕
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <button
-              onClick={() => add(q.key)}
-              className="mt-3 text-xs text-neutral-600 dark:text-neutral-400 hover:underline"
-            >
-              + add item
-            </button>
+      {QUADRANTS.map((q) => (
+        <div key={q.key} className={`p-6 min-h-[220px] flex flex-col ${q.cls}`}>
+          <div className="flex items-baseline gap-2.5 mb-3">
+            <span className="font-serif font-medium text-[22px] text-vermilion">{q.roman}.</span>
+            <span className="font-code text-[11px] tracking-[0.22em] uppercase font-medium text-ink">{q.name}</span>
           </div>
-        ))}
-      </div>
+
+          <ul className="list-none p-0 m-0 flex flex-col">
+            {state[q.key].map((t, i) => (
+              <li key={i} className={`flex gap-3 items-center py-2.5 ${i > 0 ? "border-t border-rule" : "pt-1"} group`}>
+                <span className="font-code text-[11px] text-ink-muted flex-shrink-0 w-[18px]">
+                  ·{String(i + 1).padStart(2, "0")}
+                </span>
+                <input
+                  type="text"
+                  value={t}
+                  onChange={(e) => updateItem(q.key, i, e.target.value)}
+                  placeholder={q.placeholder}
+                  className="flex-1 min-w-0 border-none bg-transparent outline-none font-serif text-base text-ink border-b border-transparent focus:border-vermilion transition-colors duration-200 placeholder:text-ink-muted placeholder:italic py-0"
+                />
+                <button
+                  onClick={() => removeItem(q.key, i)}
+                  className="opacity-0 group-hover:opacity-100 text-ink-muted hover:text-vermilion px-1.5 transition-opacity duration-200 bg-transparent border-none cursor-pointer font-serif"
+                >
+                  ×
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          <button
+            onClick={() => addItem(q.key)}
+            className="mt-auto pt-3 font-serif italic text-[13px] text-ink-muted hover:text-vermilion cursor-pointer self-start bg-transparent border-none transition-colors duration-200"
+          >
+            + add
+          </button>
+        </div>
+      ))}
     </div>
   );
 }

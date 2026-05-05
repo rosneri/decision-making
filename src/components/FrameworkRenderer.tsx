@@ -26,7 +26,7 @@ export function FrameworkRenderer({ result }: { result: FrameworkResult }) {
   );
 }
 
-function renderView(result: FrameworkResult) {
+function renderView(result: FrameworkResult): React.ReactNode {
   switch (result.framework) {
     case "decision_matrix": {
       const V = VIEWS.decision_matrix;
@@ -38,6 +38,10 @@ function renderView(result: FrameworkResult) {
     }
     case "swot": {
       const V = VIEWS.swot;
+      return <V data={result} />;
+    }
+    case "cost_benefit": {
+      const V = VIEWS.cost_benefit;
       return <V data={result} />;
     }
   }
