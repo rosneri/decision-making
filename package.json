@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.74",
     "@ai-sdk/gateway": "^3.0.110",
     "ai": "^6.0.175",
     "next": "16.2.4",

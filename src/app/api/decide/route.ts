@@ -1,4 +1,9 @@
 import { generateObject } from "ai";
+import { createAnthropic } from "@ai-sdk/anthropic";
+
+const anthropic = createAnthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY ?? process.env.AI_GATEWAY_API_KEY,
+});
 import { NextResponse } from "next/server";
 import {
   DecisionMatrixSchema,
@@ -31,7 +36,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "text is required" }, { status: 400 });
   }
 
-  const model = "anthropic/claude-sonnet-4-6";
+  const model = anthropic("claude-sonnet-4-6");
 
   try {
     let result;
