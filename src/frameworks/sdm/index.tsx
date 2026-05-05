@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Card, MicroLabel, InlineText, InlineNumber } from "@/components/ui";
+import { Card, MicroLabel, InlineText, InlineNumber, SplitPane } from "@/components/ui";
 import { meta, schema, sample, type Sdm } from "./data";
 export { meta, schema, sample };
 export type { Sdm };
@@ -26,7 +26,7 @@ export function View({ data, onUpdate }: { data: Sdm; onUpdate?: (d: Sdm) => voi
           className="block w-full mt-1 text-[16px]"
         />
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-rule">
+      <SplitPane>
         {scored.map((o) => {
           const isBest = o.i === best.i;
           return (
@@ -72,7 +72,7 @@ export function View({ data, onUpdate }: { data: Sdm; onUpdate?: (d: Sdm) => voi
             </div>
           );
         })}
-      </div>
+      </SplitPane>
       <div className="p-4 border-t border-rule bg-paper-deep" data-testid="sdm-best">
         <MicroLabel>Best fit</MicroLabel>
         <span className="ml-2 font-serif font-medium text-vermilion text-[15px]">{best.name}</span>

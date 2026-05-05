@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Card, MicroLabel, InlineText, Range } from "@/components/ui";
+import { Card, MicroLabel, InlineText, Range, SplitPane } from "@/components/ui";
 import { meta, schema, sample, type Ignatian } from "./data";
 export { meta, schema, sample };
 export type { Ignatian };
@@ -19,7 +19,7 @@ export function View({ data, onUpdate }: { data: Ignatian; onUpdate?: (d: Ignati
 
   return (
     <Card>
-      <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-rule">
+      <SplitPane>
         {scored.map((o) => {
           const isBest = o.i === best.i;
           return (
@@ -64,7 +64,7 @@ export function View({ data, onUpdate }: { data: Ignatian; onUpdate?: (d: Ignati
             </div>
           );
         })}
-      </div>
+      </SplitPane>
       <div className="p-4 border-t border-rule">
         <MicroLabel>Sit with it · does it hold?</MicroLabel>
         <div className="mt-3 grid gap-2" style={{ gridTemplateColumns: `repeat(${s.days.length}, 1fr)` }}>

@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Card, MicroLabel, InlineText, AddButton, RemoveButton } from "@/components/ui";
+import { Card, MicroLabel, InlineText, AddButton, RemoveButton, SplitPane } from "@/components/ui";
 import { meta, schema, sample, type Harvard, type Section, META } from "./data";
 export { meta, schema, sample };
 export type { Harvard };
@@ -14,8 +14,9 @@ export function View({ data, onUpdate }: { data: Harvard; onUpdate?: (d: Harvard
   const rm = (sec: Section, i: number) => upd({ ...s, [sec]: s[sec].filter((_, j) => j !== i) });
 
   return (
-    <Card className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-rule">
-      {(Object.keys(META) as Section[]).map((sec) => (
+    <Card>
+      <SplitPane>
+        {(Object.keys(META) as Section[]).map((sec) => (
         <div key={sec} className={`p-4 ${META[sec].accent ? "bg-vermilion/5" : ""}`} data-testid={`hn-${sec}`}>
           <MicroLabel accent={META[sec].accent} bold>
             {META[sec].label} · <span className="italic font-normal">{META[sec].sub}</span>
@@ -30,7 +31,8 @@ export function View({ data, onUpdate }: { data: Harvard; onUpdate?: (d: Harvard
           </ul>
           <AddButton onClick={() => add(sec)} className="mt-2">+ add</AddButton>
         </div>
-      ))}
+        ))}
+      </SplitPane>
     </Card>
   );
 }

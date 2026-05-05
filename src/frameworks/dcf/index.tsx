@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Card, MicroLabel, InlineNumber, AddButton } from "@/components/ui";
+import { Card, MicroLabel, InlineNumber, AddButton, BigNumber } from "@/components/ui";
 import { meta, schema, sample, type Dcf } from "./data";
 export { meta, schema, sample };
 export type { Dcf };
@@ -20,43 +20,41 @@ export function View({ data, onUpdate }: { data: Dcf; onUpdate?: (d: Dcf) => voi
   const addYear = () => upd({ ...s, fcf: [...s.fcf, 0] });
   const rmYear = () => s.fcf.length > 1 && upd({ ...s, fcf: s.fcf.slice(0, -1) });
 
-  const headerNum = "block mt-1 font-serif font-medium text-[24px] bg-transparent border-b border-rule outline-none w-full text-ink";
-
   return (
     <Card>
       <div className="grid grid-cols-3 divide-x divide-rule border-b border-rule">
         <label className="p-3">
           <MicroLabel>Discount rate</MicroLabel>
-          <input
-            type="number"
+          <BigNumber
+            value={s.discountRate}
+            onChange={(v) => upd({ ...s, discountRate: v })}
             min={0}
             max={1}
             step={0.01}
-            value={s.discountRate}
-            onChange={(e) => upd({ ...s, discountRate: Math.max(0, Math.min(1, Number(e.target.value) || 0)) })}
-            data-testid="dcf-rate"
-            className={headerNum}
+            size="lg"
+            className="mt-1"
+            testId="dcf-rate"
           />
           <span className="font-code text-[11px] text-ink-muted">{(r * 100).toFixed(1)}%</span>
         </label>
         <label className="p-3">
           <MicroLabel>Terminal value</MicroLabel>
-          <input
-            type="number"
+          <BigNumber
             value={s.terminalValue}
-            onChange={(e) => upd({ ...s, terminalValue: Number(e.target.value) || 0 })}
-            className={headerNum}
+            onChange={(v) => upd({ ...s, terminalValue: v })}
+            size="lg"
+            className="mt-1"
           />
         </label>
         <label className="p-3">
           <MicroLabel>Asking price</MicroLabel>
-          <input
-            type="number"
-            min={0}
+          <BigNumber
             value={s.askingPrice}
-            onChange={(e) => upd({ ...s, askingPrice: Math.max(0, Number(e.target.value) || 0) })}
-            data-testid="dcf-asking"
-            className={headerNum}
+            onChange={(v) => upd({ ...s, askingPrice: v })}
+            min={0}
+            size="lg"
+            className="mt-1"
+            testId="dcf-asking"
           />
         </label>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Card, MicroLabel, InlineText } from "@/components/ui";
+import { Card, MicroLabel, InlineText, HeaderBand } from "@/components/ui";
 import { meta, schema, sample, type ModelCard, FIELDS } from "./data";
 export { meta, schema, sample };
 export type { ModelCard };
@@ -13,8 +13,7 @@ export function View({ data, onUpdate }: { data: ModelCard; onUpdate?: (d: Model
 
   return (
     <Card>
-      <div className="p-4 border-b border-vermilion bg-vermilion/5">
-        <MicroLabel accent bold>Model</MicroLabel>
+      <HeaderBand label="Model">
         <InlineText
           value={s.modelName}
           onChange={(v) => upd({ ...s, modelName: v })}
@@ -28,7 +27,7 @@ export function View({ data, onUpdate }: { data: ModelCard; onUpdate?: (d: Model
           size="sm"
           className="block w-full mt-1 text-ink-muted"
         />
-      </div>
+      </HeaderBand>
       <ul className="divide-y divide-rule">
         {FIELDS.map((f) => (
           <li key={f.k} data-testid={`mc-${f.k}`} className={`p-3 ${f.accent ? "bg-vermilion/5" : ""}`}>

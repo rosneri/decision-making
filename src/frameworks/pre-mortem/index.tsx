@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Card, MicroLabel, InlineText, Range, AddButton, RemoveButton } from "@/components/ui";
+import { Card, MicroLabel, InlineText, Range, AddButton, RemoveButton, HeaderBand } from "@/components/ui";
 import { meta, schema, sample, type PreMortem } from "./data";
 export { meta, schema, sample };
 export type { PreMortem };
@@ -15,8 +15,7 @@ export function View({ data, onUpdate }: { data: PreMortem; onUpdate?: (d: PreMo
 
   return (
     <Card>
-      <div className="p-4 bg-paper-deep border-b border-rule">
-        <MicroLabel>Scenario</MicroLabel>
+      <HeaderBand label="Scenario" accent={false}>
         <InlineText
           value={s.scenario}
           onChange={(v) => upd({ ...s, scenario: v })}
@@ -24,7 +23,7 @@ export function View({ data, onUpdate }: { data: PreMortem; onUpdate?: (d: PreMo
           size="lg"
           className="block w-full mt-1"
         />
-      </div>
+      </HeaderBand>
       <table className="w-full">
         <thead>
           <tr>

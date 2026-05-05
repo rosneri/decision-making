@@ -1,7 +1,15 @@
 "use client";
 import { useState } from "react";
-import { Card, MicroLabel, InlineText, AddButton, RemoveButton } from "@/components/ui";
-import { meta, schema, sample, type Rpd, cycleState } from "./data";
+import { Card, MicroLabel, InlineText, AddButton, RemoveButton, HeaderBand, VerdictBar, CycleButton } from "@/components/ui";
+import { meta, schema, sample, type Rpd } from "./data";
+
+const RPD_STATES = ["yes", "no", "unknown"] as const;
+type RpdState = (typeof RPD_STATES)[number];
+const RPD_VARIANTS: Record<RpdState, { className: string; label: string }> = {
+  yes:     { className: "border-[1.5px] border-ink text-ink font-serif text-[18px] font-medium", label: "✓" },
+  no:      { className: "border-[1.5px] border-vermilion text-vermilion bg-vermilion/10 font-serif text-[18px] font-medium", label: "✗" },
+  unknown: { className: "border-[1.5px] border-rule text-ink-muted font-serif text-[18px] font-medium", label: "?" },
+};
 export { meta, schema, sample };
 export type { Rpd };
 
@@ -18,8 +26,7 @@ export function View({ data, onUpdate }: { data: Rpd; onUpdate?: (d: Rpd) => voi
 
   return (
     <Card>
-      <div className="p-4 border-b border-vermilion bg-vermilion/5">
-        <MicroLabel accent bold>Pattern · match</MicroLabel>
+      <HeaderBand label="Pattern · match">
         <InlineText
           value={s.pattern}
           onChange={(v) => upd({ ...s, pattern: v })}
@@ -27,7 +34,7 @@ export function View({ data, onUpdate }: { data: Rpd; onUpdate?: (d: Rpd) => voi
           italic
           className="block w-full mt-1"
         />
-      </div>
+      </HeaderBand>
       <div className="p-4 border-b border-rule">
         <MicroLabel>First workable course</MicroLabel>
         <InlineText
@@ -42,13 +49,14 @@ export function View({ data, onUpdate }: { data: Rpd; onUpdate?: (d: Rpd) => voi
         <ul className="mt-3 space-y-1">
           {s.checks.map((c, i) => (
             <li key={i} className="flex items-center gap-3 group" data-testid={`rpd-check-${i}`}>
-              <button
-                onClick={() => setCheck(i, { state: cycleState(c.state) })}
-                aria-label={`toggle ${c.item}: ${c.state}`}
-                className={`w-7 h-7 grid place-items-center font-serif text-[18px] font-medium border-[1.5px] ${c.state === "yes" ? "border-ink text-ink" : c.state === "no" ? "border-vermilion text-vermilion bg-vermilion/10" : "border-rule text-ink-muted"}`}
-              >
-                {c.state === "yes" ? "✓" : c.state === "no" ? "✗" : "?"}
-              </button>
+              <CycleButton
+                value={c.state as RpdState}
+                states={RPD_STATES}
+                variants={RPD_VARIANTS}
+                onCycle={(next) => setCheck(i, { state: next })}
+                size={7}
+                ariaLabel={`toggle ${c.item}: ${c.state}`}
+              />
               <InlineText
                 value={c.item}
                 onChange={(v) => setCheck(i, { item: v })}
@@ -61,12 +69,9 @@ export function View({ data, onUpdate }: { data: Rpd; onUpdate?: (d: Rpd) => voi
         </ul>
         <AddButton onClick={addCheck} className="mt-2">+ check</AddButton>
       </div>
-      <div
-        className={`p-3 border-t border-ink text-center font-code text-[12px] tracking-[0.22em] uppercase font-medium ${blocked ? "bg-paper-deep text-ink-muted" : "bg-vermilion text-paper"}`}
-        data-testid="rpd-verdict"
-      >
+      <VerdictBar alarm={!blocked} testId="rpd-verdict">
         {blocked ? "Hold — find another course" : allYes ? "Execute" : "Execute (with risk noted)"}
-      </div>
+      </VerdictBar>
     </Card>
   );
 }

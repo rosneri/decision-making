@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Card, MicroLabel, InlineText } from "@/components/ui";
+import { Card, MicroLabel, InlineText, SplitPane } from "@/components/ui";
 import { meta, schema, sample, type Meddic, KEYS, type Key, META } from "./data";
 export { meta, schema, sample };
 export type { Meddic };
@@ -15,7 +15,7 @@ export function View({ data, onUpdate }: { data: Meddic; onUpdate?: (d: Meddic) 
 
   return (
     <Card>
-      <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-rule">
+      <SplitPane>
         {KEYS.map((k) => {
           const c = s.cells[k]!;
           const danger = !c.confirmed;
@@ -50,7 +50,7 @@ export function View({ data, onUpdate }: { data: Meddic; onUpdate?: (d: Meddic) 
             </div>
           );
         })}
-      </div>
+      </SplitPane>
       <div className="p-4 border-t border-rule bg-paper-deep">
         <MicroLabel>Open</MicroLabel>
         <span className="ml-2 font-serif text-[14px] text-vermilion font-medium" data-testid="meddic-open">

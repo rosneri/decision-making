@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Card, MicroLabel, InlineText, RemoveButton, AddButton } from "@/components/ui";
+import { Card, MicroLabel, InlineText, RemoveButton, AddButton, HeaderBand } from "@/components/ui";
 import { meta, schema, sample, type Scorecard } from "./data";
 export { meta, schema, sample };
 export type { Scorecard };
@@ -17,8 +17,7 @@ export function View({ data, onUpdate }: { data: Scorecard; onUpdate?: (d: Score
 
   return (
     <Card>
-      <div className="p-4 bg-vermilion/5 border-b border-vermilion">
-        <MicroLabel accent bold>Mission</MicroLabel>
+      <HeaderBand label="Mission">
         <InlineText
           value={s.mission}
           onChange={(v) => upd({ ...s, mission: v })}
@@ -27,7 +26,7 @@ export function View({ data, onUpdate }: { data: Scorecard; onUpdate?: (d: Score
           size="lg"
           className="block w-full mt-1"
         />
-      </div>
+      </HeaderBand>
       <div className="p-4 border-b border-rule">
         <MicroLabel>Outcomes · 12 months</MicroLabel>
         <ul className="mt-2 space-y-1">

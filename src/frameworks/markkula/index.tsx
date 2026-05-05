@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Card, MicroLabel, InlineText } from "@/components/ui";
+import { Card, MicroLabel, InlineText, DotMeter } from "@/components/ui";
 import { meta, schema, sample, type Markkula, LENSES, type Lens, META } from "./data";
 export { meta, schema, sample };
 export type { Markkula };
@@ -36,16 +36,13 @@ export function View({ data, onUpdate }: { data: Markkula; onUpdate?: (d: Markku
                 size="sm"
                 className="border-b border-rule py-1"
               />
-              <div className="flex gap-1" role="group" aria-label={`score for ${l}`}>
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <button
-                    key={n}
-                    onClick={() => setScore(l, n)}
-                    aria-label={`set ${n}`}
-                    className={`w-3.5 h-3.5 rounded-full border ${n <= score ? (isWeak ? "bg-vermilion border-vermilion" : "bg-ink border-ink") : "border-rule"}`}
-                  />
-                ))}
-              </div>
+              <DotMeter
+                value={score}
+                onChange={(n) => setScore(l, n)}
+                variant="dot"
+                accent={isWeak}
+                ariaLabel={`score for ${l}`}
+              />
             </li>
           );
         })}

@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Card, MicroLabel } from "@/components/ui";
+import { Card, MicroLabel, PhaseTabs } from "@/components/ui";
 import { meta, schema, sample, type DesignThinking, STAGES, META } from "./data";
 export { meta, schema, sample };
 export type { DesignThinking };
@@ -11,24 +11,16 @@ export function View({ data, onUpdate }: { data: DesignThinking; onUpdate?: (d: 
 
   return (
     <Card>
-      <div className="grid grid-cols-5 divide-x divide-rule">
-        {STAGES.map((k, i) => {
-          const isCurrent = s.current === k;
-          return (
-            <button
-              key={k}
-              onClick={() => upd({ ...s, current: k })}
-              data-testid={`dt-tab-${k}`}
-              className={`p-4 text-left ${isCurrent ? "bg-vermilion/5" : ""}`}
-            >
-              <MicroLabel accent={isCurrent} bold>0{i + 1}</MicroLabel>
-              <div className={`font-serif text-[15px] font-medium mt-1 ${isCurrent ? "text-vermilion" : "text-ink"}`}>
-                {META[k].label}
-              </div>
-            </button>
-          );
-        })}
-      </div>
+      <PhaseTabs
+        active={s.current}
+        onSelect={(k) => upd({ ...s, current: k })}
+        items={STAGES.map((k, i) => ({
+          key: k,
+          label: `0${i + 1}`,
+          sub: META[k].label,
+          testId: `dt-tab-${k}`,
+        }))}
+      />
       <div className="p-4 border-t border-rule">
         <MicroLabel>{META[s.current].label} notes</MicroLabel>
         <textarea

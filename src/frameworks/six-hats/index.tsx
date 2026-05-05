@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Card, MicroLabel, InlineText, AddButton, RemoveButton } from "@/components/ui";
+import { Card, MicroLabel, InlineText, AddButton, RemoveButton, PhaseTabs } from "@/components/ui";
 import { meta, schema, sample, type SixHats, HATS, type Hat, HAT_META } from "./data";
 export { meta, schema, sample };
 export type { SixHats };
@@ -17,18 +17,18 @@ export function View({ data, onUpdate }: { data: SixHats; onUpdate?: (d: SixHats
 
   return (
     <Card>
-      <div className="border-b border-rule p-3 flex gap-2 flex-wrap">
-        {HATS.map((h) => (
-          <button
-            key={h}
-            onClick={() => upd({ ...s, active: h })}
-            data-testid={`hat-tab-${h}`}
-            aria-pressed={s.active === h}
-            className={`font-code text-[10px] tracking-[0.22em] uppercase px-3 py-1 border ${s.active === h ? "bg-vermilion text-paper border-vermilion" : "border-rule text-ink-muted hover:border-ink"}`}
-          >
-            {HAT_META[h].label} · {HAT_META[h].sub}
-          </button>
-        ))}
+      <div className="border-b border-rule p-3">
+        <PhaseTabs
+          variant="pill"
+          active={s.active}
+          onSelect={(h) => upd({ ...s, active: h })}
+          items={HATS.map((h) => ({
+            key: h,
+            label: HAT_META[h].label,
+            sub: HAT_META[h].sub,
+            testId: `hat-tab-${h}`,
+          }))}
+        />
       </div>
       <div className="p-5" data-testid={`hat-panel-${s.active}`}>
         <div className="flex items-baseline gap-3 mb-4">

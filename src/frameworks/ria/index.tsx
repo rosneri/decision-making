@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Card, MicroLabel, InlineText, InlineNumber, AddButton, RemoveButton } from "@/components/ui";
+import { Card, MicroLabel, InlineText, InlineNumber, AddButton, RemoveButton, DotMeter } from "@/components/ui";
 import { meta, schema, sample, type Ria } from "./data";
 export { meta, schema, sample };
 export type { Ria };
@@ -35,16 +35,13 @@ export function View({ data, onUpdate }: { data: Ria; onUpdate?: (d: Ria) => voi
                 size="sm"
                 className={concern ? "text-vermilion" : ""}
               />
-              <div className="flex gap-1" role="group" aria-label={`power ${x.name}`}>
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <button
-                    key={n}
-                    onClick={() => set(i, { power: n })}
-                    aria-label={`power ${n}`}
-                    className={`w-2 h-4 ${n <= x.power ? (concern ? "bg-vermilion" : "bg-ink") : "bg-paper border border-rule"}`}
-                  />
-                ))}
-              </div>
+              <DotMeter
+                value={x.power}
+                onChange={(n) => set(i, { power: n })}
+                variant="bar"
+                accent={concern}
+                ariaLabel={`power ${x.name}`}
+              />
               <div className="relative h-6 border border-rule">
                 <div className="absolute inset-y-0 left-1/2 border-l border-dashed border-rule" />
                 <div

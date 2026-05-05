@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Card, MicroLabel, InlineText } from "@/components/ui";
+import { Card, MicroLabel, InlineText, HeaderBand } from "@/components/ui";
 import { meta, schema, sample, type Ics, SECTIONS, type Section, META } from "./data";
 export { meta, schema, sample };
 export type { Ics };
@@ -15,15 +15,14 @@ export function View({ data, onUpdate }: { data: Ics; onUpdate?: (d: Ics) => voi
 
   return (
     <Card>
-      <div className="p-4 border-b border-vermilion bg-vermilion/5 text-center">
-        <MicroLabel accent bold>Incident commander · single point</MicroLabel>
+      <HeaderBand label="Incident commander · single point" align="center">
         <input
           value={s.commander}
           onChange={(e) => upd({ ...s, commander: e.target.value })}
           data-testid="ics-commander"
           className="block w-full mt-1 font-serif font-medium text-[20px] text-center bg-transparent border-none outline-none text-ink"
         />
-      </div>
+      </HeaderBand>
       <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-rule">
         {SECTIONS.map((k) => {
           const sec = s.sections[k]!;

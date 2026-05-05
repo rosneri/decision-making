@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Card, MicroLabel } from "@/components/ui";
+import { Card, MicroLabel, BigNumber } from "@/components/ui";
 import { meta, schema, sample, type Pythagorean } from "./data";
 export { meta, schema, sample };
 export type { Pythagorean };
@@ -31,13 +31,13 @@ export function View({ data, onUpdate }: { data: Pythagorean; onUpdate?: (d: Pyt
         ].map((f) => (
           <label key={f.k} className="p-3 block">
             <MicroLabel>{f.l}</MicroLabel>
-            <input
-              type="number"
-              min={0}
+            <BigNumber
               value={f.v}
-              onChange={(e) => upd({ ...s, [f.k]: Math.max(0, Number(e.target.value) || 0) })}
-              data-testid={`pyth-${f.k}`}
-              className="block w-full mt-1 font-serif font-medium text-[20px] bg-transparent border-b border-rule outline-none text-ink"
+              onChange={(v) => upd({ ...s, [f.k]: Math.max(0, v) })}
+              min={0}
+              size="md"
+              className="mt-1"
+              testId={`pyth-${f.k}`}
             />
           </label>
         ))}

@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Card, InlineText } from "@/components/ui";
+import { Card, InlineText, VerdictBar } from "@/components/ui";
 import { meta, schema, sample, type Deterrence, COND, type Cond, META, cycleState } from "./data";
 export { meta, schema, sample };
 export type { Deterrence };
@@ -50,12 +50,9 @@ export function View({ data, onUpdate }: { data: Deterrence; onUpdate?: (d: Dete
           );
         })}
       </ul>
-      <div
-        className={`p-4 border-t border-ink text-center font-code text-[12px] tracking-[0.22em] uppercase font-medium ${willHold ? "bg-paper-deep text-ink" : "bg-vermilion text-paper"}`}
-        data-testid="deterrence-verdict"
-      >
+      <VerdictBar alarm={!willHold} testId="deterrence-verdict">
         {willHold ? "Deterrence will hold" : `Will fail · weak link: ${META[weakest!].label}`}
-      </div>
+      </VerdictBar>
     </Card>
   );
 }

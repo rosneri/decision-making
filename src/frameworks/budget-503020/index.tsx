@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Card, MicroLabel } from "@/components/ui";
+import { Card, MicroLabel, BigNumber } from "@/components/ui";
 import { meta, schema, sample, type Budget } from "./data";
 export { meta, schema, sample };
 export type { Budget };
@@ -15,20 +15,19 @@ export function View({ data, onUpdate }: { data: Budget; onUpdate?: (d: Budget) 
   const targetAmt = (k: keyof Budget["actuals"]) => s.income * target[k];
   const delta = (k: keyof Budget["actuals"]) => s.actuals[k] - targetAmt(k);
 
-  const numCls = "block mt-1 font-serif font-medium bg-transparent border-b border-rule outline-none text-ink";
-
   return (
     <Card>
       <div className="p-4 border-b border-rule">
         <label>
           <MicroLabel>Take-home / month</MicroLabel>
-          <input
-            type="number"
-            min={0}
+          <BigNumber
             value={s.income}
-            onChange={(e) => upd({ ...s, income: Math.max(0, Number(e.target.value) || 0) })}
-            data-testid="budget-income"
-            className={`${numCls} text-[24px] w-32`}
+            onChange={(v) => upd({ ...s, income: Math.max(0, v) })}
+            min={0}
+            size="lg"
+            width="w-32"
+            className="mt-1"
+            testId="budget-income"
           />
         </label>
       </div>
@@ -50,13 +49,13 @@ export function View({ data, onUpdate }: { data: Budget; onUpdate?: (d: Budget) 
               <MicroLabel accent={i === 2} bold>
                 {k} · {Math.round(target[k] * 100)}%
               </MicroLabel>
-              <input
-                type="number"
-                min={0}
+              <BigNumber
                 value={s.actuals[k]}
-                onChange={(e) => upd({ ...s, actuals: { ...s.actuals, [k]: Math.max(0, Number(e.target.value) || 0) } })}
-                data-testid={`budget-${k}`}
-                className={`${numCls} text-[20px] w-full`}
+                onChange={(v) => upd({ ...s, actuals: { ...s.actuals, [k]: Math.max(0, v) } })}
+                min={0}
+                size="md"
+                className="mt-1"
+                testId={`budget-${k}`}
               />
               <span className={`font-code text-[11px] ${delta(k) > 1 ? "text-vermilion" : delta(k) < -1 ? "text-ink-muted" : "text-ink"}`}>
                 target ${targetAmt(k).toFixed(0)} · Δ {delta(k) > 0 ? "+" : ""}{delta(k).toFixed(0)}
