@@ -28,3 +28,10 @@ export const sample: Stp = {
   position: "single-origin from the farm we visit twice a year — not from the auction floor.",
   recommendation: "Target hobbyist baristas first. Position on provenance, not roast level. Channel: IG + 3-Wave shows.",
 };
+
+export function getMetrics(d: Stp) {
+  return [
+    { k: "Target", v: d.segments[d.targetIdx] ?? "—" },
+    { k: "Segments", v: String(d.segments.length) },
+  ];
+}

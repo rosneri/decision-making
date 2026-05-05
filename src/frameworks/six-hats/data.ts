@@ -52,3 +52,14 @@ export const HAT_META: Record<Hat, { label: string; sub: string }> = {
   green: { label: "Green", sub: "creativity" },
   blue: { label: "Blue", sub: "process" },
 };
+
+export function getMetrics(d: SixHats) {
+  const counts = (Object.values(d.hats) as string[][]).map((arr) => arr.length);
+  const total = counts.reduce((s, n) => s + n, 0);
+  const empty = counts.filter((n) => n === 0).length;
+  return [
+    { k: "Hat", v: d.active },
+    { k: "Notes", v: String(total) },
+    { k: "Empty hats", v: String(empty) },
+  ];
+}

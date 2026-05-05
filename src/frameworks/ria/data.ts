@@ -35,3 +35,12 @@ export const sample: Ria = {
   ],
   recommendation: "Net benefit is positive (+$325/yr). Mitigate small biz and utilities or the rule won't pass.",
 };
+
+export function getMetrics(d: Ria) {
+  const net = d.stakeholders.reduce((s, x) => s + x.netImpact, 0);
+  const losers = d.stakeholders.filter((s) => s.netImpact < 0 && s.power >= 4).length;
+  return [
+    { k: "Net impact", v: (net >= 0 ? "+" : "") + net.toFixed(0) },
+    { k: "Powerful losers", v: String(losers) },
+  ];
+}

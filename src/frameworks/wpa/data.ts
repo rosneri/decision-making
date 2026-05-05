@@ -31,3 +31,11 @@ export const sample: Wpa = {
   ],
   recommendation: "Going for it adds +6 WP%. The math says go even though the gut says punt.",
 };
+
+export function getMetrics(d: Wpa) {
+  const top = d.options.reduce((b, o) => (o.wp > b.wp ? o : b), d.options[0]!);
+  return [
+    { k: "Pick", v: top.name },
+    { k: "WP", v: `${(top.wp * 100).toFixed(0)}%` },
+  ];
+}

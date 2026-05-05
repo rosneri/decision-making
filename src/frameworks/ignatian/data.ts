@@ -34,3 +34,12 @@ export const sample: Ignatian = {
   days: ["B", "B", "B"],
   recommendation: "Steady consolation toward 'Teach' across all three days — a sign worth trusting. Take the next concrete step.",
 };
+
+export function getMetrics(d: Ignatian) {
+  const scored = d.options.map((o) => ({ name: o.name, net: o.consolation - o.desolation }));
+  const best = scored.reduce((b, o) => (o.net > b.net ? o : b), scored[0]!);
+  return [
+    { k: "Leaning", v: best.name },
+    { k: "Consolation net", v: (best.net > 0 ? "+" : "") + best.net },
+  ];
+}

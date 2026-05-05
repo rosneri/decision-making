@@ -39,3 +39,10 @@ export const sample: Adr = {
   alternatives: ["DynamoDB", "Cassandra", "CockroachDB"],
   recommendation: "Accept Postgres now; reopen this ADR if tps approaches the ceiling.",
 };
+
+export function getMetrics(d: Adr) {
+  return [
+    { k: "ADR", v: d.number ? `#${d.number}` : "—" },
+    { k: "Status", v: d.status },
+  ];
+}

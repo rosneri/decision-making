@@ -32,3 +32,10 @@ export const sample: FirstPrinciples = {
   truths: ["env access is the real bottleneck", "shadowing > slides", "context lives in code, not docs"],
   recommendation: "Replace the 6-week curriculum with a self-serve env + a buddy. Measure time-to-first-PR weekly.",
 };
+
+export function getMetrics(d: FirstPrinciples) {
+  return [
+    { k: "Truths", v: String(d.truths.length) },
+    { k: "Questions", v: String(d.questions.length) },
+  ];
+}

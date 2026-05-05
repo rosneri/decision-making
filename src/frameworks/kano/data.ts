@@ -44,3 +44,14 @@ export const CAT_META: Record<Cat, { label: string; color: string }> = {
   delighter: { label: "Delighter", color: "border-vermilion text-vermilion" },
   indifferent: { label: "Indifferent", color: "border-rule text-ink-muted" },
 };
+
+export function getMetrics(d: Kano) {
+  const must = d.features.filter((f) => f.category === "must").length;
+  const perf = d.features.filter((f) => f.category === "performance").length;
+  const delight = d.features.filter((f) => f.category === "delighter").length;
+  return [
+    { k: "Must", v: String(must) },
+    { k: "Perf", v: String(perf) },
+    { k: "Delight", v: String(delight) },
+  ];
+}

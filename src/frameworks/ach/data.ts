@@ -37,3 +37,14 @@ export const sample: Ach = {
 };
 
 export const cycle = (v: "+" | "-" | "?"): "+" | "-" | "?" => v === "+" ? "-" : v === "-" ? "?" : "+";
+
+export function getMetrics(d: Ach) {
+  const scores = d.hypotheses.map((_, i) =>
+    d.evidence.reduce((s, e) => s + (e.consistency[i] === "+" ? 1 : e.consistency[i] === "-" ? -1 : 0), 0),
+  );
+  const best = scores.reduce((bi, s, i) => (s > (scores[bi] ?? -Infinity) ? i : bi), 0);
+  return [
+    { k: "Working hypothesis", v: d.hypotheses[best] ?? "—" },
+    { k: "Net evidence", v: (scores[best] ?? 0) > 0 ? `+${scores[best]}` : String(scores[best] ?? 0) },
+  ];
+}

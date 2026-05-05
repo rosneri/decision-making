@@ -37,3 +37,11 @@ export const sample: Veil = {
   ],
   recommendation: "Worst-off (contractors) take a -4. If you couldn't bear that seat, redesign the change before announcing it.",
 };
+
+export function getMetrics(d: Veil) {
+  const worst = d.seats.reduce((b, s) => (s.score < b.score ? s : b), d.seats[0]!);
+  return [
+    { k: "Worst seat", v: worst.who },
+    { k: "Score", v: String(worst.score) },
+  ];
+}

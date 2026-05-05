@@ -36,3 +36,12 @@ export const sample: Sdm = {
   ],
   recommendation: "Given priority on staying active, surveillance preserves QoL with minimal survival trade-off.",
 };
+
+export function getMetrics(d: Sdm) {
+  const scored = d.options.map((o) => ({ ...o, fit: o.qualityOfLife - o.burden + o.survivalPct / 25 }));
+  const best = scored.reduce((b, o) => (o.fit > b.fit ? o : b), scored[0]!);
+  return [
+    { k: "Best fit", v: best.name },
+    { k: "Survival", v: `${best.survivalPct}%` },
+  ];
+}

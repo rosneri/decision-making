@@ -38,3 +38,11 @@ export const sample: Wardley = {
 };
 
 export const STAGES = ["Genesis", "Custom", "Product", "Commodity"];
+
+export function getMetrics(d: Wardley) {
+  const invest = d.nodes.filter((n) => n.invest);
+  return [
+    { k: "Nodes", v: String(d.nodes.length) },
+    { k: "Invest", v: invest.length > 0 ? invest.map((n) => n.name).join(", ") : "—" },
+  ];
+}

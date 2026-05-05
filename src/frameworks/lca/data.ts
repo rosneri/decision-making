@@ -35,3 +35,12 @@ export const sample: Lca = {
   ],
   recommendation: "Hotspot is raw materials at 38%. Switch sourcing first — manufacturing tweaks won't move the needle.",
 };
+
+export function getMetrics(d: Lca) {
+  const total = d.stages.reduce((s, x) => s + x.impact, 0);
+  const top = d.stages.reduce((b, s) => (s.impact > b.impact ? s : b), d.stages[0]!);
+  return [
+    { k: "Total", v: `${total.toFixed(0)} ${d.unit}` },
+    { k: "Hotspot", v: top.name },
+  ];
+}

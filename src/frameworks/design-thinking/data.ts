@@ -49,3 +49,11 @@ export const META: Record<Stage, { label: string }> = {
   prototype: { label: "Prototype" },
   test: { label: "Test" },
 };
+
+export function getMetrics(d: DesignThinking) {
+  const filled = (Object.keys(d.notes) as Stage[]).filter((s) => d.notes[s].trim().length > 0).length;
+  return [
+    { k: "Stage", v: META[d.current].label },
+    { k: "Progress", v: `${filled}/5` },
+  ];
+}

@@ -55,3 +55,13 @@ export const META: Record<Lens, { label: string; q: string }> = {
   commonGood: { label: "Common Good", q: "serves community?" },
   virtue: { label: "Virtue", q: "person you want to be?" },
 };
+
+export function getMetrics(d: Markkula) {
+  const entries = Object.entries(d.scores) as [keyof typeof d.scores, number][];
+  const min = entries.reduce((b, e) => (e[1] < b[1] ? e : b), entries[0]!);
+  const total = entries.reduce((s, [, v]) => s + v, 0);
+  return [
+    { k: "Avg", v: (total / entries.length).toFixed(1) },
+    { k: "Weakest lens", v: String(min[0]) },
+  ];
+}

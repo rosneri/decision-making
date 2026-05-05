@@ -26,3 +26,9 @@ export const sample: Inversion = {
   failureModes: ["pricing too high", "wrong audience", "onboarding slips", "support overwhelmed"],
   recommendation: "Pre-empt each failure mode: anchor pricing to a known band, run a 50-customer beta, and staff support up by 2× for week one.",
 };
+
+export function getMetrics(d: Inversion) {
+  return [
+    { k: "Failure modes", v: String(d.failureModes.length) },
+  ];
+}

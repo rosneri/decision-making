@@ -38,3 +38,8 @@ export const sample: Irac = {
 export const META: Record<Block, { word: string }> = {
   I: { word: "Issue" }, R: { word: "Rule" }, A: { word: "Application" }, C: { word: "Conclusion" },
 };
+
+export function getMetrics(d: Irac) {
+  const c = d.blocks.C ?? "";
+  return [{ k: "Conclusion", v: c.length > 60 ? c.slice(0, 60) + "…" : (c || "—") }];
+}

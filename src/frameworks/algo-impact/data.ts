@@ -35,3 +35,13 @@ export const sample: AlgoImpact = {
   ],
   recommendation: "Two open items at severity 4+. Do not ship. Run bias mitigation pass + add explainability before re-evaluation.",
 };
+
+export function getMetrics(d: AlgoImpact) {
+  const openHigh = d.risks.filter((r) => r.open && r.severity >= 4).length;
+  const max = d.risks.reduce((m, r) => Math.max(m, r.severity), 0);
+  return [
+    { k: "Open ≥4", v: String(openHigh) },
+    { k: "Verdict", v: openHigh > 0 ? "Block" : "Ship" },
+    { k: "Max severity", v: String(max) },
+  ];
+}

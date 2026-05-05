@@ -28,3 +28,10 @@ export const sample: Stoic = {
 };
 
 export type Side = "yours" | "notYours";
+
+export function getMetrics(d: Stoic) {
+  return [
+    { k: "Yours", v: String(d.yours.length) },
+    { k: "Not yours", v: String(d.notYours.length) },
+  ];
+}

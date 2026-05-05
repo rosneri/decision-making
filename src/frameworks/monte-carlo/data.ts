@@ -43,3 +43,16 @@ export function box(seed: number) {
     return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
   };
 }
+
+export function getMetrics(d: MonteCarlo) {
+  let success = 0;
+  const rng = box(42);
+  for (let i = 0; i < d.trials; i++) {
+    const x = d.mean + d.stdDev * rng();
+    if (x >= d.successThreshold) success++;
+  }
+  return [
+    { k: "P(success)", v: `${((success / d.trials) * 100).toFixed(1)}%` },
+    { k: "Trials", v: String(d.trials) },
+  ];
+}

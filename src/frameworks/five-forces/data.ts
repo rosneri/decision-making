@@ -47,3 +47,13 @@ export const FORCE_META: Record<Force, { label: string }> = {
   buyers: { label: "Buyer power" },
   substitutes: { label: "Substitutes" },
 };
+
+export function getMetrics(d: FiveForces) {
+  const entries = Object.entries(d.forces) as [Force, { level: number; note: string }][];
+  const top = entries.reduce((b, e) => (e[1].level > b[1].level ? e : b), entries[0]!);
+  const avg = entries.reduce((s, [, v]) => s + v.level, 0) / entries.length;
+  return [
+    { k: "Top force", v: FORCE_META[top[0]].label },
+    { k: "Avg pressure", v: avg.toFixed(1) },
+  ];
+}

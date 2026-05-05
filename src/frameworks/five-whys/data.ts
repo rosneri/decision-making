@@ -32,3 +32,11 @@ export const sample: FiveWhys = {
   ],
   recommendation: "Stop adding migration patches. Assign infra-tooling ownership and ship a shared deploy lib in Q3.",
 };
+
+export function getMetrics(d: FiveWhys) {
+  const root = d.whys[d.whys.length - 1] ?? "—";
+  return [
+    { k: "Whys", v: String(d.whys.length) },
+    { k: "Root", v: root.length > 40 ? root.slice(0, 40) + "…" : root },
+  ];
+}

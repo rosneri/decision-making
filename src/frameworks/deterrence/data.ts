@@ -44,3 +44,14 @@ export const META: Record<Cond, { label: string; q: string }> = {
 
 export const cycleState = (v: "yes" | "weak" | "no"): "yes" | "weak" | "no" =>
   v === "yes" ? "weak" : v === "weak" ? "no" : "yes";
+
+export function getMetrics(d: Deterrence) {
+  const score = (s: "yes" | "weak" | "no") => s === "yes" ? 2 : s === "weak" ? 1 : 0;
+  const entries = (Object.entries(d.conditions) as [Cond, { state: "yes" | "weak" | "no"; note: string }][]);
+  const weak = entries.reduce((b, e) => (score(e[1].state) < score(b[1].state) ? e : b), entries[0]!);
+  const allYes = entries.every((e) => e[1].state === "yes");
+  return [
+    { k: "Verdict", v: allYes ? "Holds" : "Fails" },
+    { k: "Weak link", v: META[weak[0]].label },
+  ];
+}

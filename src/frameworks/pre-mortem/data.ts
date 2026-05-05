@@ -36,3 +36,12 @@ export const sample: PreMortem = {
   ],
   recommendation: "Two risks need tripwires now: scope creep (set a kill-feature trigger) and key-engineer dependency (pair them with a backup).",
 };
+
+export function getMetrics(d: PreMortem) {
+  const scored = d.risks.map((r) => ({ ...r, score: r.likelihood * r.impact }));
+  const top = scored.reduce((b, r) => (r.score > b.score ? r : b), scored[0]!);
+  return [
+    { k: "Top risk", v: top.cause.length > 40 ? top.cause.slice(0, 40) + "…" : top.cause },
+    { k: "L×I", v: String(top.score) },
+  ];
+}

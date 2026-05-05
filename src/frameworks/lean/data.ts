@@ -34,3 +34,10 @@ export const sample: Lean = {
   decision: "pivot",
   recommendation: "Pivot the segment to small agencies; persevere on the offer. Run cycle 5 with team-account billing.",
 };
+
+export function getMetrics(d: Lean) {
+  return [
+    { k: "Cycle", v: `#${d.cycle}` },
+    { k: "Decision", v: d.decision },
+  ];
+}

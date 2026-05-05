@@ -45,3 +45,14 @@ export const QUAL_META: Record<Qual, { label: string; level: number }> = {
   moderate: { label: "Moderate", level: 3 },
   high: { label: "High", level: 4 },
 };
+
+export function getMetrics(d: Grade) {
+  const top = d.studies.reduce(
+    (b, s) => (QUAL_META[s.quality].level > QUAL_META[b.quality].level ? s : b),
+    d.studies[0]!,
+  );
+  return [
+    { k: "Best evidence", v: QUAL_META[top.quality].label },
+    { k: "Strength", v: d.strength },
+  ];
+}

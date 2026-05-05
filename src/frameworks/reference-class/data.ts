@@ -38,3 +38,13 @@ export const sample: ReferenceClass = {
   ],
   recommendation: "Past base rate is ~1.75× over plan. Your 12-month estimate likely lands at 20–22 months. Plan funding accordingly.",
 };
+
+export function getMetrics(d: ReferenceClass) {
+  const ratios = d.pastProjects.map((p) => p.actual / (p.estimate || 1));
+  const mult = ratios.reduce((s, r) => s + r, 0) / (ratios.length || 1);
+  const adjusted = d.yourEstimate * mult;
+  return [
+    { k: "Multiplier", v: `${mult.toFixed(2)}×` },
+    { k: "Adjusted", v: `${adjusted.toFixed(0)} ${d.unit}` },
+  ];
+}

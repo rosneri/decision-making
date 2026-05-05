@@ -32,3 +32,10 @@ export const sample: Scorecard = {
   competencies: ["analytical", "fast-execute", "writes well", "calm under load", "cross-functional"],
   recommendation: "Score every candidate against THIS card, not against each other. Reject anyone weak on > 2 competencies.",
 };
+
+export function getMetrics(d: Scorecard) {
+  return [
+    { k: "Outcomes", v: String(d.outcomes.length) },
+    { k: "Competencies", v: String(d.competencies.length) },
+  ];
+}
