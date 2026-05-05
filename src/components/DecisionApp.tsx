@@ -246,9 +246,17 @@ export function DecisionApp() {
                   !!analyzeError ||
                   (serverResultKey !== null && JSON.stringify(result) !== serverResultKey),
                 onRerecommend: rerecommend,
+                recommendation: result.recommendation,
               }}
             >
-              <ActiveView data={result} onUpdate={setResult} />
+              <ActiveView
+                data={result}
+                onUpdate={(d) =>
+                  setResult((prev) =>
+                    prev ? { ...d, recommendation: prev.recommendation } : d
+                  )
+                }
+              />
             </RerecommendProvider>
 
             <div className="flex gap-3 mt-10 items-center">

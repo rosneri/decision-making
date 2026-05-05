@@ -19,6 +19,10 @@ interface RerecommendValue {
   error: boolean;
   show: boolean;
   onRerecommend: () => void;
+  /** Authoritative recommendation text from the parent. Overrides the
+   *  view's local prop so re-recommend results render even when the view
+   *  holds its own copy of `data` in useState. */
+  recommendation?: string;
 }
 
 const RerecommendContext = createContext<RerecommendValue | null>(null);
@@ -35,7 +39,8 @@ export function RerecommendProvider({
 
 export function ResultPanel({ body, label = "Recommendation", metrics }: Props) {
   const rerec = useContext(RerecommendContext);
-  if (!body) return null;
+  const text = rerec?.recommendation ?? body;
+  if (!text) return null;
 
   return (
     <div
@@ -73,7 +78,7 @@ export function ResultPanel({ body, label = "Recommendation", metrics }: Props) 
           </span>
         )}
       </div>
-      <p className="font-serif text-[15px] leading-7 text-ink max-w-[68ch]">{body}</p>
+      <p className="font-serif text-[15px] leading-7 text-ink max-w-[68ch]">{text}</p>
     </div>
   );
 }
