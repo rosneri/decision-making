@@ -106,7 +106,7 @@ export function ChatFiller({ frameworkId, frameworkName, decisionText, data, onU
 
   return (
     <aside
-      className="fixed right-0 top-0 bottom-0 w-full sm:w-[420px] z-30 border-l border-rule bg-paper flex flex-col shadow-[-4px_0_24px_rgba(0,0,0,0.06)] animate-page-in"
+      className="absolute right-4 sm:right-6 top-[10vh] w-[calc(100%-2rem)] sm:w-[420px] h-[80vh] z-30 border border-rule rounded-sm bg-paper flex flex-col shadow-[0_8px_32px_rgba(0,0,0,0.12)] animate-page-in overflow-hidden"
       role="complementary"
       aria-label="Chat with the framework"
     >
