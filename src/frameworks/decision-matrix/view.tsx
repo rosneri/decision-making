@@ -1,69 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { z } from "zod";
-
-export const meta = {
-  id: "decision_matrix",
-  name: "Decision Matrix",
-  category: "Analysis & evaluation",
-  blurb:
-    "Score each option against weighted criteria. Best for picking between concrete alternatives.",
-} as const;
-
-export const schema = z.object({
-  framework: z.literal("decision_matrix"),
-  category: z
-    .string()
-    .describe(
-      "The category this framework belongs to, e.g. 'Analysis & evaluation'"
-    ),
-  title: z.string().describe("Title summarizing the decision"),
-  criteria: z
-    .array(
-      z.object({
-        name: z.string(),
-        weight: z.number().min(1).max(10).describe("Importance 1-10"),
-      })
-    )
-    .min(2)
-    .max(6),
-  options: z
-    .array(
-      z.object({
-        name: z.string(),
-        scores: z
-          .array(z.number().min(0).max(10))
-          .describe("One score 0-10 per criterion in the same order"),
-      })
-    )
-    .min(2)
-    .max(6),
-  recommendation: z
-    .string()
-    .describe("Which option wins and why, 2-4 sentences"),
-});
-
-export type DecisionMatrix = z.infer<typeof schema>;
-
-export const sample: DecisionMatrix = {
-  framework: "decision_matrix",
-  category: meta.category,
-  title: "Choosing a new laptop",
-  criteria: [
-    { name: "Price", weight: 8 },
-    { name: "Performance", weight: 9 },
-    { name: "Battery", weight: 6 },
-    { name: "Build quality", weight: 5 },
-  ],
-  options: [
-    { name: "MacBook Pro 14", scores: [4, 9, 8, 9] },
-    { name: "Dell XPS 15", scores: [6, 8, 6, 7] },
-    { name: "ThinkPad X1", scores: [7, 7, 9, 8] },
-  ],
-  recommendation:
-    "Try the sliders — adjust weights based on what matters most to you and the highlighted winner will update.",
-};
+import type { DecisionMatrix } from "./schema";
 
 export function View({ data }: { data: DecisionMatrix }) {
   const [matrix, setMatrix] = useState(data);

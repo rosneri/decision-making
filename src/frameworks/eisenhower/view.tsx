@@ -1,56 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { z } from "zod";
-
-export const meta = {
-  id: "eisenhower",
-  name: "Eisenhower Matrix",
-  category: "Speed & prioritization",
-  blurb:
-    "Sort tasks by urgent vs. important. Best when overwhelmed by many things to do.",
-} as const;
-
-export const schema = z.object({
-  framework: z.literal("eisenhower"),
-  category: z
-    .string()
-    .describe(
-      "The category this framework belongs to, e.g. 'Speed & prioritization'"
-    ),
-  title: z.string(),
-  tasks: z
-    .array(
-      z.object({
-        text: z.string(),
-        urgent: z.boolean(),
-        important: z.boolean(),
-      })
-    )
-    .min(3)
-    .max(12),
-  recommendation: z
-    .string()
-    .describe("Prioritized plan referencing each quadrant, 2-5 sentences"),
-});
-
-export type Eisenhower = z.infer<typeof schema>;
-
-export const sample: Eisenhower = {
-  framework: "eisenhower",
-  category: meta.category,
-  title: "This week's tasks",
-  tasks: [
-    { text: "Fix production bug", urgent: true, important: true },
-    { text: "Plan Q3 roadmap", urgent: false, important: true },
-    { text: "Reply to recruiter spam", urgent: true, important: false },
-    { text: "Browse Twitter", urgent: false, important: false },
-    { text: "1:1 with manager", urgent: false, important: true },
-    { text: "Order office snacks", urgent: true, important: false },
-  ],
-  recommendation:
-    "Do the production bug now, schedule deep work on the roadmap, delegate the snack run, and stop scrolling.",
-};
+import type { Eisenhower } from "./schema";
 
 const QUADRANTS = [
   {
