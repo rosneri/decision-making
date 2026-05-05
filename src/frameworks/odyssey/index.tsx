@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { RangeField } from "@/components/ui/Range";
 import { meta, schema, sample, type Odyssey } from "./data";
 export { meta, schema, sample };
 export type { Odyssey };
@@ -37,12 +38,16 @@ export function View({ data, onUpdate }: { data: Odyssey; onUpdate?: (d: Odyssey
             </svg>
             <div className="grid grid-cols-3 gap-3 mt-2">
               {(["resources", "likeability", "confidence"] as const).map((k) => (
-                <label key={k}>
-                  <span className="font-code text-[10px] tracking-[0.18em] uppercase text-ink-muted">{k}</span>
-                  <input type="range" min={1} max={5} value={p[k]}
-                    onChange={(e) => set(i, { [k]: Number(e.target.value) })}
-                    aria-label={`${k} for ${p.title}`} className="block w-full" />
-                </label>
+                <RangeField
+                  key={k}
+                  label={k}
+                  value={p[k]}
+                  onChange={(v) => set(i, { [k]: v })}
+                  min={1}
+                  max={5}
+                  accent={isPreferred}
+                  ariaLabel={`${k} for ${p.title}`}
+                />
               ))}
             </div>
           </div>

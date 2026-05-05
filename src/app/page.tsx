@@ -1,5 +1,10 @@
+import { Suspense } from "react";
 import { DecisionApp } from "@/components/DecisionApp";
 
 export default function Home() {
-  return <DecisionApp />;
+  return (
+    <Suspense fallback={null}>
+      <DecisionApp />
+    </Suspense>
+  );
 }

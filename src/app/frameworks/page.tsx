@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { FRAMEWORKS, SAMPLES } from "@/frameworks";
+import { HELP } from "@/frameworks/help";
 import { FrameworkRenderer } from "@/components/FrameworkRenderer";
+import { FrameworkHelpPanel } from "@/components/FrameworkHelpPanel";
+import { LibraryHeader } from "@/components/LibraryHeader";
 
 function toRoman(n: number): string {
   const map: Array<[number, string]> = [
@@ -18,22 +21,7 @@ function toRoman(n: number): string {
 export default function FrameworksPage() {
   return (
     <>
-      {/* Header */}
-      <header className="sticky top-0 z-20 border-b border-rule px-10 py-[18px] flex items-center gap-7"
-        style={{ background: "color-mix(in oklab, var(--paper) 85%, transparent)", backdropFilter: "blur(6px)" }}>
-        <Link href="/" className="font-serif font-medium text-[18px] tracking-[0.02em] text-ink hover:text-ink-muted transition-colors duration-200">
-          Decision Making
-        </Link>
-        <div className="flex-1" />
-        <nav className="flex gap-6 items-center">
-          <Link href="/" className="font-serif italic text-[15px] text-ink-muted hover:text-ink border-b border-transparent pb-0.5 transition-colors duration-200">
-            Compose
-          </Link>
-          <Link href="/frameworks" className="font-serif italic text-[15px] text-ink border-b border-vermilion pb-0.5">
-            Library
-          </Link>
-        </nav>
-      </header>
+      <LibraryHeader />
 
       <main className="max-w-[1080px] mx-auto px-10 py-16 pb-32">
         {/* Page head */}
@@ -69,6 +57,7 @@ export default function FrameworksPage() {
                   <p className="font-serif italic text-ink-muted text-[17px] mt-2 max-w-[60ch]">
                     {f.blurb}
                   </p>
+                  {HELP[f.id] ? <FrameworkHelpPanel help={HELP[f.id]!} /> : null}
                 </div>
               </div>
 
