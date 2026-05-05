@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { Card, MicroLabel } from "@/components/ui";
 import { meta, schema, sample, type Kelly } from "./data";
 export { meta, schema, sample };
 export type { Kelly };
@@ -16,7 +17,7 @@ export function View({ data, onUpdate }: { data: Kelly; onUpdate?: (d: Kelly) =>
   const pctOfBankroll = s.bankroll > 0 ? (wager / s.bankroll) * 100 : 0;
 
   return (
-    <div className="border border-ink bg-paper">
+    <Card>
       <div className="p-4 bg-paper-deep border-b border-rule font-code text-[12px] text-ink-muted">
         f* = (b·p − q) / b · b={b} · p={p.toFixed(2)} · q={q.toFixed(2)}
       </div>
@@ -28,23 +29,28 @@ export function View({ data, onUpdate }: { data: Kelly; onUpdate?: (d: Kelly) =>
           { l: "Fraction", v: s.fraction, k: "fraction" as const, min: 0, max: 1, step: 0.01 },
         ].map((f) => (
           <label key={f.k} className="p-3 block">
-            <span className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">{f.l}</span>
-            <input type="number" min={f.min} max={f.max} step={f.step} value={f.v}
+            <MicroLabel>{f.l}</MicroLabel>
+            <input
+              type="number"
+              min={f.min}
+              max={f.max}
+              step={f.step}
+              value={f.v}
               onChange={(e) => {
                 const n = Number(e.target.value) || 0;
                 const clamped = f.max != null ? Math.max(f.min!, Math.min(f.max, n)) : Math.max(f.min!, n);
                 upd({ ...s, [f.k]: clamped });
               }}
               data-testid={`kelly-${f.k}`}
-              className="block w-full mt-1 font-code text-[16px] bg-transparent border-b border-rule outline-none focus:border-vermilion text-ink" />
+              className="block w-full mt-1 font-code text-[16px] bg-transparent border-b border-rule outline-none focus:border-vermilion text-ink"
+            />
           </label>
         ))}
       </div>
       <div className="p-4 border-t border-rule">
-        <span className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">Bankroll · ${s.bankroll.toLocaleString()}</span>
+        <MicroLabel>Bankroll · ${s.bankroll.toLocaleString()}</MicroLabel>
         <div className="mt-3 h-12 border-2 border-ink flex" data-testid="kelly-bar">
-          <div className="bg-vermilion grid place-items-center text-paper font-code text-[11px]"
-            style={{ width: `${Math.min(100, pctOfBankroll)}%` }}>
+          <div className="bg-vermilion grid place-items-center text-paper font-code text-[11px]" style={{ width: `${Math.min(100, pctOfBankroll)}%` }}>
             ${wager.toFixed(0)}
           </div>
           <div className="flex-1 grid place-items-center font-serif italic text-[12px] text-ink-muted">keep dry</div>
@@ -52,14 +58,14 @@ export function View({ data, onUpdate }: { data: Kelly; onUpdate?: (d: Kelly) =>
       </div>
       <div className="grid grid-cols-2 border-t border-rule">
         <div className="p-4">
-          <span className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">Full Kelly</span>
+          <MicroLabel>Full Kelly</MicroLabel>
           <div className="font-serif font-medium text-[24px] text-ink mt-1" data-testid="kelly-full">{(fStar * 100).toFixed(1)}%</div>
         </div>
         <div className="p-4 bg-vermilion/5 border-l border-vermilion">
-          <span className="font-code text-[10px] tracking-[0.22em] uppercase text-vermilion font-medium">Wager ({(s.fraction * 100).toFixed(0)}% Kelly)</span>
+          <MicroLabel accent bold>Wager ({(s.fraction * 100).toFixed(0)}% Kelly)</MicroLabel>
           <div className="font-serif font-medium text-[24px] text-vermilion mt-1" data-testid="kelly-wager">${wager.toFixed(0)}</div>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

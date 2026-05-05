@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { Card, MicroLabel, InlineText, Range, AddButton, RemoveButton } from "@/components/ui";
 import { meta, schema, sample, type Veil } from "./data";
 export { meta, schema, sample };
 export type { Veil };
@@ -15,41 +16,63 @@ export function View({ data, onUpdate }: { data: Veil; onUpdate?: (d: Veil) => v
   const worst = s.seats.reduce((a, x) => x.score < a.score ? x : a, s.seats[0]!);
 
   return (
-    <div className="border border-ink bg-paper">
+    <Card>
       <div className="p-4 bg-paper-deep border-b border-rule">
-        <span className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">Scenario</span>
-        <input value={s.scenario} onChange={(e) => upd({ ...s, scenario: e.target.value })}
-          className="block w-full mt-1 font-serif italic text-[15px] text-ink bg-transparent border-none outline-none" />
+        <MicroLabel>Scenario</MicroLabel>
+        <InlineText
+          value={s.scenario}
+          onChange={(v) => upd({ ...s, scenario: v })}
+          italic
+          className="block w-full mt-1"
+        />
       </div>
       <div className="grid grid-cols-2 divide-x divide-rule">
         {s.seats.map((seat, i) => {
           const isWorst = seat === worst;
           return (
-            <div key={i} data-testid={`seat-${i}`}
-              className={`p-4 border-b border-rule ${isWorst ? "bg-vermilion/5 border-l-4 border-l-vermilion" : ""}`}>
-              <input value={seat.who} onChange={(e) => set(i, { who: e.target.value })}
-                className="font-serif text-[15px] font-medium text-ink bg-transparent border-none outline-none w-full" />
-              <input value={seat.impact} onChange={(e) => set(i, { impact: e.target.value })}
-                className={`block w-full mt-1 font-serif italic text-[13px] bg-transparent border-none outline-none ${isWorst ? "text-vermilion" : "text-ink-muted"}`} />
+            <div
+              key={i}
+              data-testid={`seat-${i}`}
+              className={`p-4 border-b border-rule ${isWorst ? "bg-vermilion/5 border-l-4 border-l-vermilion" : ""}`}
+            >
+              <InlineText
+                value={seat.who}
+                onChange={(v) => set(i, { who: v })}
+                className="font-medium"
+              />
+              <InlineText
+                value={seat.impact}
+                onChange={(v) => set(i, { impact: v })}
+                italic
+                size="sm"
+                className={`block w-full mt-1 ${isWorst ? "text-vermilion" : "text-ink-muted"}`}
+              />
               <div className="mt-2 flex items-center gap-2">
-                <input type="range" min={-5} max={5} value={seat.score}
-                  onChange={(e) => set(i, { score: Number(e.target.value) })}
-                  data-testid={`seat-${i}-score`}
-                  aria-label={`score for ${seat.who}`} className="flex-1" />
-                <span className={`font-code text-[12px] w-8 text-right ${seat.score < 0 ? "text-vermilion" : "text-ink"}`}>{seat.score > 0 ? "+" : ""}{seat.score}</span>
-                <button onClick={() => rm(i)} aria-label="remove" className="text-ink-muted hover:text-vermilion">×</button>
+                <Range
+                  value={seat.score}
+                  onChange={(v) => set(i, { score: v })}
+                  min={-5}
+                  max={5}
+                  testId={`seat-${i}-score`}
+                  ariaLabel={`score for ${seat.who}`}
+                  className="flex-1"
+                />
+                <span className={`font-code text-[12px] w-8 text-right ${seat.score < 0 ? "text-vermilion" : "text-ink"}`}>
+                  {seat.score > 0 ? "+" : ""}{seat.score}
+                </span>
+                <RemoveButton onClick={() => rm(i)} ariaLabel="remove" />
               </div>
             </div>
           );
         })}
       </div>
-      <button onClick={add} className="font-serif italic text-[13px] text-ink-muted hover:text-vermilion px-4 py-2 border-t border-rule w-full text-left">+ another seat</button>
+      <AddButton onClick={add} className="px-4 py-2 border-t border-rule w-full text-left">+ another seat</AddButton>
       <div className="p-4 border-t border-rule bg-paper-deep">
-        <span className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">Worst-off seat</span>
+        <MicroLabel>Worst-off seat</MicroLabel>
         <p className="mt-1 font-serif text-[15px] text-ink">
           <span className="font-medium">{worst.who}</span> · <span className="italic text-ink-muted">{worst.impact}</span> · <span className="text-vermilion font-medium" data-testid="veil-worst-score">{worst.score}</span>
         </p>
       </div>
-    </div>
+    </Card>
   );
 }

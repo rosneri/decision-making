@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { Card, MicroLabel, InlineText, InlineNumber } from "@/components/ui";
 import { meta, schema, sample, type StructuredInterview } from "./data";
 export { meta, schema, sample };
 export type { StructuredInterview };
@@ -21,19 +22,24 @@ export function View({ data, onUpdate }: { data: StructuredInterview; onUpdate?:
   const ranked = s.candidates.map((c, i) => ({ ...c, i, avg: avg(c) }));
   const winner = ranked.reduce((a, x) => x.avg > a.avg ? x : a, ranked[0]!);
 
+  const head = "px-3 py-2 border-b border-rule";
+
   return (
-    <div className="border border-ink bg-paper overflow-x-auto">
+    <Card className="overflow-x-auto">
       <table className="w-full" data-testid="si-table">
         <thead>
           <tr>
-            <th className="text-left px-3 py-2 font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted border-b border-rule">Candidate</th>
+            <th className={`${head} text-left`}><MicroLabel>Candidate</MicroLabel></th>
             {s.dimensions.map((d, k) => (
               <th key={k} className="text-center px-2 py-2 border-b border-rule">
-                <input value={d} onChange={(e) => setDim(k, e.target.value)}
-                  className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted bg-transparent border-none outline-none text-center w-20" />
+                <input
+                  value={d}
+                  onChange={(e) => setDim(k, e.target.value)}
+                  className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted bg-transparent border-none outline-none text-center w-20"
+                />
               </th>
             ))}
-            <th className="text-right px-3 py-2 font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted border-b border-rule">Avg</th>
+            <th className={`${head} text-right`}><MicroLabel>Avg</MicroLabel></th>
           </tr>
         </thead>
         <tbody>
@@ -42,19 +48,30 @@ export function View({ data, onUpdate }: { data: StructuredInterview; onUpdate?:
             return (
               <tr key={c.i} className="border-b border-rule" data-testid={`si-row-${c.i}`}>
                 <td className="px-3 py-2">
-                  <input value={c.name} onChange={(e) => setName(c.i, e.target.value)}
-                    className={`font-serif text-[15px] bg-transparent border-none outline-none ${isWinner ? "text-vermilion font-medium" : "text-ink"}`} />
+                  <InlineText
+                    value={c.name}
+                    onChange={(v) => setName(c.i, v)}
+                    className={isWinner ? "text-vermilion font-medium" : ""}
+                  />
                 </td>
                 {c.scores.map((sc, k) => (
                   <td key={k} className="text-center px-2 py-2">
-                    <input type="number" min={1} max={5} value={sc}
-                      onChange={(e) => setScore(c.i, k, Math.max(1, Math.min(5, Number(e.target.value) || 1)))}
-                      data-testid={`si-score-${c.i}-${k}`}
-                      className="font-code text-[13px] w-10 text-center bg-transparent border-b border-rule outline-none text-ink" />
+                    <InlineNumber
+                      value={sc}
+                      onChange={(v) => setScore(c.i, k, Math.max(1, Math.min(5, v)))}
+                      min={1}
+                      max={5}
+                      size="sm"
+                      width="w-10"
+                      testId={`si-score-${c.i}-${k}`}
+                      className="border-b border-rule"
+                    />
                   </td>
                 ))}
-                <td className={`text-right px-3 py-2 font-code text-[14px] font-medium ${isWinner ? "text-vermilion" : "text-ink"}`}
-                  data-testid={`si-avg-${c.i}`}>
+                <td
+                  className={`text-right px-3 py-2 font-code text-[14px] font-medium ${isWinner ? "text-vermilion" : "text-ink"}`}
+                  data-testid={`si-avg-${c.i}`}
+                >
                   {c.avg.toFixed(1)}
                 </td>
               </tr>
@@ -62,6 +79,6 @@ export function View({ data, onUpdate }: { data: StructuredInterview; onUpdate?:
           })}
         </tbody>
       </table>
-    </div>
+    </Card>
   );
 }

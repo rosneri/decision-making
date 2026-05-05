@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { Card, MicroLabel } from "@/components/ui";
 import { meta, schema, sample, type Irac, BLOCKS, type Block, META } from "./data";
 export { meta, schema, sample };
 export type { Irac };
@@ -10,26 +11,26 @@ export function View({ data, onUpdate }: { data: Irac; onUpdate?: (d: Irac) => v
   const set = (k: Block, v: string) => upd({ ...s, blocks: { ...s.blocks, [k]: v } });
 
   return (
-    <div className="border border-ink bg-paper divide-y divide-rule">
+    <Card className="divide-y divide-rule">
       {BLOCKS.map((k) => {
         const isApplication = k === "A";
         return (
-          <div key={k} data-testid={`irac-${k}`}
-            className={`flex items-stretch ${isApplication ? "bg-vermilion/5" : ""}`}>
+          <div key={k} data-testid={`irac-${k}`} className={`flex items-stretch ${isApplication ? "bg-vermilion/5" : ""}`}>
             <div className={`w-14 grid place-items-center font-serif font-medium text-[28px] text-paper ${isApplication ? "bg-vermilion" : "bg-ink"}`}>
               {k}
             </div>
             <div className="flex-1 p-4">
-              <span className={`font-code text-[10px] tracking-[0.22em] uppercase font-medium ${isApplication ? "text-vermilion" : "text-ink-muted"}`}>
-                {META[k].word}
-              </span>
-              <textarea value={s.blocks[k]} onChange={(e) => set(k, e.target.value)}
+              <MicroLabel accent={isApplication} bold>{META[k].word}</MicroLabel>
+              <textarea
+                value={s.blocks[k]}
+                onChange={(e) => set(k, e.target.value)}
                 className="block w-full mt-1 font-serif text-[15px] bg-transparent border-none outline-none resize-none text-ink"
-                rows={2} />
+                rows={2}
+              />
             </div>
           </div>
         );
       })}
-    </div>
+    </Card>
   );
 }

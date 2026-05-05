@@ -1,5 +1,6 @@
 "use client";
 import { useState, useMemo } from "react";
+import { Card, MicroLabel } from "@/components/ui";
 import { meta, schema, sample, type MonteCarlo, box } from "./data";
 export { meta, schema, sample };
 export type { MonteCarlo };
@@ -29,7 +30,7 @@ export function View({ data, onUpdate }: { data: MonteCarlo; onUpdate?: (d: Mont
   const max = Math.max(...bins);
 
   return (
-    <div className="border border-ink bg-paper">
+    <Card>
       <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-rule border-b border-rule">
         {[
           { l: "Mean", v: s.mean, k: "mean" as const },
@@ -38,11 +39,14 @@ export function View({ data, onUpdate }: { data: MonteCarlo; onUpdate?: (d: Mont
           { l: "Success ≥", v: s.successThreshold, k: "successThreshold" as const },
         ].map((f) => (
           <label key={f.k} className="p-3 block">
-            <span className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">{f.l}</span>
-            <input type="number" value={f.v}
+            <MicroLabel>{f.l}</MicroLabel>
+            <input
+              type="number"
+              value={f.v}
               onChange={(e) => upd({ ...s, [f.k]: f.int ? Math.max(100, Math.min(50000, Math.round(Number(e.target.value) || 100))) : Number(e.target.value) || 0 })}
               data-testid={`mc-${f.k}`}
-              className="block w-full mt-1 font-code text-[16px] bg-transparent border-b border-rule outline-none focus:border-vermilion text-ink" />
+              className="block w-full mt-1 font-code text-[16px] bg-transparent border-b border-rule outline-none focus:border-vermilion text-ink"
+            />
           </label>
         ))}
       </div>
@@ -51,8 +55,11 @@ export function View({ data, onUpdate }: { data: MonteCarlo; onUpdate?: (d: Mont
           {bins.map((b, i) => {
             const isAccent = i >= 2 && i <= 4;
             return (
-              <div key={i} className={`flex-1 ${isAccent ? "bg-vermilion" : "bg-ink"} ${isAccent ? "" : "opacity-80"} border border-ink`}
-                style={{ height: `${(b / max) * 100}%` }} />
+              <div
+                key={i}
+                className={`flex-1 ${isAccent ? "bg-vermilion" : "bg-ink"} ${isAccent ? "" : "opacity-80"} border border-ink`}
+                style={{ height: `${(b / max) * 100}%` }}
+              />
             );
           })}
         </div>
@@ -64,16 +71,16 @@ export function View({ data, onUpdate }: { data: MonteCarlo; onUpdate?: (d: Mont
       </div>
       <div className="grid grid-cols-2 border-t border-rule">
         <div className="p-4">
-          <span className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">P(success)</span>
+          <MicroLabel>P(success)</MicroLabel>
           <div className="font-serif font-medium text-[28px] text-ink mt-1">{(pSuccess * 100).toFixed(1)}%</div>
         </div>
         <div className="p-4 bg-vermilion/5 border-l border-vermilion">
-          <span className="font-code text-[10px] tracking-[0.22em] uppercase text-vermilion">P(ruin)</span>
+          <MicroLabel accent>P(ruin)</MicroLabel>
           <div className="font-serif font-medium text-[28px] text-vermilion mt-1" data-testid="mc-pruin">
             {((1 - pSuccess) * 100).toFixed(1)}%
           </div>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }
