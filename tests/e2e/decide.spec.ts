@@ -34,7 +34,7 @@ test.describe("/decide", () => {
       .fill("Pick between two job offers.");
     await page.getByRole("button", { name: /Analyse decision/i }).click();
 
-    await expect(page.getByDisplayValue(SAMPLES.decision_matrix.options[0]!.name)).toBeVisible();
+    await expect(page.locator(`input[value="${SAMPLES.decision_matrix.options[0]!.name}"]`)).toBeVisible();
   });
 
   test("shows error message on API failure (mocked)", async ({ page }) => {
