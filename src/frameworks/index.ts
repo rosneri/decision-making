@@ -185,3 +185,8 @@ export const SAMPLES = Object.fromEntries(
 export const VIEWS = Object.fromEntries(
   ALL.map((m) => [m.meta.id, m.View])
 ) as unknown as Record<FrameworkId, AnyView>;
+
+// Per-framework schema lookup for two-stage AI generation.
+export const SCHEMAS = Object.fromEntries(
+  ALL.map((m) => [m.meta.id, m.schema])
+) as unknown as Record<FrameworkId, z.ZodTypeAny>;

@@ -64,6 +64,7 @@ export function DecisionApp() {
   const [recNote, setRecNote]     = useState<string | null>(null);
   const [recLoading, setRecLoading] = useState(false);
   const [analyzeReady, setAnalyzeReady] = useState(false);
+  const [analyzeError, setAnalyzeError] = useState<string | null>(null);
   const recReqRef = useRef(0);
   const hydratedRef = useRef(false);
 
@@ -103,6 +104,7 @@ export function DecisionApp() {
     setRoute("reading");
     setRecNote(null);
     setAnalyzeReady(false);
+    setAnalyzeError(null);
     setResult(null);
     const id = ++recReqRef.current;
     setRecLoading(true);
@@ -114,8 +116,11 @@ export function DecisionApp() {
         setRecLoading(false);
         setAnalyzeReady(true);
       })
-      .catch(() => {
+      .catch((err: unknown) => {
         if (id !== recReqRef.current) return;
+        const message = err instanceof Error ? err.message : "Unknown error";
+        console.error("[analyze] failed after retries:", err);
+        setAnalyzeError(message);
         setRecLoading(false);
         setAnalyzeReady(true); // advance anyway so the user isn't stuck
       });
@@ -234,16 +239,31 @@ export function DecisionApp() {
       })()}
 
       {route === "result" && !result && (
-        <main className="max-w-[1080px] mx-auto px-4 sm:px-10 py-14 text-center">
+        <main className="max-w-[1080px] mx-auto px-4 sm:px-10 py-14 text-center space-y-4">
           <p className="font-serif italic text-ink-muted">
-            No analysis to show.{" "}
+            {analyzeError ? "The analysis failed." : "No analysis to show."}
+          </p>
+          {analyzeError && (
+            <pre className="font-code text-[12px] text-vermilion bg-paper-deep border border-rule rounded-sm p-3 max-w-[60ch] mx-auto whitespace-pre-wrap text-left">
+              {analyzeError}
+            </pre>
+          )}
+          <div className="flex gap-3 justify-center">
+            {decisionText && (
+              <button
+                onClick={() => submit(decisionText)}
+                className="font-serif text-base font-medium px-[22px] py-3 rounded-sm bg-vermilion text-paper hover:bg-vermilion-deep transition-colors duration-200 cursor-pointer"
+              >
+                Try again
+              </button>
+            )}
             <button
-              className="underline cursor-pointer"
               onClick={() => setRoute("compose")}
+              className="font-serif text-base font-medium px-[22px] py-3 rounded-sm border border-rule text-ink hover:border-ink transition-colors duration-200 cursor-pointer"
             >
               Start over →
             </button>
-          </p>
+          </div>
         </main>
       )}
     </div>
