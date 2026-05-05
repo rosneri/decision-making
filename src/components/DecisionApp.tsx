@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { startTransition, useEffect, useRef, useState } from "react";
 import { Composer } from "./Composer";
 import { ReadingInterstitial } from "./ReadingInterstitial";
 import { RecommendationCard } from "./RecommendationCard";
@@ -107,26 +107,45 @@ function MoonIcon() {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export function DecisionApp() {
-  const [route, setRoute]         = useState<Route>(() => {
-    const saved = loadSavedState();
-    if (!saved) return "compose";
-    return saved.route === "reading"
-      ? (saved.decisionText ? "result" : "compose")
-      : saved.route;
-  });
-  const [decisionText, setText]   = useState(() => loadSavedState()?.decisionText ?? "");
-  const [framework, setFramework] = useState<Framework>(() => loadSavedState()?.framework ?? "decision_matrix");
-  const [theme, setTheme]         = useState<Theme>(() => loadSavedState()?.theme ?? "light");
-  const [matrix, setMatrix]       = useState<DecisionMatrix>(() => loadSavedState()?.matrix ?? BLANK_MATRIX);
-  const [balance, setBalance]     = useState<CostBenefit>(() => loadSavedState()?.balance ?? BLANK_BALANCE);
-  const [swot, setSwot]           = useState<Swot>(() => loadSavedState()?.swot ?? BLANK_SWOT);
-  const [recNote, setRecNote]     = useState<string | null>(() => loadSavedState()?.recNote ?? null);
+  const [route, setRoute]         = useState<Route>("compose");
+  const [decisionText, setText]   = useState("");
+  const [framework, setFramework] = useState<Framework>("decision_matrix");
+  const [theme, setTheme]         = useState<Theme>("light");
+  const [matrix, setMatrix]       = useState<DecisionMatrix>(BLANK_MATRIX);
+  const [balance, setBalance]     = useState<CostBenefit>(BLANK_BALANCE);
+  const [swot, setSwot]           = useState<Swot>(BLANK_SWOT);
+  const [recNote, setRecNote]     = useState<string | null>(null);
   const [recLoading, setRecLoading] = useState(false);
   const [analyzeReady, setAnalyzeReady] = useState(false);
   const recReqRef = useRef(0);
+  const hydratedRef = useRef(false);
 
-  // ── Persist whenever state changes ──
+  // ── Restore from localStorage after mount (startTransition = deferred, no cascading renders) ──
   useEffect(() => {
+    const saved = loadSavedState();
+    if (saved) {
+      const restoredRoute: Route =
+        saved.route === "reading"
+          ? (saved.decisionText ? "result" : "compose")
+          : saved.route;
+      startTransition(() => {
+        setRoute(restoredRoute);
+        setText(saved.decisionText ?? "");
+        setFramework(saved.framework ?? "decision_matrix");
+        setTheme(saved.theme ?? "light");
+        if (saved.matrix)  setMatrix(saved.matrix);
+        if (saved.balance) setBalance(saved.balance);
+        if (saved.swot)    setSwot(saved.swot);
+        if (saved.recNote) setRecNote(saved.recNote);
+      });
+    }
+    hydratedRef.current = true;
+   
+  }, []);
+
+  // ── Persist whenever state changes (after hydration) ──
+  useEffect(() => {
+    if (!hydratedRef.current) return;
     persistState({ route, decisionText, framework, theme, matrix, balance, swot, recNote });
   }, [route, decisionText, framework, theme, matrix, balance, swot, recNote]);
 
