@@ -1,11 +1,13 @@
 "use client";
 
 import { type FrameworkResult, VIEWS } from "@/frameworks";
+import type { ComponentType } from "react";
 
 export function FrameworkRenderer({ result }: { result: FrameworkResult }) {
+  const View = VIEWS[result.framework] as ComponentType<{ data: FrameworkResult }>;
   return (
     <div className="space-y-6">
-      {renderView(result)}
+      <View data={result} />
 
       <div className="rounded-lg border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 p-5">
         <div className="flex items-center justify-between mb-2">
@@ -24,25 +26,4 @@ export function FrameworkRenderer({ result }: { result: FrameworkResult }) {
       </div>
     </div>
   );
-}
-
-function renderView(result: FrameworkResult): React.ReactNode {
-  switch (result.framework) {
-    case "decision_matrix": {
-      const V = VIEWS.decision_matrix;
-      return <V data={result} />;
-    }
-    case "eisenhower": {
-      const V = VIEWS.eisenhower;
-      return <V data={result} />;
-    }
-    case "swot": {
-      const V = VIEWS.swot;
-      return <V data={result} />;
-    }
-    case "cost_benefit": {
-      const V = VIEWS.cost_benefit;
-      return <V data={result} />;
-    }
-  }
 }

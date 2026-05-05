@@ -2,7 +2,18 @@ import Link from "next/link";
 import { FRAMEWORKS, SAMPLES } from "@/frameworks";
 import { FrameworkRenderer } from "@/components/FrameworkRenderer";
 
-const ROMAN = ["I", "II", "III", "IV"];
+function toRoman(n: number): string {
+  const map: Array<[number, string]> = [
+    [1000, "M"], [900, "CM"], [500, "D"], [400, "CD"],
+    [100, "C"], [90, "XC"], [50, "L"], [40, "XL"],
+    [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"],
+  ];
+  let out = "";
+  for (const [v, s] of map) {
+    while (n >= v) { out += s; n -= v; }
+  }
+  return out;
+}
 
 export default function FrameworksPage() {
   return (
@@ -43,12 +54,12 @@ export default function FrameworksPage() {
 
         {/* Framework sections */}
         <div className="space-y-24">
-          {FRAMEWORKS.filter((f) => f.id !== "eisenhower").map((f, idx) => (
+          {FRAMEWORKS.map((f, idx) => (
             <section key={f.id} id={f.id} className="scroll-mt-8">
               {/* Section head */}
               <div className="grid mb-10" style={{ gridTemplateColumns: "auto 1fr", gap: 28, alignItems: "baseline" }}>
                 <span className="font-serif font-medium text-[64px] leading-[0.9] text-vermilion tracking-[-0.02em]">
-                  {ROMAN[idx]}.
+                  {toRoman(idx + 1)}.
                 </span>
                 <div>
                   <span className="folio folio-accent block mb-1">Framework</span>

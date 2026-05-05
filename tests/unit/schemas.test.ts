@@ -110,12 +110,15 @@ describe("FrameworkSchema (discriminated union)", () => {
 });
 
 describe("FRAMEWORKS", () => {
-  it("exposes the four frameworks with stable ids", () => {
-    expect(FRAMEWORKS.map((f) => f.id).sort()).toEqual([
-      "cost_benefit",
-      "decision_matrix",
-      "eisenhower",
-      "swot",
-    ]);
+  it("includes the original four with stable ids", () => {
+    const ids = FRAMEWORKS.map((f) => f.id);
+    for (const required of ["cost_benefit", "decision_matrix", "eisenhower", "swot"]) {
+      expect(ids).toContain(required);
+    }
+  });
+
+  it("has unique ids across the registry", () => {
+    const ids = FRAMEWORKS.map((f) => f.id);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 });
