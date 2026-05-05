@@ -3,128 +3,159 @@
 import { useState } from "react";
 import type { DecisionMatrix } from "./schema";
 
-export function View({ data }: { data: DecisionMatrix }) {
-  const [matrix, setMatrix] = useState(data);
+interface Props {
+  data: DecisionMatrix;
+  onUpdate?: (d: DecisionMatrix) => void;
+}
 
-  const setScore = (oi: number, ci: number, value: number) => {
-    setMatrix((m) => {
-      const options = m.options.map((o, i) =>
-        i === oi
-          ? { ...o, scores: o.scores.map((s, j) => (j === ci ? value : s)) }
-          : o
-      );
-      return { ...m, options };
-    });
+export function View({ data, onUpdate }: Props) {
+  const [state, setState] = useState(data);
+
+  const update = (next: DecisionMatrix) => {
+    setState(next);
+    onUpdate?.(next);
   };
 
-  const setWeight = (ci: number, value: number) => {
-    setMatrix((m) => ({
-      ...m,
-      criteria: m.criteria.map((c, i) =>
-        i === ci ? { ...c, weight: value } : c
-      ),
-    }));
-  };
-
-  const totals = matrix.options.map((o) =>
-    o.scores.reduce(
-      (sum, s, i) => sum + s * (matrix.criteria[i]?.weight ?? 0),
-      0
-    )
+  const totalW = state.criteria.reduce((s, c) => s + c.weight, 0) || 1;
+  const totals = state.options.map((o) =>
+    o.scores.reduce((sum, s, j) => sum + s * ((state.criteria[j]?.weight ?? 0) / totalW), 0)
   );
-  const max = Math.max(...totals, 1);
-  const winnerIdx = totals.indexOf(Math.max(...totals));
+  const winner = totals.reduce((bi, t, i) => (t > (totals[bi] ?? 0) ? i : bi), 0);
+
+  const setWeight = (idx: number, w: number) =>
+    update({ ...state, criteria: state.criteria.map((c, i) => i === idx ? { ...c, weight: Number(w) } : c) });
+
+  const setScore = (oi: number, ci: number, v: number) => {
+    const val = Math.max(0, Math.min(10, Number(v) || 0));
+    update({ ...state, options: state.options.map((o, i) =>
+      i === oi ? { ...o, scores: o.scores.map((s, j) => j === ci ? val : s) } : o
+    )});
+  };
+
+  const setName = (oi: number, name: string) =>
+    update({ ...state, options: state.options.map((o, i) => i === oi ? { ...o, name } : o) });
+
+  const addOption = () =>
+    update({ ...state, options: [...state.options, { name: "Another option", scores: state.criteria.map(() => 5) }] });
+
+  const removeOption = (oi: number) => {
+    if (state.options.length <= 2) return;
+    update({ ...state, options: state.options.filter((_, i) => i !== oi) });
+  };
+
+  const onScoreDrag = (oi: number, ci: number) => (e: React.MouseEvent) => {
+    const startY = e.clientY;
+    const startV = state.options[oi]?.scores[ci] ?? 5;
+    const move = (ev: MouseEvent) =>
+      setScore(oi, ci, Math.max(0, Math.min(10, Math.round(startV + (startY - ev.clientY) / 12))));
+    const up = () => { window.removeEventListener("mousemove", move); window.removeEventListener("mouseup", up); };
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
+  };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold">{matrix.title}</h2>
-        <p className="text-sm text-neutral-500 mt-1">
-          Decision Matrix — adjust weights and scores to see results update.
-        </p>
+    <div className="border-t-2 border-ink border-b border-b-ink">
+      {/* Criteria & weights */}
+      <div className="flex items-baseline gap-8 py-4 border-b border-rule flex-wrap">
+        <span className="folio">Criteria · weights</span>
+        {state.criteria.map((c, i) => (
+          <div key={i} className="flex items-center gap-2.5 font-serif text-sm">
+            <span className="italic text-ink-muted">{c.name}</span>
+            <input
+              type="range" min="1" max="10" step="1"
+              value={c.weight}
+              onChange={(e) => setWeight(i, Number(e.target.value))}
+              className="w-20 h-px appearance-none bg-ink-muted outline-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-vermilion [&::-moz-range-thumb]:w-2.5 [&::-moz-range-thumb]:h-2.5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-vermilion [&::-moz-range-thumb]:border-none"
+            />
+            <span className="font-code text-[13px] font-medium text-vermilion min-w-[28px] text-right">
+              {Math.round((c.weight / totalW) * 100)}
+            </span>
+          </div>
+        ))}
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-neutral-200 dark:border-neutral-800">
-        <table className="w-full text-sm">
-          <thead className="bg-neutral-50 dark:bg-neutral-900">
-            <tr>
-              <th className="text-left px-3 py-2">Option</th>
-              {matrix.criteria.map((c, i) => (
-                <th key={i} className="px-2 py-2 text-center min-w-[110px]">
-                  <div className="font-medium text-xs leading-tight">
-                    {c.name}
-                  </div>
-                  <div className="flex items-center gap-1.5 mt-1 justify-center">
+      {/* Table */}
+      <table className="w-full border-collapse" style={{ tableLayout: "fixed" }}>
+        <thead>
+          <tr>
+            <th className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted font-medium px-3.5 py-3.5 text-left border-b border-rule align-bottom">
+              Option
+            </th>
+            {state.criteria.map((c, i) => (
+              <th key={i} className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted font-medium px-3.5 py-3.5 text-center border-b border-rule align-bottom">
+                {c.name}
+                <span className="block mt-1 text-vermilion text-[11px] tracking-[0.06em]">
+                  ·{Math.round((c.weight / totalW) * 100)}
+                </span>
+              </th>
+            ))}
+            <th className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted font-medium px-3.5 py-3.5 text-right border-b border-rule align-bottom w-24">
+              Score
+            </th>
+            <th className="w-8 border-b border-rule" />
+          </tr>
+        </thead>
+        <tbody>
+          {state.options.map((o, oi) => {
+            const isWinner = oi === winner;
+            return (
+              <tr key={oi}>
+                <td className="font-serif text-[17px] px-3.5 py-[18px] border-b border-rule last:border-b-0 align-middle">
+                  <div className="flex items-center gap-2">
+                    {isWinner && <span className="text-vermilion text-sm flex-shrink-0">▸</span>}
                     <input
-                      type="range"
-                      min={1}
-                      max={10}
-                      value={c.weight}
-                      onChange={(e) => setWeight(i, Number(e.target.value))}
-                      className="w-14"
+                      type="text"
+                      value={o.name}
+                      onChange={(e) => setName(oi, e.target.value)}
+                      className="flex-1 min-w-0 italic border-none bg-transparent outline-none font-serif text-[17px] text-ink border-b border-transparent focus:border-vermilion transition-colors duration-200 py-0"
                     />
-                    <span className="text-[10px] text-neutral-500 tabular-nums">
-                      w{c.weight}
-                    </span>
                   </div>
-                </th>
-              ))}
-              <th className="px-3 py-2 text-right">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {matrix.options.map((o, oi) => (
-              <tr
-                key={oi}
-                className={
-                  oi === winnerIdx
-                    ? "bg-emerald-50 dark:bg-emerald-950/30"
-                    : "border-t border-neutral-100 dark:border-neutral-900"
-                }
-              >
-                <td className="px-3 py-2 font-medium">
-                  {o.name}
-                  {oi === winnerIdx && (
-                    <span className="ml-2 text-xs text-emerald-700 dark:text-emerald-400">
-                      ★ winner
-                    </span>
-                  )}
                 </td>
                 {o.scores.map((s, ci) => (
-                  <td key={ci} className="px-2 py-2">
-                    <div className="flex items-center gap-1.5">
+                  <td key={ci} className="px-3.5 py-[18px] border-b border-rule text-center align-middle">
+                    <div className="inline-flex flex-col items-center gap-1">
                       <input
-                        type="range"
-                        min={0}
-                        max={10}
+                        type="number" min="0" max="10"
                         value={s}
-                        onChange={(e) =>
-                          setScore(oi, ci, Number(e.target.value))
-                        }
-                        className="flex-1 min-w-0"
+                        onChange={(e) => setScore(oi, ci, Number(e.target.value))}
+                        onMouseDown={onScoreDrag(oi, ci)}
+                        className={`font-code text-base font-medium text-center w-10 border-none bg-transparent outline-none py-0.5 border-b border-transparent hover:border-vermilion focus:border-vermilion transition-colors duration-200 cursor-ns-resize [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${isWinner ? "text-vermilion" : "text-ink"}`}
+                        title="Drag up/down to adjust"
                       />
-                      <span className="text-[10px] w-4 text-right tabular-nums">
-                        {s}
-                      </span>
+                      <div className="w-9 h-0.5 bg-rule relative">
+                        <div
+                          className={`score-bar-fill ${isWinner ? "bg-vermilion" : "bg-ink"}`}
+                          style={{ transform: `scaleX(${s / 10})` }}
+                        />
+                      </div>
                     </div>
                   </td>
                 ))}
-                <td className="px-2 py-2 text-right font-mono whitespace-nowrap">
-                  <div className="flex items-center gap-2 justify-end">
-                    <div className="h-2 w-16 bg-neutral-200 dark:bg-neutral-800 rounded shrink-0">
-                      <div
-                        className="h-2 rounded bg-emerald-500"
-                        style={{ width: `${((totals[oi] ?? 0) / max) * 100}%` }}
-                      />
-                    </div>
-                    <span className="text-xs">{totals[oi]}</span>
-                  </div>
+                <td className={`px-3.5 py-[18px] border-b border-rule text-right font-code text-lg font-medium tracking-[-0.01em] w-24 align-middle ${isWinner ? "text-vermilion" : "text-ink"}`}>
+                  {(totals[oi] ?? 0).toFixed(2)}
+                </td>
+                <td className="py-[18px] pr-1 text-right border-b border-rule align-middle">
+                  {state.options.length > 2 && (
+                    <button
+                      onClick={() => removeOption(oi)}
+                      className="text-ink-muted hover:text-vermilion text-base px-1 cursor-pointer"
+                      title="Remove"
+                    >
+                      ×
+                    </button>
+                  )}
                 </td>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            );
+          })}
+        </tbody>
+      </table>
+      <button
+        onClick={addOption}
+        className="font-serif italic text-sm text-ink-muted hover:text-vermilion cursor-pointer px-3.5 py-3.5 border-t border-rule inline-block transition-colors duration-200 bg-transparent border-x-0 border-b-0"
+      >
+        + another option
+      </button>
     </div>
   );
 }

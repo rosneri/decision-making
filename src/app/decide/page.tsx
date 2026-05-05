@@ -16,27 +16,35 @@ type SR = {
   lang: string;
 };
 
-export default function DecidePage() {
-  const [text, setText] = useState("");
-  const [framework, setFramework] = useState<FrameworkId | "auto">("auto");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<FrameworkResult | null>(null);
+function MicIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 256 256" fill="none" stroke="currentColor" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="88" y="16" width="80" height="136" rx="40" />
+      <path d="M48 128a80 80 0 0 0 160 0" />
+      <line x1="128" y1="208" x2="128" y2="232" />
+      <line x1="96" y1="232" x2="160" y2="232" />
+    </svg>
+  );
+}
 
+export default function DecidePage() {
+  const [text, setText]           = useState("");
+  const [framework, setFramework] = useState<FrameworkId | "auto">("auto");
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState<string | null>(null);
+  const [result, setResult]       = useState<FrameworkResult | null>(null);
   const [recording, setRecording] = useState(false);
-  const [supported, setSupported] = useState(false);
+  const [supported] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const w = window as unknown as { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown };
+    return !!(w.SpeechRecognition ?? w.webkitSpeechRecognition);
+  });
   const recRef = useRef<SR | null>(null);
 
   useEffect(() => {
-    const w = window as unknown as {
-      SpeechRecognition?: new () => SR;
-      webkitSpeechRecognition?: new () => SR;
-    };
+    const w = window as unknown as { SpeechRecognition?: new () => SR; webkitSpeechRecognition?: new () => SR };
     const Ctor = w.SpeechRecognition ?? w.webkitSpeechRecognition;
     if (!Ctor) return;
-    // One-time feature detection on mount; SSR cannot read window.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSupported(true);
     const r = new Ctor();
     r.continuous = true;
     r.interimResults = false;
@@ -57,17 +65,8 @@ export default function DecidePage() {
   const toggleRecord = () => {
     const r = recRef.current;
     if (!r) return;
-    if (recording) {
-      r.stop();
-      setRecording(false);
-    } else {
-      try {
-        r.start();
-        setRecording(true);
-      } catch {
-        /* already started */
-      }
-    }
+    if (recording) { r.stop(); setRecording(false); }
+    else { try { r.start(); setRecording(true); } catch { /* already started */ } }
   };
 
   const submit = async () => {
@@ -79,14 +78,11 @@ export default function DecidePage() {
       const res = await fetch("/api/decide", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          text,
-          framework: framework === "auto" ? undefined : framework,
-        }),
+        body: JSON.stringify({ text, framework: framework === "auto" ? undefined : framework }),
       });
-      const data = await res.json();
+      const data = await res.json() as { result?: FrameworkResult; error?: string };
       if (!res.ok) throw new Error(data.error ?? "Request failed");
-      setResult(data.result);
+      setResult(data.result ?? null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to analyze");
     } finally {
@@ -94,97 +90,130 @@ export default function DecidePage() {
     }
   };
 
+  const AI_FRAMEWORKS = FRAMEWORKS.filter((f) => f.id !== "cost_benefit"); // cost_benefit not wired to AI yet
+
   return (
-    <main className="min-h-screen px-6 py-12 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
-        <Link href="/" className="text-sm text-neutral-500 hover:underline">
-          ← back
+    <>
+      {/* Header */}
+      <header className="sticky top-0 z-20 border-b border-rule px-10 py-[18px] flex items-center gap-7"
+        style={{ background: "color-mix(in oklab, var(--paper) 85%, transparent)", backdropFilter: "blur(6px)" }}>
+        <Link href="/" className="font-serif font-medium text-[18px] tracking-[0.02em] text-ink hover:text-ink-muted transition-colors duration-200">
+          Decision Making
         </Link>
-        <Link
-          href="/frameworks"
-          className="text-sm text-neutral-500 hover:underline"
-        >
-          browse frameworks
-        </Link>
-      </div>
+        <div className="flex-1 text-center font-serif italic text-ink-muted text-sm overflow-hidden text-ellipsis whitespace-nowrap px-6">
+          {result ? `on "${text.length > 60 ? text.slice(0, 60) + "…" : text}"` : "a new entry"}
+        </div>
+        <nav className="flex gap-6 items-center">
+          <Link href="/" className="font-serif italic text-[15px] text-ink border-b border-vermilion pb-0.5">
+            Compose
+          </Link>
+          <Link href="/frameworks" className="font-serif italic text-[15px] text-ink-muted hover:text-ink border-b border-transparent pb-0.5 transition-colors duration-200">
+            Library
+          </Link>
+        </nav>
+      </header>
 
-      <h1 className="text-3xl font-semibold mb-2">Make a decision</h1>
-      <p className="text-neutral-500 mb-8">
-        Describe what you&apos;re trying to decide. The AI picks the right
-        framework and walks you through it.
-      </p>
+      <main className="max-w-[760px] mx-auto px-10 py-24">
+        {/* Page head */}
+        <span className="folio folio-accent">§ AI Analysis</span>
+        <h1 className="font-serif text-[52px] leading-[1.06] font-medium tracking-[-0.012em] mt-3.5 text-ink text-balance">
+          Let the machine read it.
+        </h1>
+        <p className="font-serif italic text-[19px] leading-[30px] text-ink-muted max-w-[56ch] mt-4">
+          Describe the decision. The AI picks the right framework and fills it in.
+          You can also choose one yourself.
+        </p>
 
-      <div className="space-y-4">
-        <div className="relative">
+        {/* Input field */}
+        <div className="border-t border-ink border-b border-b-rule pt-7 pb-7 mt-12 relative">
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="e.g. I'm choosing between three job offers — one at a startup with high equity, one at a mid-size company with great work-life balance, and one at a FAANG with the highest salary..."
-            className="w-full min-h-[180px] rounded-lg border border-neutral-300 dark:border-neutral-700 bg-transparent p-4 pr-14 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            placeholder="What are you trying to decide?"
+            rows={5}
+            autoFocus
+            className="w-full border-none outline-none bg-transparent font-serif text-[22px] leading-[34px] text-ink resize-none placeholder:text-ink-muted placeholder:italic pr-14"
+            onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submit(); }}
           />
           {supported && (
             <button
               onClick={toggleRecord}
-              type="button"
-              title={recording ? "Stop recording" : "Record voice"}
-              className={`absolute top-3 right-3 h-10 w-10 rounded-full flex items-center justify-center border transition ${
+              className={`absolute top-7 right-0 w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-200 ${
                 recording
-                  ? "bg-rose-500 text-white border-rose-500 animate-pulse"
-                  : "bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100"
+                  ? "bg-vermilion border-vermilion text-paper animate-mic-pulse"
+                  : "border-rule text-ink-muted hover:border-ink hover:text-ink"
               }`}
+              aria-label={recording ? "Stop recording" : "Dictate"}
             >
-              {recording ? "■" : "🎙"}
+              <MicIcon />
             </button>
           )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm text-neutral-500 mr-2">Framework:</span>
-          <button
-            onClick={() => setFramework("auto")}
-            className={`px-3 py-1.5 rounded-full text-xs border ${
-              framework === "auto"
-                ? "bg-neutral-900 text-white dark:bg-white dark:text-black border-transparent"
-                : "border-neutral-300 dark:border-neutral-700"
-            }`}
-          >
-            Auto (let AI pick)
-          </button>
-          {FRAMEWORKS.map((f) => (
+        {/* Framework selector */}
+        <div className="mt-6">
+          <span className="folio">Framework</span>
+          <div className="flex flex-wrap gap-2 mt-3">
             <button
-              key={f.id}
-              onClick={() => setFramework(f.id)}
-              className={`px-3 py-1.5 rounded-full text-xs border ${
-                framework === f.id
-                  ? "bg-neutral-900 text-white dark:bg-white dark:text-black border-transparent"
-                  : "border-neutral-300 dark:border-neutral-700"
+              onClick={() => setFramework("auto")}
+              className={`font-serif italic text-sm px-4 py-1.5 border rounded-sm transition-colors duration-150 ${
+                framework === "auto"
+                  ? "bg-ink text-paper border-ink"
+                  : "border-rule text-ink-muted hover:border-ink hover:text-ink"
               }`}
             >
-              {f.name}
+              Auto — let AI decide
             </button>
-          ))}
+            {AI_FRAMEWORKS.map((f) => (
+              <button
+                key={f.id}
+                onClick={() => setFramework(f.id)}
+                className={`font-serif italic text-sm px-4 py-1.5 border rounded-sm transition-colors duration-150 ${
+                  framework === f.id
+                    ? "bg-ink text-paper border-ink"
+                    : "border-rule text-ink-muted hover:border-ink hover:text-ink"
+                }`}
+              >
+                {f.name}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <button
-          onClick={submit}
-          disabled={loading || !text.trim()}
-          className="w-full py-3 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? "Analyzing…" : "Analyze decision"}
-        </button>
+        {/* Submit */}
+        <div className="mt-8 flex items-center gap-4">
+          <button
+            onClick={submit}
+            disabled={loading || !text.trim()}
+            className="font-serif text-base font-medium px-[22px] py-3 rounded-sm bg-vermilion text-paper hover:bg-vermilion-deep transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.99]"
+          >
+            {loading ? "Reading…" : "Analyse decision →"}
+          </button>
+          {text && (
+            <button
+              onClick={() => { setText(""); setResult(null); setError(null); }}
+              className="font-serif italic text-sm text-ink-muted hover:text-ink transition-colors duration-200"
+            >
+              Clear
+            </button>
+          )}
+        </div>
 
+        {/* Error */}
         {error && (
-          <div className="rounded-lg border border-rose-300 bg-rose-50 dark:bg-rose-950/30 dark:border-rose-900 p-4 text-sm text-rose-700 dark:text-rose-300">
+          <div className="mt-8 border-l-2 border-vermilion pl-4 font-serif italic text-[15px] text-ink-muted">
             {error}
           </div>
         )}
-      </div>
 
-      {result && (
-        <div className="mt-12">
-          <FrameworkRenderer result={result} />
-        </div>
-      )}
-    </main>
+        {/* Result */}
+        {result && (
+          <div className="mt-16 border-t border-rule pt-10 animate-page-in">
+            <span className="folio folio-accent block mb-8">§ Result</span>
+            <FrameworkRenderer result={result} />
+          </div>
+        )}
+      </main>
+    </>
   );
 }
