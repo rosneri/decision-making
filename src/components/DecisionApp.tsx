@@ -202,7 +202,7 @@ export function DecisionApp() {
     <div className="min-h-screen relative paper-grain">
       {/* ── Header ── */}
       <header
-        className="sticky top-0 z-20 border-b border-rule px-10 py-[18px] flex items-center gap-7"
+        className="sticky top-0 z-20 border-b border-rule px-4 sm:px-10 py-[18px] flex items-center justify-between gap-4 sm:gap-7"
         style={{ background: "color-mix(in oklab, var(--paper) 85%, transparent)", backdropFilter: "blur(6px)" }}
       >
         <button
@@ -212,7 +212,7 @@ export function DecisionApp() {
           Decision Making
         </button>
 
-        <div className="flex-1 text-center font-serif italic text-ink-muted text-sm overflow-hidden text-ellipsis whitespace-nowrap px-6">
+        <div className="hidden sm:block flex-1 text-center font-serif italic text-ink-muted text-sm overflow-hidden text-ellipsis whitespace-nowrap px-6">
           {runningHead}
         </div>
 
@@ -248,7 +248,7 @@ export function DecisionApp() {
       {route === "compose" && <Composer onSubmit={submit} initialText={decisionText} />}
       {route === "reading" && <ReadingInterstitial text={decisionText} ready={analyzeReady} onDone={() => setRoute("result")} />}
       {route === "result"  && (
-        <main className="max-w-[1080px] mx-auto px-10 py-14 pb-[120px] animate-page-in">
+        <main className="max-w-[1080px] mx-auto px-4 sm:px-10 py-8 sm:py-14 pb-16 sm:pb-[120px] animate-page-in">
           {/* Topbar */}
           <div className="flex items-center gap-4 pb-4 mb-8 border-b border-rule">
             <button
@@ -289,7 +289,7 @@ export function DecisionApp() {
           {/* Actions */}
           <div className="flex gap-3 mt-10 items-center">
             <button className="font-serif text-base font-medium px-[22px] py-3 rounded-sm bg-vermilion text-paper hover:bg-vermilion-deep transition-colors duration-200">
-              Keep this
+              <span className="sm:hidden">Keep</span><span className="hidden sm:inline">Keep this</span>
             </button>
             <button
               onClick={() => setRoute("compose")}
@@ -302,7 +302,7 @@ export function DecisionApp() {
                 onClick={() => window.print()}
                 className="font-serif text-base font-medium px-[22px] py-3 rounded-sm border border-rule text-ink hover:border-ink transition-colors duration-200"
               >
-                Print · share
+              <span className="sm:hidden">Share</span><span className="hidden sm:inline">Print · share</span>
               </button>
             </div>
           </div>

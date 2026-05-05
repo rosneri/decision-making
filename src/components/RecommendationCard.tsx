@@ -62,7 +62,7 @@ export function RecommendationCard({ initialNote, initialLoading, ...ctx }: Prop
   return (
     <aside
       key={note && !loading ? "loaded" : "empty"}
-      className={`border border-rule bg-paper rounded-sm mt-16 px-[52px] py-11 ${note && !loading ? "animate-arrive" : ""}`}
+      className={`border border-rule bg-paper rounded-sm mt-16 px-4 sm:px-[52px] py-8 sm:py-11 ${note && !loading ? "animate-arrive" : ""}`}
       style={{ boxShadow: "var(--shadow-letter)" }}
     >
       <div className="font-code text-[11px] tracking-[0.22em] uppercase text-vermilion mb-3.5">
@@ -70,8 +70,10 @@ export function RecommendationCard({ initialNote, initialLoading, ...ctx }: Prop
       </div>
 
       {loading ? (
-        <div className="font-serif italic text-ink-muted text-lg leading-[30px]">
-          <em>Reading what you wrote…</em>
+        <div className="flex gap-[6px] items-center py-2">
+          {[0, 1, 2].map((i) => (
+            <span key={i} className="dm-dot" style={{ animationDelay: `${i * 0.2}s` }} />
+          ))}
         </div>
       ) : error ? (
         <div className="space-y-3">
@@ -115,7 +117,7 @@ export function RecommendationCard({ initialNote, initialLoading, ...ctx }: Prop
       <div className="mt-7 pt-[18px] border-t border-rule flex justify-between items-baseline">
         <div className="flex items-center gap-4">
           <span className="font-serif italic text-[13px] text-ink-muted">
-            {loading ? "Reading…" : "From the book."}
+            From the book.
           </span>
         </div>
         <span className="font-serif not-italic text-vermilion tracking-[0.06em]">§</span>

@@ -104,12 +104,12 @@ export function Composer({ onSubmit, initialText = "" }: Props) {
   };
 
   return (
-    <main className="max-w-[760px] mx-auto px-10 py-24 animate-page-in">
+    <main className="max-w-[760px] mx-auto px-4 sm:px-10 py-12 sm:py-24 animate-page-in">
       <span className="folio folio-accent">§ Compose</span>
       <h1 className="font-serif text-[52px] leading-[1.06] font-medium tracking-[-0.012em] mt-3.5 text-ink text-balance">
         Begin with what you&rsquo;re weighing.
       </h1>
-      <p className="font-serif italic text-[19px] leading-[30px] text-ink-muted max-w-[56ch] mt-[18px]">
+      <p className="font-serif italic text-[19px] leading-[30px] text-ink-muted max-w-[56ch] mt-[18px] text-justify">
         A few sentences are enough. The book will choose a framework — a way of
         looking — and walk you through it.
       </p>
@@ -172,7 +172,7 @@ export function Composer({ onSubmit, initialText = "" }: Props) {
           </button>
         )}
 
-        <span className="font-serif italic text-[15px]" style={{ color: recording ? "var(--vermilion)" : "var(--ink-muted)" }}>
+        <span className="hidden sm:inline font-serif italic text-[15px]" style={{ color: recording ? "var(--vermilion)" : "var(--ink-muted)" }}>
           {recording ? "Tap to finish." : srSupported ? "Or tap to dictate." : ""}
         </span>
 

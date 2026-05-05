@@ -62,7 +62,7 @@ export function ReadingInterstitial({ text, ready = false, onDone }: Props) {
   }, []);
 
   return (
-    <main ref={rootRef} className="max-w-[760px] mx-auto px-10 py-[200px] text-center animate-page-in">
+    <main ref={rootRef} className="max-w-[760px] mx-auto px-4 sm:px-10 py-24 sm:py-[200px] text-center animate-page-in">
       <span className="folio folio-accent flex justify-center">
         <span className="flex gap-[6px] items-center mb-4">
           {[0, 1, 2].map((i) => (
