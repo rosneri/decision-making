@@ -11,6 +11,7 @@ describe("DecisionMatrixSchema", () => {
   it("accepts a valid matrix", () => {
     const ok = DecisionMatrixSchema.safeParse({
       framework: "decision_matrix",
+      category: "Analysis & evaluation",
       title: "Pick a job",
       criteria: [
         { name: "Salary", weight: 8 },
@@ -91,6 +92,7 @@ describe("FrameworkSchema (discriminated union)", () => {
   it("dispatches by framework field", () => {
     const parsed = FrameworkSchema.safeParse({
       framework: "swot",
+      category: "Strategy & business",
       title: "x",
       strengths: ["s"],
       weaknesses: ["w"],
