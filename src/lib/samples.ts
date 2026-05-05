@@ -3,6 +3,7 @@ import type { FrameworkId, FrameworkResult } from "./schemas";
 export const SAMPLES = {
   decision_matrix: {
     framework: "decision_matrix",
+    category: "Analysis & evaluation",
     title: "Choosing a new laptop",
     criteria: [
       { name: "Price", weight: 8 },
@@ -20,6 +21,7 @@ export const SAMPLES = {
   },
   eisenhower: {
     framework: "eisenhower",
+    category: "Speed & prioritization",
     title: "This week's tasks",
     tasks: [
       { text: "Fix production bug", urgent: true, important: true },
@@ -34,6 +36,7 @@ export const SAMPLES = {
   },
   swot: {
     framework: "swot",
+    category: "Strategy & business",
     title: "Launching a side project",
     strengths: ["Strong domain expertise", "Existing audience", "Low overhead"],
     weaknesses: ["Limited time outside day job", "No co-founder"],

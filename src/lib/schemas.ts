@@ -2,6 +2,11 @@ import { z } from "zod";
 
 export const DecisionMatrixSchema = z.object({
   framework: z.literal("decision_matrix"),
+  category: z
+    .string()
+    .describe(
+      "The category this framework belongs to, e.g. 'Analysis & evaluation'"
+    ),
   title: z.string().describe("Title summarizing the decision"),
   criteria: z
     .array(
@@ -30,6 +35,11 @@ export const DecisionMatrixSchema = z.object({
 
 export const EisenhowerSchema = z.object({
   framework: z.literal("eisenhower"),
+  category: z
+    .string()
+    .describe(
+      "The category this framework belongs to, e.g. 'Speed & prioritization'"
+    ),
   title: z.string(),
   tasks: z
     .array(
@@ -48,6 +58,11 @@ export const EisenhowerSchema = z.object({
 
 export const SwotSchema = z.object({
   framework: z.literal("swot"),
+  category: z
+    .string()
+    .describe(
+      "The category this framework belongs to, e.g. 'Strategy & business'"
+    ),
   title: z.string(),
   strengths: z.array(z.string()).min(1).max(6),
   weaknesses: z.array(z.string()).min(1).max(6),

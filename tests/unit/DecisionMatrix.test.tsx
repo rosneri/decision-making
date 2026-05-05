@@ -5,6 +5,7 @@ import type { DecisionMatrix } from "@/lib/schemas";
 
 const sample: DecisionMatrix = {
   framework: "decision_matrix",
+  category: "Analysis & evaluation",
   title: "Pick a city",
   criteria: [
     { name: "Cost", weight: 5 },
