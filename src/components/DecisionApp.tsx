@@ -288,20 +288,20 @@ export function DecisionApp() {
                 </button>
               </div>
             </div>
-
-            {chatOpen && (
-              <ChatFiller
-                frameworkId={result.framework}
-                frameworkName={meta.name}
-                decisionText={decisionText}
-                data={result}
-                onUpdate={(next) => setResult(next)}
-                onClose={() => setChatOpen(false)}
-              />
-            )}
           </main>
         );
       })()}
+
+      {route === "result" && result && meta && chatOpen && (
+        <ChatFiller
+          frameworkId={result.framework}
+          frameworkName={meta.name}
+          decisionText={decisionText}
+          data={result}
+          onUpdate={(next) => setResult(next)}
+          onClose={() => setChatOpen(false)}
+        />
+      )}
 
       {route === "result" && !result && (
         <main className="max-w-[1080px] mx-auto px-4 sm:px-10 py-14 text-center space-y-4">
