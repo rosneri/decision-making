@@ -1,15 +1,18 @@
 "use client";
 
-import { startTransition, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Composer } from "./Composer";
 import { ReadingInterstitial } from "./ReadingInterstitial";
 import { RecommendationCard } from "./RecommendationCard";
 import { FRAMEWORKS, VIEWS, type FrameworkResult } from "@/frameworks";
+import { HELP } from "@/frameworks/help";
+import { FrameworkHelpPanel } from "./FrameworkHelpPanel";
+import { SiteHeader } from "./SiteHeader";
 import type { AnalysisResult } from "./analyze-utils";
 import { AnalyzeError, fetchAnalysis } from "./analyze-utils";
 
 type Route = "compose" | "reading" | "result";
-type Theme = "light" | "dark";
 
 // ── Persistence ──────────────────────────────────────────────────────────────
 
@@ -18,7 +21,6 @@ const STORAGE_KEY = "dm-app-state-v2";
 interface SavedState {
   route: Route;
   decisionText: string;
-  theme: Theme;
   result: FrameworkResult | null;
 }
 
@@ -34,70 +36,53 @@ function persistState(s: SavedState) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch { /* quota exceeded */ }
 }
 
-// ── Icons ────────────────────────────────────────────────────────────────────
-
-function SunIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-      <circle cx="12" cy="12" r="4" />
-      <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
-    </svg>
-  );
-}
-
-function MoonIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-    </svg>
-  );
-}
-
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export function DecisionApp() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const viewParam = searchParams?.get("view") ?? null;
+
   const [route, setRoute]         = useState<Route>("compose");
   const [decisionText, setText]   = useState("");
-  const [theme, setTheme]         = useState<Theme>("light");
   const [result, setResult]       = useState<FrameworkResult | null>(null);
   const [serverResultKey, setServerResultKey] = useState<string | null>(null);
   const [recLoading, setRecLoading] = useState(false);
   const [analyzeReady, setAnalyzeReady] = useState(false);
   const [analyzeError, setAnalyzeError] = useState<{ message: string; code: string } | null>(null);
+  const [hydrated, setHydrated] = useState(false);
   const recReqRef = useRef(0);
-  const hydratedRef = useRef(false);
 
-  // ── Restore from localStorage after mount ──
+  // ── Restore from localStorage on mount, before persisting any state ──
   useEffect(() => {
     const saved = loadSavedState();
+    const wantsResult = viewParam === "result";
     if (saved) {
-      const restoredRoute: Route =
+      const baseRoute: Route =
         saved.route === "reading"
           ? (saved.decisionText && saved.result ? "result" : "compose")
           : saved.route;
-      startTransition(() => {
-        setRoute(restoredRoute);
-        setText(saved.decisionText ?? "");
-        setTheme(saved.theme ?? "light");
-        if (saved.result) {
-          setResult(saved.result);
-          setServerResultKey(JSON.stringify(saved.result));
-        }
-      });
+      const restoredRoute: Route = wantsResult && saved.result ? "result" : baseRoute;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setRoute(restoredRoute);
+      setText(saved.decisionText ?? "");
+      if (saved.result) {
+        setResult(saved.result);
+        setServerResultKey(JSON.stringify(saved.result));
+      }
     }
-    hydratedRef.current = true;
+    if (wantsResult) {
+      router.replace("/", { scroll: false });
+    }
+    setHydrated(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Persist whenever state changes (after hydration) ──
   useEffect(() => {
-    if (!hydratedRef.current) return;
-    persistState({ route, decisionText, theme, result });
-  }, [route, decisionText, theme, result]);
-
-  // ── Apply theme to <html> ──
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-  }, [theme]);
+    if (!hydrated) return;
+    persistState({ route, decisionText, result });
+  }, [hydrated, route, decisionText, result]);
 
   // ── Submit ──
   const submit = (text: string) => {
@@ -177,49 +162,15 @@ export function DecisionApp() {
 
   return (
     <div className="min-h-screen relative paper-grain">
-      {/* ── Header ── */}
-      <header
-        className="sticky top-0 z-20 border-b border-rule px-4 sm:px-10 py-[18px] flex items-center justify-between gap-4 sm:gap-7"
-        style={{ background: "color-mix(in oklab, var(--paper) 85%, transparent)", backdropFilter: "blur(6px)" }}
-      >
-        <button
-          onClick={() => setRoute("compose")}
-          className="font-serif font-medium text-[18px] tracking-[0.02em] text-ink bg-transparent border-none cursor-pointer p-0"
-        >
-          Decision Making
-        </button>
-
-        <div className="hidden sm:block flex-1 text-center font-serif italic text-ink-muted text-sm overflow-hidden text-ellipsis whitespace-nowrap px-6">
-          {runningHead}
-        </div>
-
-        <nav className="flex gap-6 items-center">
-          <button
-            onClick={() => setRoute("compose")}
-            className={`font-serif italic text-[15px] border-b pb-0.5 bg-transparent border-t-0 border-l-0 border-r-0 cursor-pointer transition-colors duration-200 ${
-              route !== "result" ? "text-ink border-vermilion" : "text-ink-muted border-transparent hover:text-ink"
-            }`}
-          >
-            Compose
-          </button>
-          <button
-            disabled={route !== "result"}
-            className={`font-serif italic text-[15px] border-b pb-0.5 bg-transparent border-t-0 border-l-0 border-r-0 transition-colors duration-200 ${
-              route === "result" ? "text-vermilion border-vermilion cursor-pointer" : "text-ink-muted border-transparent opacity-50 cursor-default"
-            }`}
-          >
-            Result
-          </button>
-
-          <button
-            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-            className="w-8 h-8 rounded-full border border-rule text-ink-muted hover:border-ink hover:text-ink flex items-center justify-center transition-colors duration-200 bg-transparent cursor-pointer"
-            aria-label={theme === "light" ? "Switch to evening theme" : "Switch to daylight theme"}
-          >
-            {theme === "light" ? <MoonIcon /> : <SunIcon />}
-          </button>
-        </nav>
-      </header>
+      <SiteHeader
+        runningHead={runningHead}
+        onBrandClick={() => setRoute("compose")}
+        items={[
+          ...(result ? [{ label: "Result", onClick: () => setRoute("result"), active: route === "result" }] : []),
+          { label: "Compose", onClick: () => setRoute("compose"), active: route !== "result" },
+          { label: "Library", href: "/frameworks" },
+        ]}
+      />
 
       {/* ── Screens ── */}
       {route === "compose" && <Composer onSubmit={submit} initialText={decisionText} />}
@@ -245,6 +196,10 @@ export function DecisionApp() {
               <p className="font-serif italic text-ink-muted text-[17px] mt-2 max-w-[60ch]">
                 {meta.blurb}&nbsp;·&nbsp;on <em>&ldquo;{decisionText}&rdquo;</em>
               </p>
+              {(() => {
+                const help = HELP[result.framework];
+                return help ? <FrameworkHelpPanel help={help} /> : null;
+              })()}
             </div>
 
             <ActiveView data={result} onUpdate={setResult} />
