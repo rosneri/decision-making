@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { Card, MicroLabel, InlineText, AddButton, RemoveButton } from "@/components/ui";
 import { meta, schema, sample, type Ach, cycle } from "./data";
 export { meta, schema, sample };
 export type { Ach };
@@ -21,22 +22,27 @@ export function View({ data, onUpdate }: { data: Ach; onUpdate?: (d: Ach) => voi
     upd({ ...s, evidence: [...s.evidence, { text: "new evidence", consistency: s.hypotheses.map(() => "?") }] });
   const rmEv = (i: number) => upd({ ...s, evidence: s.evidence.filter((_, j) => j !== i) });
 
-  // inconsistencies = count of "-" per hypothesis
   const inconsist = s.hypotheses.map((_, j) =>
     s.evidence.reduce((a, e) => a + (e.consistency[j] === "-" ? 1 : 0), 0)
   );
   const minIdx = inconsist.indexOf(Math.min(...inconsist));
 
   return (
-    <div className="border border-ink bg-paper overflow-x-auto">
+    <Card className="overflow-x-auto">
       <table className="w-full" data-testid="ach-table">
         <thead>
           <tr>
-            <th className="text-left px-3 py-2 font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted border-b border-rule">Evidence \ Hypothesis</th>
+            <th className="text-left px-3 py-2 border-b border-rule"><MicroLabel>Evidence \ Hypothesis</MicroLabel></th>
             {s.hypotheses.map((h, j) => (
               <th key={j} className="px-2 py-2 border-b border-rule">
-                <input value={h} onChange={(e) => setHyp(j, e.target.value)}
-                  className={`font-serif italic text-[13px] text-center bg-transparent border-none outline-none w-28 ${j === minIdx ? "text-vermilion font-medium" : "text-ink"}`} />
+                <InlineText
+                  value={h}
+                  onChange={(v) => setHyp(j, v)}
+                  italic
+                  size="sm"
+                  fullWidth={false}
+                  className={`text-center w-28 ${j === minIdx ? "text-vermilion font-medium" : ""}`}
+                />
               </th>
             ))}
             <th className="border-b border-rule" />
@@ -46,8 +52,7 @@ export function View({ data, onUpdate }: { data: Ach; onUpdate?: (d: Ach) => voi
           {s.evidence.map((e, i) => (
             <tr key={i} className="border-b border-rule">
               <td className="px-3 py-1">
-                <input value={e.text} onChange={(e2) => setEv(i, { text: e2.target.value })}
-                  className="font-serif italic text-[14px] bg-transparent border-none outline-none w-full" />
+                <InlineText value={e.text} onChange={(v) => setEv(i, { text: v })} italic size="sm" />
               </td>
               {s.hypotheses.map((_, j) => {
                 const v = e.consistency[j] ?? "?";
@@ -63,12 +68,12 @@ export function View({ data, onUpdate }: { data: Ach; onUpdate?: (d: Ach) => voi
                 );
               })}
               <td className="px-2">
-                <button onClick={() => rmEv(i)} aria-label="remove" className="text-ink-muted hover:text-vermilion">×</button>
+                <RemoveButton onClick={() => rmEv(i)} ariaLabel="remove" />
               </td>
             </tr>
           ))}
           <tr>
-            <td className="px-3 py-2 font-code text-[10px] tracking-[0.22em] uppercase text-vermilion font-medium">Inconsistencies</td>
+            <td className="px-3 py-2"><MicroLabel accent bold>Inconsistencies</MicroLabel></td>
             {inconsist.map((n, j) => (
               <td key={j} className="text-center font-code text-[14px] font-medium" data-testid={`ach-inconsist-${j}`}>
                 <span className={j === minIdx ? "text-vermilion" : "text-ink"}>{n}</span>
@@ -78,7 +83,7 @@ export function View({ data, onUpdate }: { data: Ach; onUpdate?: (d: Ach) => voi
           </tr>
         </tbody>
       </table>
-      <button onClick={addEv} className="font-serif italic text-[13px] text-ink-muted hover:text-vermilion px-3 py-2 border-t border-rule w-full text-left">+ add evidence</button>
-    </div>
+      <AddButton onClick={addEv} className="px-3 py-2 border-t border-rule w-full text-left">+ add evidence</AddButton>
+    </Card>
   );
 }

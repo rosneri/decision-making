@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { Card, MicroLabel, InlineText } from "@/components/ui";
 import { meta, schema, sample, type Pugh, cycle } from "./data";
 export { meta, schema, sample };
 export type { Pugh };
@@ -26,15 +27,15 @@ export function View({ data, onUpdate }: { data: Pugh; onUpdate?: (d: Pugh) => v
   const winnerIdx = sums.reduce((b, x, i) => x.net > sums[b]!.net ? i : b, 0);
 
   return (
-    <div className="border border-ink bg-paper overflow-x-auto">
+    <Card className="overflow-x-auto">
       <table className="w-full" data-testid="pugh-table">
         <thead>
           <tr className="border-b border-rule">
-            <th className="text-left px-3 py-2 font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">Criterion</th>
-            <th className="text-center px-3 py-2 font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">{s.datum} (datum)</th>
+            <th className="text-left px-3 py-2"><MicroLabel>Criterion</MicroLabel></th>
+            <th className="text-center px-3 py-2"><MicroLabel>{s.datum} (datum)</MicroLabel></th>
             {s.concepts.map((c, j) => (
-              <th key={j} className={`text-center px-3 py-2 font-code text-[10px] tracking-[0.22em] uppercase ${j === winnerIdx ? "text-vermilion" : "text-ink-muted"}`}>
-                {c} {j === winnerIdx && "★"}
+              <th key={j} className="text-center px-3 py-2">
+                <MicroLabel accent={j === winnerIdx}>{c} {j === winnerIdx && "★"}</MicroLabel>
               </th>
             ))}
           </tr>
@@ -43,8 +44,7 @@ export function View({ data, onUpdate }: { data: Pugh; onUpdate?: (d: Pugh) => v
           {s.criteria.map((c, i) => (
             <tr key={i} className="border-b border-rule">
               <td className="px-3 py-2">
-                <input value={c.name} onChange={(e) => setName(i, e.target.value)}
-                  className="font-serif italic text-[14px] bg-transparent border-none outline-none w-full" />
+                <InlineText value={c.name} onChange={(v) => setName(i, v)} italic size="sm" />
               </td>
               <td className="text-center font-code text-[13px] text-ink-muted">S</td>
               {s.concepts.map((_, j) => (
@@ -60,7 +60,7 @@ export function View({ data, onUpdate }: { data: Pugh; onUpdate?: (d: Pugh) => v
             </tr>
           ))}
           <tr className="border-b border-rule">
-            <td className="px-3 py-2 font-code text-[10px] tracking-[0.22em] uppercase text-vermilion font-medium">Net</td>
+            <td className="px-3 py-2"><MicroLabel accent bold>Net</MicroLabel></td>
             <td className="text-center font-code text-[14px] text-ink-muted">0</td>
             {sums.map((sm, j) => (
               <td key={j} className="text-center font-code text-[16px] font-medium" data-testid={`pugh-net-${j}`}>
@@ -70,6 +70,6 @@ export function View({ data, onUpdate }: { data: Pugh; onUpdate?: (d: Pugh) => v
           </tr>
         </tbody>
       </table>
-    </div>
+    </Card>
   );
 }

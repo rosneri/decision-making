@@ -1,6 +1,7 @@
 "use client";
 
 import { useFrameworkData } from "@/components/DecisionContext";
+import { Card, MicroLabel, Range, InlineText, InlineNumber, AddButton, RemoveButton } from "@/components/ui";
 import type { DecisionMatrix } from "./schema";
 
 interface Props {
@@ -48,20 +49,17 @@ export function View({ data, onUpdate }: Props) {
     window.addEventListener("mouseup", up);
   };
 
+  const head = "px-3.5 py-3.5 border-b border-rule align-bottom";
+  const cell = "px-3.5 py-[18px] border-b border-rule align-middle";
+
   return (
-    <div className="border-t-2 border-ink border-b border-b-ink">
-      {/* Criteria & weights */}
+    <Card variant="ruled">
       <div className="flex items-baseline gap-8 py-4 border-b border-rule flex-wrap">
         <span className="folio">Criteria · weights</span>
         {state.criteria.map((c, i) => (
           <div key={i} className="flex items-center gap-2.5 font-serif text-sm">
             <span className="italic text-ink-muted">{c.name}</span>
-            <input
-              type="range" min="1" max="10" step="1"
-              value={c.weight}
-              onChange={(e) => setWeight(i, Number(e.target.value))}
-              className="w-20 h-px appearance-none bg-ink-muted outline-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-vermilion [&::-moz-range-thumb]:w-2.5 [&::-moz-range-thumb]:h-2.5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-vermilion [&::-moz-range-thumb]:border-none"
-            />
+            <Range value={c.weight} onChange={(v) => setWeight(i, v)} min={1} max={10} step={1} className="w-20" ariaLabel={`${c.name} weight`} />
             <span className="font-code text-[13px] font-medium text-vermilion min-w-[28px] text-right">
               {Math.round((c.weight / totalW) * 100)}
             </span>
@@ -69,24 +67,19 @@ export function View({ data, onUpdate }: Props) {
         ))}
       </div>
 
-      {/* Table */}
       <table className="w-full border-collapse" style={{ tableLayout: "fixed" }}>
         <thead>
           <tr>
-            <th className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted font-medium px-3.5 py-3.5 text-left border-b border-rule align-bottom">
-              Option
-            </th>
+            <th className={`${head} text-left`}><MicroLabel bold>Option</MicroLabel></th>
             {state.criteria.map((c, i) => (
-              <th key={i} className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted font-medium px-3.5 py-3.5 text-center border-b border-rule align-bottom">
-                {c.name}
+              <th key={i} className={`${head} text-center`}>
+                <MicroLabel bold>{c.name}</MicroLabel>
                 <span className="block mt-1 text-vermilion text-[11px] tracking-[0.06em]">
                   ·{Math.round((c.weight / totalW) * 100)}
                 </span>
               </th>
             ))}
-            <th className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted font-medium px-3.5 py-3.5 text-right border-b border-rule align-bottom w-24">
-              Score
-            </th>
+            <th className={`${head} text-right w-24`}><MicroLabel bold>Score</MicroLabel></th>
             <th className="w-8 border-b border-rule" />
           </tr>
         </thead>
@@ -95,49 +88,42 @@ export function View({ data, onUpdate }: Props) {
             const isWinner = oi === winner;
             return (
               <tr key={oi}>
-                <td className="font-serif text-[17px] px-3.5 py-[18px] border-b border-rule last:border-b-0 align-middle">
+                <td className={`font-serif text-[17px] ${cell} last:border-b-0`}>
                   <div className="flex items-center gap-2">
                     {isWinner && <span className="text-vermilion text-sm flex-shrink-0">▸</span>}
-                    <input
-                      type="text"
-                      value={o.name}
-                      onChange={(e) => setName(oi, e.target.value)}
-                      className="flex-1 min-w-0 italic border-none bg-transparent outline-none font-serif text-[17px] text-ink border-b border-transparent focus:border-vermilion transition-colors duration-200 py-0"
-                    />
+                    <InlineText value={o.name} onChange={(v) => setName(oi, v)} italic size="lg" />
                   </div>
                 </td>
-                {o.scores.map((s, ci) => (
-                  <td key={ci} className="px-3.5 py-[18px] border-b border-rule text-center align-middle">
+                {o.scores.map((sc, ci) => (
+                  <td key={ci} className={`${cell} text-center`}>
                     <div className="inline-flex flex-col items-center gap-1">
-                      <input
-                        type="number" min="0" max="10"
-                        value={s}
-                        onChange={(e) => setScore(oi, ci, Number(e.target.value))}
+                      <InlineNumber
+                        value={sc}
+                        onChange={(v) => setScore(oi, ci, v)}
                         onMouseDown={onScoreDrag(oi, ci)}
-                        className={`font-code text-base font-medium text-center w-10 border-none bg-transparent outline-none py-0.5 border-b border-transparent hover:border-vermilion focus:border-vermilion transition-colors duration-200 cursor-ns-resize [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${isWinner ? "text-vermilion" : "text-ink"}`}
+                        min={0}
+                        max={10}
+                        accent={isWinner}
+                        size="lg"
+                        width="w-10"
+                        className="hover:border-b hover:border-vermilion focus:border-b focus:border-vermilion cursor-ns-resize py-0.5"
                         title="Drag up/down to adjust"
                       />
                       <div className="w-9 h-0.5 bg-rule relative">
                         <div
                           className={`score-bar-fill ${isWinner ? "bg-vermilion" : "bg-ink"}`}
-                          style={{ transform: `scaleX(${s / 10})` }}
+                          style={{ transform: `scaleX(${sc / 10})` }}
                         />
                       </div>
                     </div>
                   </td>
                 ))}
-                <td className={`px-3.5 py-[18px] border-b border-rule text-right font-code text-lg font-medium tracking-[-0.01em] w-24 align-middle ${isWinner ? "text-vermilion" : "text-ink"}`}>
+                <td className={`${cell} text-right font-code text-lg font-medium tracking-[-0.01em] w-24 ${isWinner ? "text-vermilion" : "text-ink"}`}>
                   {(totals[oi] ?? 0).toFixed(2)}
                 </td>
                 <td className="py-[18px] pr-1 text-right border-b border-rule align-middle">
                   {state.options.length > 2 && (
-                    <button
-                      onClick={() => removeOption(oi)}
-                      className="text-ink-muted hover:text-vermilion text-base px-1 cursor-pointer"
-                      title="Remove"
-                    >
-                      ×
-                    </button>
+                    <RemoveButton onClick={() => removeOption(oi)} title="Remove" />
                   )}
                 </td>
               </tr>
@@ -145,12 +131,9 @@ export function View({ data, onUpdate }: Props) {
           })}
         </tbody>
       </table>
-      <button
-        onClick={addOption}
-        className="font-serif italic text-sm text-ink-muted hover:text-vermilion cursor-pointer px-3.5 py-3.5 border-t border-rule inline-block transition-colors duration-200 bg-transparent border-x-0 border-b-0"
-      >
+      <AddButton onClick={addOption} className="px-3.5 py-3.5 border-t border-rule inline-block text-sm">
         + another option
-      </button>
-    </div>
+      </AddButton>
+    </Card>
   );
 }

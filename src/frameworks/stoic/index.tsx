@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { Card, MicroLabel, InlineText, AddButton, RemoveButton } from "@/components/ui";
 import { meta, schema, sample, type Stoic, type Side } from "./data";
 export { meta, schema, sample };
 export type { Stoic };
@@ -18,41 +19,52 @@ export function View({ data, onUpdate }: { data: Stoic; onUpdate?: (d: Stoic) =>
   };
 
   return (
-    <div className="border border-ink bg-paper grid grid-cols-2 divide-x divide-ink">
+    <Card className="grid grid-cols-2 divide-x divide-ink">
       <div className="p-4 bg-vermilion/5">
-        <span className="font-code text-[10px] tracking-[0.22em] uppercase text-vermilion font-medium">Yours · act on these</span>
+        <MicroLabel accent bold>Yours · act on these</MicroLabel>
         <ul className="mt-3 space-y-1" data-testid="stoic-yours">
           {s.yours.map((x, i) => (
             <li key={i} className="flex items-center gap-2 group">
               <span className="text-vermilion">•</span>
-              <input value={x} onChange={(e) => set("yours", i, e.target.value)}
-                className="flex-1 font-serif text-[14px] bg-transparent border-b border-rule outline-none focus:border-vermilion text-ink" />
-              <button onClick={() => move("yours", i)} aria-label="move to not yours"
-                className="opacity-0 group-hover:opacity-100 font-code text-[10px] text-ink-muted hover:text-vermilion">→</button>
-              <button onClick={() => rm("yours", i)} aria-label="remove"
-                className="opacity-0 group-hover:opacity-100 text-ink-muted hover:text-vermilion">×</button>
+              <InlineText value={x} onChange={(v) => set("yours", i, v)} size="sm" className="border-b border-rule" />
+              <button
+                onClick={() => move("yours", i)}
+                aria-label="move to not yours"
+                className="opacity-0 group-hover:opacity-100 font-code text-[10px] text-ink-muted hover:text-vermilion"
+              >
+                →
+              </button>
+              <RemoveButton onClick={() => rm("yours", i)} ariaLabel="remove" showOnHover />
             </li>
           ))}
         </ul>
-        <button onClick={() => add("yours")} className="mt-2 font-serif italic text-[13px] text-ink-muted hover:text-vermilion">+ add</button>
+        <AddButton onClick={() => add("yours")} className="mt-2">+ add</AddButton>
       </div>
       <div className="p-4 opacity-70">
-        <span className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">Not yours · release these</span>
+        <MicroLabel>Not yours · release these</MicroLabel>
         <ul className="mt-3 space-y-1" data-testid="stoic-not-yours">
           {s.notYours.map((x, i) => (
             <li key={i} className="flex items-center gap-2 group">
               <span className="text-ink-muted">○</span>
-              <input value={x} onChange={(e) => set("notYours", i, e.target.value)}
-                className="flex-1 font-serif text-[14px] bg-transparent border-b border-rule outline-none focus:border-vermilion text-ink-muted line-through" />
-              <button onClick={() => move("notYours", i)} aria-label="move to yours"
-                className="opacity-0 group-hover:opacity-100 font-code text-[10px] text-ink-muted hover:text-vermilion">←</button>
-              <button onClick={() => rm("notYours", i)} aria-label="remove"
-                className="opacity-0 group-hover:opacity-100 text-ink-muted hover:text-vermilion">×</button>
+              <InlineText
+                value={x}
+                onChange={(v) => set("notYours", i, v)}
+                size="sm"
+                className="border-b border-rule text-ink-muted line-through"
+              />
+              <button
+                onClick={() => move("notYours", i)}
+                aria-label="move to yours"
+                className="opacity-0 group-hover:opacity-100 font-code text-[10px] text-ink-muted hover:text-vermilion"
+              >
+                ←
+              </button>
+              <RemoveButton onClick={() => rm("notYours", i)} ariaLabel="remove" showOnHover />
             </li>
           ))}
         </ul>
-        <button onClick={() => add("notYours")} className="mt-2 font-serif italic text-[13px] text-ink-muted hover:text-vermilion">+ add</button>
+        <AddButton onClick={() => add("notYours")} className="mt-2">+ add</AddButton>
       </div>
-    </div>
+    </Card>
   );
 }

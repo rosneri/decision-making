@@ -1,6 +1,6 @@
 "use client";
-import { RangeField } from "@/components/ui/Range";
 import { useFrameworkData } from "@/components/DecisionContext";
+import { Card, RangeField, InlineText, AddButton, RemoveButton } from "@/components/ui";
 import { meta, schema, sample, bestOption, type RegretMin } from "./data";
 export { meta, schema, sample };
 export type { RegretMin };
@@ -16,27 +16,35 @@ export function View({ data, onUpdate }: { data: RegretMin; onUpdate?: (d: Regre
   const best = bestOption(s);
 
   return (
-    <div className="border border-ink bg-paper">
+    <Card>
       <div className="p-4 border-b border-rule bg-paper-deep font-serif italic text-[14px] text-ink-muted">
         &ldquo;Project yourself to 80. Look back. Which choice will you regret?&rdquo;
       </div>
       {scored.map((o) => {
         const isBest = o.i === best.i;
         return (
-          <div key={o.i} data-testid={`regret-option-${o.i}`}
-            className={`p-4 border-b border-rule ${isBest ? "bg-vermilion/5" : ""}`}>
+          <div key={o.i} data-testid={`regret-option-${o.i}`} className={`p-4 border-b border-rule ${isBest ? "bg-vermilion/5" : ""}`}>
             <div className="flex items-center gap-2">
-              <input value={o.name} onChange={(e) => set(o.i, { name: e.target.value })}
-                className={`font-serif text-[16px] font-medium bg-transparent border-none outline-none flex-1 ${isBest ? "text-vermilion" : "text-ink"}`} />
-              <button onClick={() => rm(o.i)} aria-label="remove" className="text-ink-muted hover:text-vermilion">×</button>
+              <InlineText
+                value={o.name}
+                onChange={(v) => set(o.i, { name: v })}
+                className={`text-[16px] font-medium ${isBest ? "text-vermilion" : ""}`}
+              />
+              <RemoveButton onClick={() => rm(o.i)} ariaLabel="remove" />
             </div>
-            <input value={o.eightyYrThought} onChange={(e) => set(o.i, { eightyYrThought: e.target.value })}
+            <InlineText
+              value={o.eightyYrThought}
+              onChange={(v) => set(o.i, { eightyYrThought: v })}
               placeholder="At 80 you say: …"
-              className="block w-full mt-1 font-serif italic text-[14px] text-ink-muted bg-transparent border-b border-rule outline-none focus:border-vermilion" />
+              italic
+              size="sm"
+              className="block w-full mt-1 text-ink-muted border-b border-rule"
+            />
             <div className="grid grid-cols-2 gap-4 mt-3">
               <RangeField
                 label="Regret if taken"
-                min={1} max={10}
+                min={1}
+                max={10}
                 value={o.regretIfTaken}
                 onChange={(v) => set(o.i, { regretIfTaken: v })}
                 ariaLabel={`regret if taken for ${o.name}`}
@@ -45,7 +53,8 @@ export function View({ data, onUpdate }: { data: RegretMin; onUpdate?: (d: Regre
               <RangeField
                 label="Regret if NOT taken"
                 accent
-                min={1} max={10}
+                min={1}
+                max={10}
                 value={o.regretIfNotTaken}
                 onChange={(v) => set(o.i, { regretIfNotTaken: v })}
                 ariaLabel={`regret if not taken for ${o.name}`}
@@ -55,7 +64,7 @@ export function View({ data, onUpdate }: { data: RegretMin; onUpdate?: (d: Regre
           </div>
         );
       })}
-      <button onClick={add} className="font-serif italic text-[13px] text-ink-muted hover:text-vermilion px-4 py-2 w-full text-left">+ option</button>
-    </div>
+      <AddButton onClick={add} className="px-4 py-2 w-full text-left">+ option</AddButton>
+    </Card>
   );
 }
