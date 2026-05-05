@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { RangeField } from "@/components/ui/Range";
+import { ResultPanel } from "@/components/ResultPanel";
 import { meta, schema, sample, type RegretMin } from "./data";
 export { meta, schema, sample };
 export type { RegretMin };
@@ -58,10 +59,13 @@ export function View({ data, onUpdate }: { data: RegretMin; onUpdate?: (d: Regre
         );
       })}
       <button onClick={add} className="font-serif italic text-[13px] text-ink-muted hover:text-vermilion px-4 py-2 w-full text-left">+ option</button>
-      <div className="p-4 border-t border-rule bg-paper-deep">
-        <span className="font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">Lowest 80-year regret</span>
-        <span className="ml-2 font-serif font-medium text-vermilion text-[15px]" data-testid="regret-best">{best.name}</span>
-      </div>
+      <ResultPanel
+        body={s.recommendation}
+        metrics={[
+          { k: "Pick", v: best.name },
+          { k: "Asymmetry", v: (best.asymmetry > 0 ? "+" : "") + best.asymmetry },
+        ]}
+      />
     </div>
   );
 }

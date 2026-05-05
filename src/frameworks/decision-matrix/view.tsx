@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ResultPanel } from "@/components/ResultPanel";
 import type { DecisionMatrix } from "./schema";
 
 interface Props {
@@ -156,6 +157,13 @@ export function View({ data, onUpdate }: Props) {
       >
         + another option
       </button>
+      <ResultPanel
+        body={state.recommendation}
+        metrics={[
+          { k: "Winner", v: state.options[winner]?.name ?? "—" },
+          { k: "Score", v: (totals[winner] ?? 0).toFixed(2) },
+        ]}
+      />
     </div>
   );
 }

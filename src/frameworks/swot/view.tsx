@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ResultPanel } from "@/components/ResultPanel";
 import type { Swot } from "./schema";
 
 interface Props {
@@ -32,7 +33,8 @@ export function View({ data, onUpdate }: Props) {
     update({ ...state, [key]: [...state[key], ""] });
 
   return (
-    <div className="border border-ink grid grid-cols-2 bg-paper relative">
+    <div className="border border-ink bg-paper">
+    <div className="grid grid-cols-2 relative">
       {/* Horizontal axis labels (outside) */}
       <span className="absolute font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted bg-paper px-2 top-[-7px] left-1/2 -translate-x-1/2 whitespace-nowrap">Helpful</span>
       <span className="absolute font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted bg-paper px-2 bottom-[-7px] left-1/2 -translate-x-1/2 whitespace-nowrap">Harmful</span>
@@ -78,6 +80,8 @@ export function View({ data, onUpdate }: Props) {
           </button>
         </div>
       ))}
+    </div>
+      <ResultPanel body={state.recommendation} />
     </div>
   );
 }

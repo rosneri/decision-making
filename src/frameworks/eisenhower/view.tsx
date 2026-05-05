@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ResultPanel } from "@/components/ResultPanel";
 import type { Eisenhower } from "./schema";
 
 interface Props {
@@ -86,7 +87,8 @@ export function View({ data, onUpdate }: Props) {
     });
 
   return (
-    <div className="border border-ink grid grid-cols-2 bg-paper relative">
+    <div className="border border-ink bg-paper">
+    <div className="grid grid-cols-2 relative">
       {/* Axis labels */}
       <span className="absolute font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted bg-paper px-2 top-[-7px] left-1/2 -translate-x-1/2 whitespace-nowrap">
         Urgent
@@ -190,6 +192,8 @@ export function View({ data, onUpdate }: Props) {
           </div>
         );
       })}
+    </div>
+      <ResultPanel body={state.recommendation} />
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import { startTransition, useEffect, useRef, useState } from "react";
 import { Composer } from "./Composer";
 import { ReadingInterstitial } from "./ReadingInterstitial";
-import { RecommendationCard } from "./RecommendationCard";
+import { RerecommendProvider } from "./ResultPanel";
 import { FRAMEWORKS, VIEWS, type FrameworkResult } from "@/frameworks";
 import type { AnalysisResult } from "./analyze-utils";
 import { AnalyzeError, fetchAnalysis } from "./analyze-utils";
@@ -229,16 +229,6 @@ export function DecisionApp() {
         const ActiveView = VIEWS[result.framework];
         return (
           <main className="max-w-[1080px] mx-auto px-4 sm:px-10 py-8 sm:py-14 pb-16 sm:pb-[120px] animate-page-in">
-            <div className="flex items-center gap-4 pb-4 mb-8 border-b border-rule">
-              <button
-                onClick={() => setRoute("compose")}
-                className="inline-flex items-center gap-2 font-serif italic text-sm text-ink-muted hover:text-ink transition-colors duration-200 bg-transparent border-none cursor-pointer p-0"
-              >
-                <span className="text-lg leading-none">↩</span>
-                Back to compose
-              </button>
-            </div>
-
             <div className="mb-10">
               <span className="folio folio-accent block mb-1">{meta.category}</span>
               <h2 className="font-serif text-[40px] font-medium tracking-[-0.008em] leading-[1.1] text-ink mt-1">{meta.name}</h2>
@@ -247,16 +237,19 @@ export function DecisionApp() {
               </p>
             </div>
 
-            <ActiveView data={result} onUpdate={setResult} />
-
-            <RecommendationCard
-              key={decisionText}
-              note={result.recommendation ?? null}
-              loading={recLoading}
-              error={analyzeError?.message ?? null}
-              dataChanged={serverResultKey !== null && JSON.stringify(result) !== serverResultKey}
-              onRerecommend={rerecommend}
-            />
+            <RerecommendProvider
+              value={{
+                loading: recLoading,
+                error: !!analyzeError,
+                show:
+                  recLoading ||
+                  !!analyzeError ||
+                  (serverResultKey !== null && JSON.stringify(result) !== serverResultKey),
+                onRerecommend: rerecommend,
+              }}
+            >
+              <ActiveView data={result} onUpdate={setResult} />
+            </RerecommendProvider>
 
             <div className="flex gap-3 mt-10 items-center">
               <button className="font-serif text-base font-medium px-[22px] py-3 rounded-sm bg-vermilion text-paper hover:bg-vermilion-deep transition-colors duration-200">

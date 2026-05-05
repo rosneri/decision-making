@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ResultPanel } from "@/components/ResultPanel";
 import type { CostBenefit } from "./schema";
 
 interface Props {
@@ -241,6 +242,17 @@ export function View({ data, onUpdate }: Props) {
             </button>
           </div>
         </div>
+      </div>
+
+      <div className="mt-8">
+        <ResultPanel
+          body={state.recommendation}
+          metrics={[
+            { k: "Benefit", v: String(benTotal) },
+            { k: "Cost", v: String(costTotal) },
+            { k: "Net", v: (diff > 0 ? "+" : "") + diff },
+          ]}
+        />
       </div>
     </div>
   );
