@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { FRAMEWORKS, type FrameworkId } from "@/frameworks";
 
 const EXAMPLES = [
   "Whether to take the new role.",
@@ -31,7 +32,7 @@ function MicIcon() {
 }
 
 interface Props {
-  onSubmit: (text: string) => void;
+  onSubmit: (text: string, frameworkId?: FrameworkId) => void;
   initialText?: string;
 }
 
@@ -39,6 +40,20 @@ export function Composer({ onSubmit, initialText = "" }: Props) {
   const [text, setText]           = useState(initialText);
   const [recording, setRecording] = useState(false);
   const [transcript, setTranscript] = useState("");
+  const [mode, setMode] = useState<"auto" | "manual">("auto");
+  const [frameworkId, setFrameworkId] = useState<FrameworkId | "">("");
+
+  const grouped = useMemo(() => {
+    const map = new Map<string, typeof FRAMEWORKS>();
+    for (const f of FRAMEWORKS) {
+      const arr = map.get(f.category) ?? [];
+      arr.push(f);
+      map.set(f.category, arr);
+    }
+    return Array.from(map.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([cat, items]) => [cat, [...items].sort((a, b) => a.name.localeCompare(b.name))] as const);
+  }, []);
   const srSupported = useSyncExternalStore(
     () => () => {},
     () => {
@@ -100,8 +115,11 @@ export function Composer({ onSubmit, initialText = "" }: Props) {
 
   const submit = () => {
     const t = text.trim();
-    if (t) onSubmit(t);
+    if (!t) return;
+    onSubmit(t, mode === "manual" && frameworkId ? frameworkId : undefined);
   };
+
+  const canSubmit = !!text.trim() && (mode === "auto" || !!frameworkId);
 
   return (
     <main className="max-w-[760px] mx-auto px-4 sm:px-10 py-12 sm:py-24 animate-page-in">
@@ -142,6 +160,54 @@ export function Composer({ onSubmit, initialText = "" }: Props) {
               <em>Speak when you&rsquo;re ready…</em>
               <span className="dm-caret" />
             </span>
+          )}
+        </div>
+      )}
+
+      {/* Framework choice */}
+      {!recording && (
+        <div className="mt-6 flex items-center gap-3 flex-wrap">
+          <span className="folio">Framework</span>
+          <div className="inline-flex border border-rule rounded-sm overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setMode("auto")}
+              aria-pressed={mode === "auto"}
+              className={[
+                "font-serif text-sm px-3 py-1.5 cursor-pointer transition-colors duration-200",
+                mode === "auto" ? "bg-ink text-paper" : "bg-transparent text-ink hover:bg-rule/40",
+              ].join(" ")}
+            >
+              Auto
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("manual")}
+              aria-pressed={mode === "manual"}
+              className={[
+                "font-serif text-sm px-3 py-1.5 cursor-pointer border-l border-rule transition-colors duration-200",
+                mode === "manual" ? "bg-ink text-paper" : "bg-transparent text-ink hover:bg-rule/40",
+              ].join(" ")}
+            >
+              Manual
+            </button>
+          </div>
+
+          {mode === "manual" && (
+            <select
+              value={frameworkId}
+              onChange={(e) => setFrameworkId(e.target.value as FrameworkId)}
+              className="font-serif text-[15px] text-ink bg-transparent border border-rule rounded-sm px-3 py-1.5 cursor-pointer hover:border-ink focus:outline-none focus:border-ink max-w-full"
+            >
+              <option value="" disabled>Choose a framework…</option>
+              {grouped.map(([cat, items]) => (
+                <optgroup key={cat} label={cat}>
+                  {items.map((f) => (
+                    <option key={f.id} value={f.id}>{f.name}</option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
           )}
         </div>
       )}
@@ -196,7 +262,7 @@ export function Composer({ onSubmit, initialText = "" }: Props) {
               <button
                 className="font-serif text-base font-medium px-[22px] py-3 rounded-sm bg-vermilion text-paper hover:bg-vermilion-deep transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.99] cursor-pointer"
                 onClick={submit}
-                disabled={!text.trim()}
+                disabled={!canSubmit}
               >
                 Decide →
               </button>

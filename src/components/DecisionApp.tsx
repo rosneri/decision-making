@@ -95,7 +95,7 @@ export function DecisionApp() {
   }, [hydrated, route, decisionText, result]);
 
   // ── Submit ──
-  const submit = (text: string) => {
+  const submit = (text: string, frameworkId?: FrameworkId) => {
     setText(text);
     setRoute("reading");
     setAnalyzeReady(false);
@@ -104,7 +104,7 @@ export function DecisionApp() {
     setServerResultKey(null);
     const id = ++recReqRef.current;
     setRecLoading(true);
-    fetchAnalysis(text)
+    fetchAnalysis(text, frameworkId ? { frameworkId } : undefined)
       .then((r: AnalysisResult) => {
         if (id !== recReqRef.current) return;
         setResult(r);
