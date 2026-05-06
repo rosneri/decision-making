@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { FRAMEWORKS, SAMPLES } from "@/frameworks";
+import { FRAMEWORKS, METRICS, SAMPLES } from "@/frameworks";
 import { HELP } from "@/frameworks/help";
 import { FrameworkRenderer } from "@/components/FrameworkRenderer";
 import { FrameworkHelpPanel } from "@/components/FrameworkHelpPanel";
 import { LibraryHeader } from "@/components/LibraryHeader";
+import { ResultStrip } from "@/components/ResultStrip";
 
 function toRoman(n: number): string {
   const map: Array<[number, string]> = [
@@ -62,6 +63,7 @@ export default function FrameworksPage() {
               </div>
 
               <FrameworkRenderer result={SAMPLES[f.id]} />
+              <ResultStrip metrics={METRICS[f.id]?.(SAMPLES[f.id]) ?? []} />
             </section>
           ))}
         </div>
