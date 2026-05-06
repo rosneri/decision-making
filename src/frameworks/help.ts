@@ -66,6 +66,36 @@ import { help as algoImpactHelp } from "./algo-impact/help";
 import { help as modelCardHelp } from "./model-card/help";
 import { help as stoicHelp } from "./stoic/help";
 import { help as ignatianHelp } from "./ignatian/help";
+import { help as nistAiRmfHelp } from "./nist-ai-rmf/help";
+import { help as paretoHelp } from "./pareto/help";
+import { help as ikigaiHelp } from "./ikigai/help";
+import { help as biasChecklistHelp } from "./bias-checklist/help";
+import { help as aarHelp } from "./aar/help";
+import { help as abTestingHelp } from "./ab-testing/help";
+import { help as dimeHelp } from "./dime/help";
+import { help as fmeaHelp } from "./fmea/help";
+import { help as tripleBottomLineHelp } from "./triple-bottom-line/help";
+import { help as categoricalImperativeHelp } from "./categorical-imperative/help";
+import { help as mptHelp } from "./mpt/help";
+import { help as nashHelp } from "./nash/help";
+import { help as daciHelp } from "./daci/help";
+import { help as nineBoxHelp } from "./nine-box/help";
+import { help as scamperHelp } from "./scamper/help";
+import { help as strictScrutinyHelp } from "./strict-scrutiny/help";
+import { help as soapHelp } from "./soap/help";
+import { help as secondOrderHelp } from "./second-order/help";
+import { help as pmesiiPtHelp } from "./pmesii-pt/help";
+import { help as zopaHelp } from "./zopa/help";
+import { help as dmaicHelp } from "./dmaic/help";
+import { help as fourPercentHelp } from "./four-percent/help";
+import { help as moscowHelp } from "./moscow/help";
+import { help as policyCycleHelp } from "./policy-cycle/help";
+import { help as bayesianHelp } from "./bayesian/help";
+import { help as aidaHelp } from "./aida/help";
+import { help as iceHelp } from "./ice/help";
+import { help as fourNobleTruthsHelp } from "./four-noble-truths/help";
+import { help as eloHelp } from "./elo/help";
+import { help as pestelHelp } from "./pestel/help";
 
 export const HELP: Record<string, FrameworkHelp> = {
   "decision_matrix": decisionMatrixHelp,
@@ -129,4 +159,34 @@ export const HELP: Record<string, FrameworkHelp> = {
   "model_card": modelCardHelp,
   stoic: stoicHelp,
   ignatian: ignatianHelp,
+  nist_ai_rmf: nistAiRmfHelp,
+  pareto: paretoHelp,
+  ikigai: ikigaiHelp,
+  bias_checklist: biasChecklistHelp,
+  aar: aarHelp,
+  ab_testing: abTestingHelp,
+  dime: dimeHelp,
+  fmea: fmeaHelp,
+  triple_bottom_line: tripleBottomLineHelp,
+  categorical_imperative: categoricalImperativeHelp,
+  mpt: mptHelp,
+  nash: nashHelp,
+  daci: daciHelp,
+  nine_box: nineBoxHelp,
+  scamper: scamperHelp,
+  strict_scrutiny: strictScrutinyHelp,
+  soap: soapHelp,
+  second_order: secondOrderHelp,
+  pmesii_pt: pmesiiPtHelp,
+  zopa: zopaHelp,
+  dmaic: dmaicHelp,
+  four_percent: fourPercentHelp,
+  moscow: moscowHelp,
+  policy_cycle: policyCycleHelp,
+  bayesian: bayesianHelp,
+  aida: aidaHelp,
+  ice: iceHelp,
+  four_noble_truths: fourNobleTruthsHelp,
+  elo: eloHelp,
+  pestel: pestelHelp,
 };

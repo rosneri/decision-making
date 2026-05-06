@@ -1,3 +1,6 @@
+"use client";
+
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { FRAMEWORKS, METRICS, SAMPLES } from "@/frameworks";
 import { HELP } from "@/frameworks/help";
@@ -20,6 +23,17 @@ function toRoman(n: number): string {
 }
 
 export default function FrameworksPage() {
+  const [query, setQuery] = useState("");
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return FRAMEWORKS;
+    return FRAMEWORKS.filter((f) => {
+      const hay = `${f.name} ${f.category ?? ""} ${f.blurb ?? ""}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }, [query]);
+
   return (
     <>
       <LibraryHeader />
@@ -39,34 +53,63 @@ export default function FrameworksPage() {
             </Link>
             .
           </p>
+
+          {/* Search */}
+          <div className="mt-10 flex items-baseline gap-4 max-w-[56ch]">
+            <label
+              htmlFor="library-search"
+              className="folio folio-accent shrink-0"
+            >
+              Search
+            </label>
+            <input
+              id="library-search"
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="name, category, or idea…"
+              className="flex-1 bg-transparent border-b border-rule focus:border-ink outline-none font-serif italic text-[17px] text-ink placeholder:text-ink-muted/60 py-1.5 transition-colors duration-200"
+            />
+            {query ? (
+              <span className="folio text-ink-muted shrink-0">
+                {filtered.length} of {FRAMEWORKS.length}
+              </span>
+            ) : null}
+          </div>
         </div>
 
         {/* Framework sections */}
-        <div className="space-y-24">
-          {FRAMEWORKS.map((f, idx) => (
-            <section key={f.id} id={f.id} className="scroll-mt-8">
-              {/* Section head */}
-              <div className="grid mb-10" style={{ gridTemplateColumns: "auto 1fr", gap: 28, alignItems: "baseline" }}>
-                <span className="font-serif font-medium text-[64px] leading-[0.9] text-vermilion tracking-[-0.02em]">
-                  {toRoman(idx + 1)}.
-                </span>
-                <div>
-                  <span className="folio folio-accent block mb-1">Framework</span>
-                  <h2 className="font-serif text-[40px] font-medium tracking-[-0.008em] leading-[1.1] mt-1.5 text-ink">
-                    {f.name}
-                  </h2>
-                  <p className="font-serif italic text-ink-muted text-[17px] mt-2 max-w-[60ch]">
-                    {f.blurb}
-                  </p>
-                  {HELP[f.id] ? <FrameworkHelpPanel help={HELP[f.id]!} /> : null}
+        {filtered.length === 0 ? (
+          <p className="font-serif italic text-[19px] text-ink-muted">
+            No frameworks match &ldquo;{query}&rdquo;.
+          </p>
+        ) : (
+          <div className="space-y-24">
+            {filtered.map((f, idx) => (
+              <section key={f.id} id={f.id} className="scroll-mt-8">
+                {/* Section head */}
+                <div className="grid mb-10" style={{ gridTemplateColumns: "auto 1fr", gap: 28, alignItems: "baseline" }}>
+                  <span className="font-serif font-medium text-[64px] leading-[0.9] text-vermilion tracking-[-0.02em]">
+                    {toRoman(idx + 1)}.
+                  </span>
+                  <div>
+                    <span className="folio folio-accent block mb-1">Framework</span>
+                    <h2 className="font-serif text-[40px] font-medium tracking-[-0.008em] leading-[1.1] mt-1.5 text-ink">
+                      {f.name}
+                    </h2>
+                    <p className="font-serif italic text-ink-muted text-[17px] mt-2 max-w-[60ch]">
+                      {f.blurb}
+                    </p>
+                    {HELP[f.id] ? <FrameworkHelpPanel help={HELP[f.id]!} /> : null}
+                  </div>
                 </div>
-              </div>
 
-              <FrameworkRenderer result={SAMPLES[f.id]} />
-              <ResultStrip metrics={METRICS[f.id]?.(SAMPLES[f.id]) ?? []} />
-            </section>
-          ))}
-        </div>
+                <FrameworkRenderer result={SAMPLES[f.id]} />
+                <ResultStrip metrics={METRICS[f.id]?.(SAMPLES[f.id]) ?? []} />
+              </section>
+            ))}
+          </div>
+        )}
 
         {/* Footer rule */}
         <div className="mt-24 pt-8 border-t border-rule flex items-center justify-between">

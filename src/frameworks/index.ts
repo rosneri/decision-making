@@ -73,6 +73,38 @@ import * as modelCardData from "./model-card/data";
 import * as stoicData from "./stoic/data";
 import * as ignatianData from "./ignatian/data";
 
+// New batch (30): one per category
+import * as nistAiRmfData from "./nist-ai-rmf/data";
+import * as paretoData from "./pareto/data";
+import * as ikigaiData from "./ikigai/data";
+import * as biasChecklistData from "./bias-checklist/data";
+import * as aarData from "./aar/data";
+import * as abTestingData from "./ab-testing/data";
+import * as dimeData from "./dime/data";
+import * as fmeaData from "./fmea/data";
+import * as tripleBottomLineData from "./triple-bottom-line/data";
+import * as categoricalImperativeData from "./categorical-imperative/data";
+import * as mptData from "./mpt/data";
+import * as nashData from "./nash/data";
+import * as daciData from "./daci/data";
+import * as nineBoxData from "./nine-box/data";
+import * as scamperData from "./scamper/data";
+import * as strictScrutinyData from "./strict-scrutiny/data";
+import * as soapData from "./soap/data";
+import * as secondOrderData from "./second-order/data";
+import * as pmesiiPtData from "./pmesii-pt/data";
+import * as zopaData from "./zopa/data";
+import * as dmaicData from "./dmaic/data";
+import * as fourPercentData from "./four-percent/data";
+import * as moscowData from "./moscow/data";
+import * as policyCycleData from "./policy-cycle/data";
+import * as bayesianData from "./bayesian/data";
+import * as aidaData from "./aida/data";
+import * as iceData from "./ice/data";
+import * as fourNobleTruthsData from "./four-noble-truths/data";
+import * as eloData from "./elo/data";
+import * as pestelData from "./pestel/data";
+
 // View imports — these are client references but VIEWS is only consumed
 // during client-side rendering of the per-framework editor.
 import { View as FirstPrinciplesView } from "./first-principles";
@@ -132,6 +164,36 @@ import { View as AlgoImpactView } from "./algo-impact";
 import { View as ModelCardView } from "./model-card";
 import { View as StoicView } from "./stoic";
 import { View as IgnatianView } from "./ignatian";
+import { View as NistAiRmfView } from "./nist-ai-rmf";
+import { View as ParetoView } from "./pareto";
+import { View as IkigaiView } from "./ikigai";
+import { View as BiasChecklistView } from "./bias-checklist";
+import { View as AarView } from "./aar";
+import { View as AbTestingView } from "./ab-testing";
+import { View as DimeView } from "./dime";
+import { View as FmeaView } from "./fmea";
+import { View as TripleBottomLineView } from "./triple-bottom-line";
+import { View as CategoricalImperativeView } from "./categorical-imperative";
+import { View as MptView } from "./mpt";
+import { View as NashView } from "./nash";
+import { View as DaciView } from "./daci";
+import { View as NineBoxView } from "./nine-box";
+import { View as ScamperView } from "./scamper";
+import { View as StrictScrutinyView } from "./strict-scrutiny";
+import { View as SoapView } from "./soap";
+import { View as SecondOrderView } from "./second-order";
+import { View as PmesiiPtView } from "./pmesii-pt";
+import { View as ZopaView } from "./zopa";
+import { View as DmaicView } from "./dmaic";
+import { View as FourPercentView } from "./four-percent";
+import { View as MoscowView } from "./moscow";
+import { View as PolicyCycleView } from "./policy-cycle";
+import { View as BayesianView } from "./bayesian";
+import { View as AidaView } from "./aida";
+import { View as IceView } from "./ice";
+import { View as FourNobleTruthsView } from "./four-noble-truths";
+import { View as EloView } from "./elo";
+import { View as PestelView } from "./pestel";
 
 // Helper: combine server-safe data namespace with the client View into a
 // single record so downstream code sees the same shape as the four originally
@@ -201,6 +263,36 @@ const algoImpact            = bundle(algoImpactData,            AlgoImpactView);
 const modelCard             = bundle(modelCardData,             ModelCardView);
 const stoic                 = bundle(stoicData,                 StoicView);
 const ignatian              = bundle(ignatianData,              IgnatianView);
+const nistAiRmf             = bundle(nistAiRmfData,             NistAiRmfView);
+const pareto                = bundle(paretoData,                ParetoView);
+const ikigai                = bundle(ikigaiData,                IkigaiView);
+const biasChecklist         = bundle(biasChecklistData,         BiasChecklistView);
+const aar                   = bundle(aarData,                   AarView);
+const abTesting             = bundle(abTestingData,             AbTestingView);
+const dime                  = bundle(dimeData,                  DimeView);
+const fmea                  = bundle(fmeaData,                  FmeaView);
+const tripleBottomLine      = bundle(tripleBottomLineData,      TripleBottomLineView);
+const categoricalImperative = bundle(categoricalImperativeData, CategoricalImperativeView);
+const mpt                   = bundle(mptData,                   MptView);
+const nash                  = bundle(nashData,                  NashView);
+const daci                  = bundle(daciData,                  DaciView);
+const nineBox               = bundle(nineBoxData,               NineBoxView);
+const scamper               = bundle(scamperData,               ScamperView);
+const strictScrutiny        = bundle(strictScrutinyData,        StrictScrutinyView);
+const soap                  = bundle(soapData,                  SoapView);
+const secondOrder           = bundle(secondOrderData,           SecondOrderView);
+const pmesiiPt              = bundle(pmesiiPtData,              PmesiiPtView);
+const zopa                  = bundle(zopaData,                  ZopaView);
+const dmaic                 = bundle(dmaicData,                 DmaicView);
+const fourPercent           = bundle(fourPercentData,           FourPercentView);
+const moscow                = bundle(moscowData,                MoscowView);
+const policyCycle           = bundle(policyCycleData,           PolicyCycleView);
+const bayesian              = bundle(bayesianData,              BayesianView);
+const aida                  = bundle(aidaData,                  AidaView);
+const ice                   = bundle(iceData,                   IceView);
+const fourNobleTruths       = bundle(fourNobleTruthsData,       FourNobleTruthsView);
+const elo                   = bundle(eloData,                   EloView);
+const pestel                = bundle(pestelData,                PestelView);
 
 // Re-exports for the four originally implemented frameworks (kept stable
 // because the AI-flow API and existing tests depend on them).
@@ -244,6 +336,21 @@ const ALL = [
   wpa, pythagorean,
   algoImpact, modelCard,
   stoic, ignatian,
+  nistAiRmf, pareto,
+  ikigai, biasChecklist,
+  aar, abTesting,
+  dime, fmea,
+  tripleBottomLine, categoricalImperative,
+  mpt, nash,
+  daci, nineBox,
+  scamper, strictScrutiny,
+  soap, secondOrder,
+  pmesiiPt, zopa,
+  dmaic, fourPercent,
+  moscow, policyCycle,
+  bayesian, aida,
+  ice, fourNobleTruths,
+  elo, pestel,
 ] as const;
 
 export const FrameworkSchema = z.discriminatedUnion("framework", [
@@ -308,6 +415,36 @@ export const FrameworkSchema = z.discriminatedUnion("framework", [
   modelCard.schema,
   stoic.schema,
   ignatian.schema,
+  nistAiRmf.schema,
+  pareto.schema,
+  ikigai.schema,
+  biasChecklist.schema,
+  aar.schema,
+  abTesting.schema,
+  dime.schema,
+  fmea.schema,
+  tripleBottomLine.schema,
+  categoricalImperative.schema,
+  mpt.schema,
+  nash.schema,
+  daci.schema,
+  nineBox.schema,
+  scamper.schema,
+  strictScrutiny.schema,
+  soap.schema,
+  secondOrder.schema,
+  pmesiiPt.schema,
+  zopa.schema,
+  dmaic.schema,
+  fourPercent.schema,
+  moscow.schema,
+  policyCycle.schema,
+  bayesian.schema,
+  aida.schema,
+  ice.schema,
+  fourNobleTruths.schema,
+  elo.schema,
+  pestel.schema,
 ]);
 
 export type FrameworkResult = z.infer<typeof FrameworkSchema>;
@@ -402,4 +539,34 @@ export const METRICS: Partial<Record<FrameworkId, MetricsFn>> = {
   wardley: wardleyData.getMetrics,
   wpa: wpaData.getMetrics,
   wrap: wrapData.getMetrics,
+  nist_ai_rmf: nistAiRmfData.getMetrics,
+  pareto: paretoData.getMetrics,
+  ikigai: ikigaiData.getMetrics,
+  bias_checklist: biasChecklistData.getMetrics,
+  aar: aarData.getMetrics,
+  ab_testing: abTestingData.getMetrics,
+  dime: dimeData.getMetrics,
+  fmea: fmeaData.getMetrics,
+  triple_bottom_line: tripleBottomLineData.getMetrics,
+  categorical_imperative: categoricalImperativeData.getMetrics,
+  mpt: mptData.getMetrics,
+  nash: nashData.getMetrics,
+  daci: daciData.getMetrics,
+  nine_box: nineBoxData.getMetrics,
+  scamper: scamperData.getMetrics,
+  strict_scrutiny: strictScrutinyData.getMetrics,
+  soap: soapData.getMetrics,
+  second_order: secondOrderData.getMetrics,
+  pmesii_pt: pmesiiPtData.getMetrics,
+  zopa: zopaData.getMetrics,
+  dmaic: dmaicData.getMetrics,
+  four_percent: fourPercentData.getMetrics,
+  moscow: moscowData.getMetrics,
+  policy_cycle: policyCycleData.getMetrics,
+  bayesian: bayesianData.getMetrics,
+  aida: aidaData.getMetrics,
+  ice: iceData.getMetrics,
+  four_noble_truths: fourNobleTruthsData.getMetrics,
+  elo: eloData.getMetrics,
+  pestel: pestelData.getMetrics,
 };
