@@ -339,7 +339,7 @@ export function DecisionApp() {
                 />
 
                 {/* Plain-language explanation */}
-                <div className="border border-rule rounded-sm px-4 sm:px-[52px] py-8 sm:py-10 mb-10" style={{ boxShadow: "var(--shadow-letter)" }}>
+                <div className="border border-rule rounded-sm px-4 sm:px-[52px] py-8 sm:py-10 mb-10 mt-10" style={{ boxShadow: "var(--shadow-letter)" }}>
                   <div className="font-code text-[11px] tracking-[0.22em] uppercase text-vermilion mb-3.5">
                     How the analysis works
                   </div>

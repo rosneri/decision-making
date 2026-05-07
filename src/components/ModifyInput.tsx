@@ -53,7 +53,7 @@ export function ModifyInput({ decisionText, currentData, onUpdate }: Props) {
   }
 
   return (
-    <div className="mt-10 border-t border-rule pt-8">
+    <div className="mt-10">
       <div className="font-code text-[11px] tracking-[0.22em] uppercase text-ink-muted mb-3">
         Adjust
       </div>
