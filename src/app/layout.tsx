@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Spectral, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,6 +32,19 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Decision Making",
   description: "AI-assisted decision making with classic frameworks.",
+  applicationName: "Decision Making",
+  appleWebApp: {
+    capable: true,
+    title: "Decisions",
+    statusBarStyle: "default",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F4EFE6" },
+    { media: "(prefers-color-scheme: dark)", color: "#16161A" },
+  ],
 };
 
 export default function RootLayout({
@@ -45,6 +59,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         {children}
+        <ServiceWorkerRegister />
         <Analytics />
       </body>
     </html>
