@@ -31,17 +31,21 @@ function MicIcon() {
   );
 }
 
+type ResultMode = "easy" | "advanced";
+
 interface Props {
-  onSubmit: (text: string, frameworkId?: FrameworkId) => void;
+  onSubmit: (text: string, frameworkId?: FrameworkId, resultMode?: ResultMode) => void;
   initialText?: string;
+  initialResultMode?: ResultMode;
 }
 
-export function Composer({ onSubmit, initialText = "" }: Props) {
+export function Composer({ onSubmit, initialText = "", initialResultMode = "easy" }: Props) {
   const [text, setText]           = useState(initialText);
   const [recording, setRecording] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [mode, setMode] = useState<"auto" | "manual">("auto");
   const [frameworkId, setFrameworkId] = useState<FrameworkId | "">("");
+  const [resultMode, setResultMode] = useState<ResultMode>(initialResultMode);
 
   const grouped = useMemo(() => {
     const map = new Map<string, typeof FRAMEWORKS>();
@@ -116,7 +120,7 @@ export function Composer({ onSubmit, initialText = "" }: Props) {
   const submit = () => {
     const t = text.trim();
     if (!t) return;
-    onSubmit(t, mode === "manual" && frameworkId ? frameworkId : undefined);
+    onSubmit(t, mode === "manual" && frameworkId ? frameworkId : undefined, resultMode);
   };
 
   const canSubmit = !!text.trim() && (mode === "auto" || !!frameworkId);
@@ -209,6 +213,42 @@ export function Composer({ onSubmit, initialText = "" }: Props) {
               ))}
             </select>
           )}
+        </div>
+      )}
+
+      {/* Result mode choice */}
+      {!recording && (
+        <div className="mt-4 flex items-center gap-3 flex-wrap">
+          <span className="folio">Result style</span>
+          <div className="inline-flex border border-rule rounded-sm overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setResultMode("easy")}
+              aria-pressed={resultMode === "easy"}
+              className={[
+                "font-serif text-sm px-3 py-1.5 cursor-pointer transition-colors duration-200",
+                resultMode === "easy" ? "bg-ink text-paper" : "bg-transparent text-ink hover:bg-rule/40",
+              ].join(" ")}
+            >
+              Simple
+            </button>
+            <button
+              type="button"
+              onClick={() => setResultMode("advanced")}
+              aria-pressed={resultMode === "advanced"}
+              className={[
+                "font-serif text-sm px-3 py-1.5 cursor-pointer border-l border-rule transition-colors duration-200",
+                resultMode === "advanced" ? "bg-ink text-paper" : "bg-transparent text-ink hover:bg-rule/40",
+              ].join(" ")}
+            >
+              Advanced
+            </button>
+          </div>
+          <span className="font-serif italic text-[13px] text-ink-muted">
+            {resultMode === "easy"
+              ? "Shows the result and a plain explanation."
+              : "Shows the full framework with all its fields."}
+          </span>
         </div>
       )}
 

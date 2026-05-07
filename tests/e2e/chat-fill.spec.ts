@@ -60,6 +60,9 @@ test.describe("chat-fill happy path", () => {
     // Result page renders the framework header
     await expect(page.getByRole("heading", { name: /Eisenhower Matrix/i })).toBeVisible();
 
+    // Switch to Advanced mode so the framework form and chat button are visible
+    await page.getByRole("button", { name: /Advanced/i }).click();
+
     // Open the chat panel from the description-line button
     await page.getByRole("button", { name: /Fill by chatting/i }).click();
 

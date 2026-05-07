@@ -8,6 +8,7 @@ import { ReadingInterstitial } from "./ReadingInterstitial";
 import { DecisionProvider } from "./DecisionContext";
 import { RecommendationCard } from "./RecommendationCard";
 import { ResultStrip } from "./ResultStrip";
+import { ModifyInput } from "./ModifyInput";
 import { FRAMEWORKS, METRICS, VIEWS, type FrameworkId, type FrameworkResult } from "@/frameworks";
 import { HELP } from "@/frameworks/help";
 import { FrameworkHelpPanel } from "./FrameworkHelpPanel";
@@ -16,15 +17,18 @@ import type { AnalysisResult, FrameworkAlternative } from "./analyze-utils";
 import { AnalyzeError, fetchAnalysis } from "./analyze-utils";
 
 type Route = "compose" | "reading" | "result";
+type Mode = "easy" | "advanced";
 
 // ── Persistence ──────────────────────────────────────────────────────────────
 
-const STORAGE_KEY = "dm-app-state-v2";
+const STORAGE_KEY = "dm-app-state-v3";
 
 interface SavedState {
   route: Route;
   decisionText: string;
   result: AnalysisResult | null;
+  mode: Mode;
+  explanation: string | null;
 }
 
 function loadSavedState(): SavedState | null {
@@ -54,16 +58,15 @@ export function DecisionApp() {
   const [analyzeReady, setAnalyzeReady] = useState(false);
   const [analyzeError, setAnalyzeError] = useState<{ message: string; code: string } | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
-  // Bumped each time the chat patches the result; used as a key on the
-  // active framework view so it remounts and picks up the new data.
-  // Framework views currently store their data in useState(data) and ignore
-  // later prop changes — remounting is the cheapest way to make external
-  // edits visible without rewriting every view.
   const [viewVersion, setViewVersion] = useState(0);
   const [hydrated, setHydrated] = useState(false);
+  const [mode, setMode] = useState<Mode>("easy");
+  const [explanation, setExplanation] = useState<string | null>(null);
+  const [explanationLoading, setExplanationLoading] = useState(false);
   const recReqRef = useRef(0);
+  const explReqRef = useRef(0);
 
-  // ── Restore from localStorage on mount, before persisting any state ──
+  // ── Restore from localStorage on mount ──
   useEffect(() => {
     const saved = loadSavedState();
     const wantsResult = viewParam === "result";
@@ -80,6 +83,8 @@ export function DecisionApp() {
         setResult(saved.result);
         setServerResultKey(JSON.stringify(saved.result));
       }
+      if (saved.mode) setMode(saved.mode);
+      if (saved.explanation) setExplanation(saved.explanation);
     }
     if (wantsResult) {
       router.replace("/", { scroll: false });
@@ -91,17 +96,41 @@ export function DecisionApp() {
   // ── Persist whenever state changes (after hydration) ──
   useEffect(() => {
     if (!hydrated) return;
-    persistState({ route, decisionText, result });
-  }, [hydrated, route, decisionText, result]);
+    persistState({ route, decisionText, result, mode, explanation });
+  }, [hydrated, route, decisionText, result, mode, explanation]);
+
+  // ── Fetch explanation when result is available and no explanation yet ──
+  useEffect(() => {
+    if (!result || explanation) return;
+    const id = ++explReqRef.current;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setExplanationLoading(true);
+    fetch("/api/explain", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ decisionText, result }),
+    })
+      .then(async (res) => {
+        if (id !== explReqRef.current) return;
+        const body = await res.json().catch(() => null) as { explanation?: string } | null;
+        if (body?.explanation) setExplanation(body.explanation);
+      })
+      .catch(() => { /* non-critical */ })
+      .finally(() => { if (id === explReqRef.current) setExplanationLoading(false); });
+  // Only run when result identity changes (new analysis)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [result?.framework, result?.title]);
 
   // ── Submit ──
-  const submit = (text: string, frameworkId?: FrameworkId) => {
+  const submit = (text: string, frameworkId?: FrameworkId, chosenMode?: Mode) => {
     setText(text);
+    if (chosenMode) setMode(chosenMode);
     setRoute("reading");
     setAnalyzeReady(false);
     setAnalyzeError(null);
     setResult(null);
     setServerResultKey(null);
+    setExplanation(null);
     const id = ++recReqRef.current;
     setRecLoading(true);
     fetchAnalysis(text, frameworkId ? { frameworkId } : undefined)
@@ -123,11 +152,11 @@ export function DecisionApp() {
           void message;
         }
         setRecLoading(false);
-        setAnalyzeReady(true); // advance anyway so the user isn't stuck
+        setAnalyzeReady(true);
       });
   };
 
-  // ── Re-recommend (regenerate just the note for the current data) ──
+  // ── Re-recommend ──
   const rerecommend = () => {
     if (!result) return;
     const id = ++recReqRef.current;
@@ -150,7 +179,6 @@ export function DecisionApp() {
         }
         setResult((prev) => prev ? { ...prev, recommendation: body.recommendation! } : prev);
         setServerResultKey((prevKey) => {
-          // Recompute so the "data changed" indicator resets to current state.
           return prevKey === null ? null : JSON.stringify({ ...result, recommendation: body.recommendation });
         });
         setRecLoading(false);
@@ -178,6 +206,7 @@ export function DecisionApp() {
     setAnalyzeError(null);
     setResult(null);
     setServerResultKey(null);
+    setExplanation(null);
     const reqId = ++recReqRef.current;
     setRecLoading(true);
     fetchAnalysis(decisionText, { frameworkId: alt.id })
@@ -202,12 +231,42 @@ export function DecisionApp() {
       });
   };
 
+  // ── Handle modify-input updates ──
+  const handleModify = (next: FrameworkResult) => {
+    setResult((prev) =>
+      prev
+        ? { ...next, recommendation: prev.recommendation, ...(prev.altFrameworks ? { altFrameworks: prev.altFrameworks } : {}) }
+        : next as AnalysisResult,
+    );
+    setViewVersion((v) => v + 1);
+    // Re-fetch explanation after a modification
+    setExplanation(null);
+  };
+
   const meta = result ? FRAMEWORKS.find((f) => f.id === result.framework) : undefined;
 
   const runningHead =
     route === "result"  ? `on "${decisionText.length > 60 ? decisionText.slice(0, 60) + "…" : decisionText}"` :
     route === "reading" ? "reading" :
                           "a new entry";
+
+  // ── Mode toggle pill ──
+  const ModeToggle = () => (
+    <div className="inline-flex border border-rule rounded-sm overflow-hidden text-[11px] font-code tracking-[0.18em] uppercase">
+      <button
+        onClick={() => setMode("easy")}
+        className={`px-3 py-1.5 transition-colors duration-150 cursor-pointer ${mode === "easy" ? "bg-ink text-paper" : "bg-paper text-ink-muted hover:text-ink"}`}
+      >
+        Simple
+      </button>
+      <button
+        onClick={() => setMode("advanced")}
+        className={`px-3 py-1.5 transition-colors duration-150 cursor-pointer border-l border-rule ${mode === "advanced" ? "bg-ink text-paper" : "bg-paper text-ink-muted hover:text-ink"}`}
+      >
+        Advanced
+      </button>
+    </div>
+  );
 
   return (
     <div className="min-h-screen relative paper-grain">
@@ -222,20 +281,32 @@ export function DecisionApp() {
       />
 
       {/* ── Screens ── */}
-      {route === "compose" && <Composer onSubmit={submit} initialText={decisionText} />}
+      {route === "compose" && <Composer onSubmit={submit} initialText={decisionText} initialResultMode={mode} />}
       {route === "reading" && <ReadingInterstitial text={decisionText} ready={analyzeReady} onDone={() => setRoute("result")} />}
 
       {route === "result" && result && meta && (() => {
         const ActiveView = VIEWS[result.framework];
+        const metrics = METRICS[result.framework]?.(result) ?? [];
+
         return (
           <main className="max-w-[1080px] mx-auto px-4 sm:px-10 py-8 sm:py-14 pb-16 sm:pb-[120px] animate-page-in">
+            {/* ── Header ── */}
             <div className="mb-10">
-              <span className="folio folio-accent block mb-1">{meta.category}</span>
-              <h2 className="font-serif text-[40px] font-medium tracking-[-0.008em] leading-[1.1] text-ink mt-1">{meta.name}</h2>
-              <p className="font-serif italic text-ink-muted text-[17px] mt-2 max-w-[60ch]">
-                {meta.blurb}&nbsp;·&nbsp;on <em>&ldquo;{decisionText}&rdquo;</em>
-              </p>
-              {(() => {
+              <div className="flex items-start justify-between gap-4 flex-wrap">
+                <div>
+                  <span className="folio folio-accent block mb-1">{meta.category}</span>
+                  <h2 className="font-serif text-[40px] font-medium tracking-[-0.008em] leading-[1.1] text-ink mt-1">{meta.name}</h2>
+                  <p className="font-serif italic text-ink-muted text-[17px] mt-2 max-w-[60ch]">
+                    {meta.blurb}&nbsp;·&nbsp;on <em>&ldquo;{decisionText}&rdquo;</em>
+                  </p>
+                </div>
+                <div className="mt-1 shrink-0">
+                  <ModeToggle />
+                </div>
+              </div>
+
+              {/* Advanced-only: help panel + chat button */}
+              {mode === "advanced" && (() => {
                 const help = HELP[result.framework];
                 const chatButton = (
                   <button
@@ -252,56 +323,133 @@ export function DecisionApp() {
               })()}
             </div>
 
-            {result.altFrameworks && result.altFrameworks.length > 0 && (
-              <div className="mb-10 -mt-4">
-                <span className="folio block mb-2">Or try a different angle</span>
-                <div className="flex gap-2 flex-wrap">
-                  {result.altFrameworks.map((alt) => (
-                    <button
-                      key={alt.id}
-                      // eslint-disable-next-line react-hooks/refs -- switchFramework reads a ref but only at click time
-                      onClick={() => switchFramework(alt)}
-                      title={alt.reason}
-                      className="font-serif text-sm text-ink hover:text-paper hover:bg-ink border border-rule hover:border-ink rounded-sm px-3 py-1.5 cursor-pointer transition-colors duration-200 bg-transparent text-left"
-                    >
-                      <span className="font-medium">{alt.name}</span>
-                      <span className="italic text-ink-muted ml-1.5">— {alt.reason}</span>
-                    </button>
-                  ))}
+            {/* ── Easy mode: result strip → modify → explanation → recommendation → alt frameworks ── */}
+            {mode === "easy" && (
+              <>
+                {metrics.length > 0 && (
+                  <div className="mb-10">
+                    <ResultStrip metrics={metrics} />
+                  </div>
+                )}
+
+                <ModifyInput
+                  decisionText={decisionText}
+                  currentData={result}
+                  onUpdate={handleModify}
+                />
+
+                {/* Plain-language explanation */}
+                <div className="border border-rule rounded-sm px-4 sm:px-[52px] py-8 sm:py-10 mb-10 mt-10" style={{ boxShadow: "var(--shadow-letter)" }}>
+                  <div className="font-code text-[11px] tracking-[0.22em] uppercase text-vermilion mb-3.5">
+                    How the analysis works
+                  </div>
+                  {explanationLoading || !explanation ? (
+                    <div className="flex gap-[6px] items-center py-2">
+                      {[0, 1, 2].map((i) => (
+                        <span key={i} className="dm-dot" style={{ animationDelay: `${i * 0.2}s` }} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="font-serif text-[17px] leading-[1.7] text-ink max-w-[62ch]">
+                      {explanation.split(/\n\s*\n/).filter(Boolean).map((p, i) => (
+                        <p key={i} className="mb-4 last:mb-0">{p}</p>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
+
+                <RecommendationCard
+                  key={decisionText}
+                  note={result.recommendation ?? null}
+                  loading={recLoading}
+                  error={analyzeError?.message ?? null}
+                  dataChanged={serverResultKey !== null && JSON.stringify(result) !== serverResultKey}
+                  onRerecommend={rerecommend}
+                />
+
+                {result.altFrameworks && result.altFrameworks.length > 0 && (
+                  <div className="mt-10">
+                    <span className="folio block mb-2">Or try a different angle</span>
+                    <div className="flex gap-2 flex-wrap">
+                      {result.altFrameworks.map((alt) => (
+                        <button
+                          key={alt.id}
+                          // eslint-disable-next-line react-hooks/refs -- switchFramework reads a ref but only at click time
+                          onClick={() => switchFramework(alt)}
+                          title={alt.reason}
+                          className="font-serif text-sm text-ink hover:text-paper hover:bg-ink border border-rule hover:border-ink rounded-sm px-3 py-1.5 cursor-pointer transition-colors duration-200 bg-transparent text-left"
+                        >
+                          <span className="font-medium">{alt.name}</span>
+                          <span className="italic text-ink-muted ml-1.5">— {alt.reason}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
-            <DecisionProvider
-              value={{
-                result,
-                updateResult: (d) =>
-                  setResult((prev) =>
-                    prev ? { ...d, recommendation: prev.recommendation, ...(prev.altFrameworks ? { altFrameworks: prev.altFrameworks } : {}) } : d,
-                  ),
-              }}
-            >
-              <ActiveView
-                key={`${result.framework}:${viewVersion}`}
-                data={result}
-                onUpdate={(d: FrameworkResult) =>
-                  setResult((prev) =>
-                    prev ? { ...d, recommendation: prev.recommendation, ...(prev.altFrameworks ? { altFrameworks: prev.altFrameworks } : {}) } : d,
-                  )
-                }
-              />
-            </DecisionProvider>
+            {/* ── Advanced mode: framework view → result strip → modify → recommendation → alt frameworks ── */}
+            {mode === "advanced" && (
+              <>
+                <DecisionProvider
+                  value={{
+                    result,
+                    updateResult: (d) =>
+                      setResult((prev) =>
+                        prev ? { ...d, recommendation: prev.recommendation, ...(prev.altFrameworks ? { altFrameworks: prev.altFrameworks } : {}) } : d,
+                      ),
+                  }}
+                >
+                  <ActiveView
+                    key={`${result.framework}:${viewVersion}`}
+                    data={result}
+                    onUpdate={(d: FrameworkResult) =>
+                      setResult((prev) =>
+                        prev ? { ...d, recommendation: prev.recommendation, ...(prev.altFrameworks ? { altFrameworks: prev.altFrameworks } : {}) } : d,
+                      )
+                    }
+                  />
+                </DecisionProvider>
 
-            <ResultStrip metrics={METRICS[result.framework]?.(result) ?? []} />
+                <ResultStrip metrics={metrics} />
 
-            <RecommendationCard
-              key={decisionText}
-              note={result.recommendation ?? null}
-              loading={recLoading}
-              error={analyzeError?.message ?? null}
-              dataChanged={serverResultKey !== null && JSON.stringify(result) !== serverResultKey}
-              onRerecommend={rerecommend}
-            />
+                <ModifyInput
+                  decisionText={decisionText}
+                  currentData={result}
+                  onUpdate={handleModify}
+                />
+
+                <RecommendationCard
+                  key={decisionText}
+                  note={result.recommendation ?? null}
+                  loading={recLoading}
+                  error={analyzeError?.message ?? null}
+                  dataChanged={serverResultKey !== null && JSON.stringify(result) !== serverResultKey}
+                  onRerecommend={rerecommend}
+                />
+
+                {result.altFrameworks && result.altFrameworks.length > 0 && (
+                  <div className="mt-10">
+                    <span className="folio block mb-2">Or try a different angle</span>
+                    <div className="flex gap-2 flex-wrap">
+                      {result.altFrameworks.map((alt) => (
+                        <button
+                          key={alt.id}
+                           
+                          onClick={() => switchFramework(alt)}
+                          title={alt.reason}
+                          className="font-serif text-sm text-ink hover:text-paper hover:bg-ink border border-rule hover:border-ink rounded-sm px-3 py-1.5 cursor-pointer transition-colors duration-200 bg-transparent text-left"
+                        >
+                          <span className="font-medium">{alt.name}</span>
+                          <span className="italic text-ink-muted ml-1.5">— {alt.reason}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
 
             <div className="flex gap-3 mt-10 items-center flex-wrap">
               <button className="font-serif text-base font-medium px-[22px] py-3 rounded-sm bg-vermilion text-paper hover:bg-vermilion-deep transition-colors duration-200">
@@ -326,7 +474,7 @@ export function DecisionApp() {
         );
       })()}
 
-      {route === "result" && result && meta && chatOpen && (
+      {route === "result" && result && meta && chatOpen && mode === "advanced" && (
         <ChatFiller
           frameworkId={result.framework}
           frameworkName={meta.name}
