@@ -57,7 +57,7 @@ export function ModifyInput({ decisionText, currentData, onUpdate }: Props) {
       <div className="font-code text-[11px] tracking-[0.22em] uppercase text-ink-muted mb-3">
         Adjust
       </div>
-      <div className="flex gap-2 items-end">
+      <div className="flex gap-2 items-stretch">
         <textarea
           value={instruction}
           onChange={(e) => { setInstruction(e.target.value); setApplied(false); }}
@@ -70,7 +70,7 @@ export function ModifyInput({ decisionText, currentData, onUpdate }: Props) {
         <button
           onClick={() => void submit()}
           disabled={busy || !instruction.trim()}
-          className="font-serif text-sm font-medium px-4 py-2 rounded-sm bg-vermilion text-paper hover:bg-vermilion-deep transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center justify-center font-serif text-sm font-medium px-4 rounded-sm bg-vermilion text-paper hover:bg-vermilion-deep transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Apply
         </button>

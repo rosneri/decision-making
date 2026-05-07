@@ -325,8 +325,10 @@ export function DecisionApp() {
 
   const meta = result ? FRAMEWORKS.find((f) => f.id === result.framework) : undefined;
 
+  const displayText = decisionText.split('\n\nAdditional context:')[0] ?? decisionText;
+
   const runningHead =
-    route === "result"  ? `on "${decisionText.length > 60 ? decisionText.slice(0, 60) + "…" : decisionText}"` :
+    route === "result"  ? `on "${displayText.length > 60 ? displayText.slice(0, 60) + "…" : displayText}"` :
     route === "reading" ? "reading" :
                           "a new entry";
 
@@ -393,10 +395,10 @@ export function DecisionApp() {
                   <span className="folio folio-accent block mb-1">{meta.category}</span>
                   <h2 className="font-serif text-[40px] font-medium tracking-[-0.008em] leading-[1.1] text-ink mt-1">{meta.name}</h2>
                   <p className="font-serif italic text-ink-muted text-[17px] mt-2 max-w-[60ch]">
-                    {meta.blurb}&nbsp;·&nbsp;on <em>&ldquo;{decisionText}&rdquo;</em>
+                    {meta.blurb}&nbsp;·&nbsp;on <em>&ldquo;{displayText}&rdquo;</em>
                   </p>
                 </div>
-                <div className="mt-1 shrink-0">
+                <div className="mt-1 shrink-0 print:hidden">
                   <ModeToggle />
                 </div>
               </div>
@@ -414,25 +416,51 @@ export function DecisionApp() {
                   </button>
                 );
                 return help
-                  ? <FrameworkHelpPanel help={help} trailing={chatButton} />
-                  : <div className="mt-4">{chatButton}</div>;
+                  ? <div className="print:hidden"><FrameworkHelpPanel help={help} trailing={chatButton} /></div>
+                  : <div className="mt-4 print:hidden">{chatButton}</div>;
               })()}
             </div>
 
             {/* ── Easy mode: result strip → modify → explanation → recommendation → alt frameworks ── */}
             {mode === "easy" && (
               <>
+                {/* Framework view — hidden on screen, visible in print */}
+                <div className="hidden print:block mb-8">
+                  <DecisionProvider
+                    value={{
+                      result,
+                      updateResult: (d) =>
+                        setResult((prev) =>
+                          prev ? { ...d, recommendation: prev.recommendation, ...(prev.altFrameworks ? { altFrameworks: prev.altFrameworks } : {}) } : d,
+                        ),
+                    }}
+                  >
+                    <ActiveView
+                      key={`print-${result.framework}:${viewVersion}`}
+                      data={result}
+                      onUpdate={(d: FrameworkResult) =>
+                        setResult((prev) =>
+                          prev ? { ...d, recommendation: prev.recommendation, ...(prev.altFrameworks ? { altFrameworks: prev.altFrameworks } : {}) } : d,
+                        )
+                      }
+                    />
+                  </DecisionProvider>
+                  {metrics.length > 0 && <ResultStrip metrics={metrics} />}
+                </div>
+
                 {metrics.length > 0 && (
-                  <div className="mb-10">
+                  <div className="mb-10 print:hidden">
                     <ResultStrip metrics={metrics} />
                   </div>
                 )}
 
-                <ModifyInput
-                  decisionText={decisionText}
-                  currentData={result}
-                  onUpdate={handleModify}
-                />
+                <div className="print:hidden">
+                  <ModifyInput
+                    decisionText={decisionText}
+                    currentData={result}
+                    onUpdate={handleModify}
+                  />
+                </div>
 
                 {/* Plain-language explanation */}
                 <div className="border border-rule rounded-sm px-4 sm:px-[52px] py-8 sm:py-10 mb-10 mt-10" style={{ boxShadow: "var(--shadow-letter)" }}>
@@ -446,7 +474,7 @@ export function DecisionApp() {
                       ))}
                     </div>
                   ) : (
-                    <div className="font-serif text-[17px] leading-[1.7] text-ink max-w-[62ch]">
+                    <div className="font-serif text-[19px] leading-8 text-ink max-w-[62ch]">
                       {explanation.split(/\n\s*\n/).filter(Boolean).map((p, i) => (
                         <p key={i} className="mb-4 last:mb-0">{p}</p>
                       ))}
@@ -464,7 +492,7 @@ export function DecisionApp() {
                 />
 
                 {result.altFrameworks && result.altFrameworks.length > 0 && (
-                  <div className="mt-10">
+                  <div className="mt-10 print:hidden">
                     <span className="folio block mb-2">Or try a different angle</span>
                     <div className="flex gap-2 flex-wrap">
                       {result.altFrameworks.map((alt) => (
@@ -510,11 +538,27 @@ export function DecisionApp() {
 
                 <ResultStrip metrics={metrics} />
 
-                <ModifyInput
-                  decisionText={decisionText}
-                  currentData={result}
-                  onUpdate={handleModify}
-                />
+                <div className="print:hidden">
+                  <ModifyInput
+                    decisionText={decisionText}
+                    currentData={result}
+                    onUpdate={handleModify}
+                  />
+                </div>
+
+                {/* Plain-language explanation — visible on print in advanced mode too */}
+                {explanation && (
+                  <div className="hidden print:block border border-rule rounded-sm px-[52px] py-10 mb-10 mt-10" style={{ boxShadow: "var(--shadow-letter)" }}>
+                    <div className="font-code text-[11px] tracking-[0.22em] uppercase text-vermilion mb-3.5">
+                      How the analysis works
+                    </div>
+                    <div className="font-serif text-[19px] leading-8 text-ink max-w-[62ch]">
+                      {explanation.split(/\n\s*\n/).filter(Boolean).map((p, i) => (
+                        <p key={i} className="mb-4 last:mb-0">{p}</p>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <RecommendationCard
                   key={decisionText}
@@ -526,13 +570,13 @@ export function DecisionApp() {
                 />
 
                 {result.altFrameworks && result.altFrameworks.length > 0 && (
-                  <div className="mt-10">
+                  <div className="mt-10 print:hidden">
                     <span className="folio block mb-2">Or try a different angle</span>
                     <div className="flex gap-2 flex-wrap">
                       {result.altFrameworks.map((alt) => (
                         <button
                           key={alt.id}
-                           
+
                           onClick={() => switchFramework(alt)}
                           title={alt.reason}
                           className="font-serif text-sm text-ink hover:text-paper hover:bg-ink border border-rule hover:border-ink rounded-sm px-3 py-1.5 cursor-pointer transition-colors duration-200 bg-transparent text-left"
@@ -547,7 +591,7 @@ export function DecisionApp() {
               </>
             )}
 
-            <div className="flex gap-3 mt-10 items-center flex-wrap">
+            <div className="flex gap-3 mt-10 items-center flex-wrap print:hidden">
               <button className="font-serif text-base font-medium px-[22px] py-3 rounded-sm bg-vermilion text-paper hover:bg-vermilion-deep transition-colors duration-200">
                 <span className="sm:hidden">Keep</span><span className="hidden sm:inline">Keep this</span>
               </button>

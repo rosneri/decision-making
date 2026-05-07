@@ -23,7 +23,7 @@ export function View({ data, onUpdate }: { data: Markkula; onUpdate?: (d: Markku
             <li
               key={l}
               data-testid={`lens-${l}`}
-              className={`p-4 grid grid-cols-[150px_1fr_auto] gap-4 items-center ${isWeak ? "bg-vermilion/5" : ""}`}
+              className={`p-4 grid grid-cols-1 sm:grid-cols-[150px_1fr_auto] gap-2 sm:gap-4 items-start sm:items-center ${isWeak ? "bg-vermilion/5" : ""}`}
             >
               <div>
                 <div className={`font-serif text-[16px] font-medium ${isWeak ? "text-vermilion" : "text-ink"}`}>{META[l].label}</div>

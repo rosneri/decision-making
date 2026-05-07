@@ -54,12 +54,12 @@ export function View({ data, onUpdate }: Props) {
 
   return (
     <Card variant="ruled">
-      <div className="flex items-baseline gap-8 py-4 border-b border-rule flex-wrap">
-        <span className="folio">Criteria · weights</span>
+      <div className="flex items-baseline gap-4 sm:gap-8 py-4 border-b border-rule flex-wrap">
+        <span className="folio shrink-0">Criteria · weights</span>
         {state.criteria.map((c, i) => (
-          <div key={i} className="flex items-center gap-2.5 font-serif text-sm">
-            <span className="italic text-ink-muted">{c.name}</span>
-            <Range value={c.weight} onChange={(v) => setWeight(i, v)} min={1} max={10} step={1} className="w-20" ariaLabel={`${c.name} weight`} />
+          <div key={i} className="flex items-center gap-2.5 font-serif text-sm w-full sm:w-auto">
+            <span className="italic text-ink-muted shrink-0">{c.name}</span>
+            <Range value={c.weight} onChange={(v) => setWeight(i, v)} min={1} max={10} step={1} className="flex-1 sm:w-20" ariaLabel={`${c.name} weight`} />
             <span className="font-code text-[13px] font-medium text-vermilion min-w-[28px] text-right">
               {Math.round((c.weight / totalW) * 100)}
             </span>

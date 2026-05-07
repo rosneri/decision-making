@@ -25,7 +25,7 @@ export function View({ data, onUpdate }: { data: AlgoImpact; onUpdate?: (d: Algo
             <li
               key={i}
               data-testid={`ai-risk-${i}`}
-              className={`p-3 grid grid-cols-[1fr_120px_80px_30px] gap-3 items-center ${danger ? "bg-vermilion/5" : ""}`}
+              className={`p-3 grid grid-cols-[1fr_auto_auto_auto] gap-2 sm:gap-3 items-center ${danger ? "bg-vermilion/5" : ""}`}
             >
               <InlineText
                 value={r.dimension}

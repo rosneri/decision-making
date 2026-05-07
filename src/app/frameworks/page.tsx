@@ -40,7 +40,7 @@ export default function FrameworksPage() {
 
       <main className="w-full max-w-[1080px] mx-auto px-5 sm:px-8 md:px-10 py-10 sm:py-16 pb-32">
         {/* Page head */}
-        <div className="mb-16 border-b border-rule pb-10">
+        <div className="mb-16 pb-10">
           <span className="folio folio-accent">§ Library</span>
           <h1 className="font-serif text-[34px] sm:text-[42px] md:text-[52px] leading-[1.06] font-medium tracking-[-0.012em] mt-3.5 text-ink text-balance">
             The frameworks.

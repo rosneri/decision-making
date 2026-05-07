@@ -170,3 +170,10 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .dm-caret, .dm-dot, .dm-wave-bar { animation: none !important; }
 }
+
+/* ===== Print ===== */
+@media print {
+  header { display: none !important; }
+  .paper-grain::after { display: none !important; }
+  body { background: white; color: black; }
+}
