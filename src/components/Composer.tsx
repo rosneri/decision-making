@@ -232,7 +232,7 @@ export function Composer({ onSubmit, initialText = "", initialResultMode = "easy
       {!recording && (
         <div className="mt-6 flex flex-col gap-3">
           {/* Framework row: label left, toggle right */}
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center justify-between sm:justify-start gap-3">
             <span className="folio">Framework</span>
             <div className="inline-flex border border-rule rounded-sm overflow-hidden">
               <button
@@ -278,7 +278,7 @@ export function Composer({ onSubmit, initialText = "", initialResultMode = "easy
           )}
 
           {/* Result style row: label left, toggle right */}
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center justify-between sm:justify-start gap-3">
             <span className="folio">Result style</span>
             <div className="inline-flex border border-rule rounded-sm overflow-hidden">
               <button
