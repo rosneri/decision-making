@@ -16,7 +16,7 @@ export function View({ data, onUpdate }: { data: Deterrence; onUpdate?: (d: Dete
 
   return (
     <Card>
-      <div className="overflow-x-auto"><ul className="divide-y divide-rule min-w-[380px]">
+      <ul className="divide-y divide-rule">
         {COND.map((c) => {
           const cd = s.conditions[c]!;
           const failing = cd.state !== "yes";
@@ -24,7 +24,7 @@ export function View({ data, onUpdate }: { data: Deterrence; onUpdate?: (d: Dete
             <li
               key={c}
               data-testid={`deterrence-${c}`}
-              className={`p-4 grid grid-cols-[140px_1fr_120px] gap-3 items-center ${failing && c === weakest ? "bg-vermilion/5" : ""}`}
+              className={`p-4 grid grid-cols-1 sm:grid-cols-[140px_1fr_120px] gap-2 sm:gap-3 items-start sm:items-center ${failing && c === weakest ? "bg-vermilion/5" : ""}`}
             >
               <div>
                 <div className="font-serif text-[15px] font-medium text-ink">{META[c].label}</div>
@@ -49,7 +49,7 @@ export function View({ data, onUpdate }: { data: Deterrence; onUpdate?: (d: Dete
             </li>
           );
         })}
-      </ul></div>
+      </ul>
       <VerdictBar alarm={!willHold} testId="deterrence-verdict">
         {willHold ? "Deterrence will hold" : `Will fail · weak link: ${META[weakest!].label}`}
       </VerdictBar>

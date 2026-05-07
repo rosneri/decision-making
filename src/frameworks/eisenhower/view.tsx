@@ -71,7 +71,7 @@ export function View({ data, onUpdate }: Props) {
                       onClick={() => updateTask(i, { urgent: !t.urgent })}
                       aria-label="toggle urgent"
                       aria-pressed={t.urgent}
-                      className={toggleClasses(t.urgent)}
+                      className={`${toggleClasses(t.urgent)} hidden sm:flex`}
                     >
                       U
                     </button>
@@ -79,7 +79,7 @@ export function View({ data, onUpdate }: Props) {
                       onClick={() => updateTask(i, { important: !t.important })}
                       aria-label="toggle important"
                       aria-pressed={t.important}
-                      className={toggleClasses(t.important)}
+                      className={`${toggleClasses(t.important)} hidden sm:flex`}
                     >
                       I
                     </button>

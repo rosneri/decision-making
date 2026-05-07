@@ -22,7 +22,7 @@ export function View({ data, onUpdate }: { data: AllisonLenses; onUpdate?: (d: A
           <div
             key={l}
             data-testid={`allison-${l}`}
-            className={`p-4 grid grid-cols-[60px_1fr_140px] gap-3 items-center ${isLoud ? "bg-vermilion/5" : ""}`}
+            className={`p-4 grid grid-cols-1 sm:grid-cols-[60px_1fr_140px] gap-2 sm:gap-3 items-start sm:items-center ${isLoud ? "bg-vermilion/5" : ""}`}
           >
             <span className={`font-serif font-medium text-[28px] ${isLoud ? "text-vermilion" : "text-ink"}`}>{META[l].roman}.</span>
             <div>
