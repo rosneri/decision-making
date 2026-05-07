@@ -63,8 +63,10 @@ export function DecisionApp() {
   const [mode, setMode] = useState<Mode>("easy");
   const [explanation, setExplanation] = useState<string | null>(null);
   const [explanationLoading, setExplanationLoading] = useState(false);
+  const [explanationKey, setExplanationKey] = useState(0);
   const recReqRef = useRef(0);
   const explReqRef = useRef(0);
+  const resultRef = useRef<AnalysisResult | null>(null);
 
   // ── Restore from localStorage on mount ──
   useEffect(() => {
@@ -99,16 +101,22 @@ export function DecisionApp() {
     persistState({ route, decisionText, result, mode, explanation });
   }, [hydrated, route, decisionText, result, mode, explanation]);
 
-  // ── Fetch explanation when result is available and no explanation yet ──
+  // Keep resultRef in sync so the explanation effect always reads fresh data
+  useEffect(() => { resultRef.current = result; }, [result]);
+
+  // ── Fetch explanation whenever explanationKey bumps (new analysis or after modify) ──
   useEffect(() => {
-    if (!result || explanation) return;
+    const current = resultRef.current;
+    if (!current) return;
     const id = ++explReqRef.current;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     setExplanationLoading(true);
+     
+    setExplanation(null);
     fetch("/api/explain", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ decisionText, result }),
+      body: JSON.stringify({ decisionText, result: current }),
     })
       .then(async (res) => {
         if (id !== explReqRef.current) return;
@@ -117,9 +125,9 @@ export function DecisionApp() {
       })
       .catch(() => { /* non-critical */ })
       .finally(() => { if (id === explReqRef.current) setExplanationLoading(false); });
-  // Only run when result identity changes (new analysis)
+  // Re-runs on new analysis (key reset in submit) and after modify (key incremented)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [result?.framework, result?.title]);
+  }, [explanationKey]);
 
   // ── Submit ──
   const submit = (text: string, frameworkId?: FrameworkId, chosenMode?: Mode) => {
@@ -130,16 +138,18 @@ export function DecisionApp() {
     setAnalyzeError(null);
     setResult(null);
     setServerResultKey(null);
-    setExplanation(null);
+    resultRef.current = null;
     const id = ++recReqRef.current;
     setRecLoading(true);
     fetchAnalysis(text, frameworkId ? { frameworkId } : undefined)
       .then((r: AnalysisResult) => {
         if (id !== recReqRef.current) return;
+        resultRef.current = r;
         setResult(r);
         setServerResultKey(JSON.stringify(r));
         setRecLoading(false);
         setAnalyzeReady(true);
+        setExplanationKey((k) => k + 1);
       })
       .catch((err: unknown) => {
         if (id !== recReqRef.current) return;
@@ -206,17 +216,19 @@ export function DecisionApp() {
     setAnalyzeError(null);
     setResult(null);
     setServerResultKey(null);
-    setExplanation(null);
+    resultRef.current = null;
     const reqId = ++recReqRef.current;
     setRecLoading(true);
     fetchAnalysis(decisionText, { frameworkId: alt.id })
       .then((r: AnalysisResult) => {
         if (reqId !== recReqRef.current) return;
         const merged: AnalysisResult = { ...r, altFrameworks: carryOverAlts };
+        resultRef.current = merged;
         setResult(merged);
         setServerResultKey(JSON.stringify(merged));
         setRecLoading(false);
         setAnalyzeReady(true);
+        setExplanationKey((k) => k + 1);
       })
       .catch((err: unknown) => {
         if (reqId !== recReqRef.current) return;
@@ -233,14 +245,15 @@ export function DecisionApp() {
 
   // ── Handle modify-input updates ──
   const handleModify = (next: FrameworkResult) => {
-    setResult((prev) =>
-      prev
-        ? { ...next, recommendation: prev.recommendation, ...(prev.altFrameworks ? { altFrameworks: prev.altFrameworks } : {}) }
-        : next as AnalysisResult,
-    );
+    const merged: AnalysisResult = {
+      ...next,
+      recommendation: (result?.recommendation) ?? (next as AnalysisResult).recommendation,
+      ...(result?.altFrameworks ? { altFrameworks: result.altFrameworks } : {}),
+    };
+    resultRef.current = merged;
+    setResult(merged);
     setViewVersion((v) => v + 1);
-    // Re-fetch explanation after a modification
-    setExplanation(null);
+    setExplanationKey((k) => k + 1);
   };
 
   const meta = result ? FRAMEWORKS.find((f) => f.id === result.framework) : undefined;
