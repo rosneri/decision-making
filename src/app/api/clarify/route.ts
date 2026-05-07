@@ -9,48 +9,42 @@ const anthropic = createAnthropic(apiKey ? { apiKey } : {});
 
 export const maxDuration = 30;
 
-const QuestionSchema = z.discriminatedUnion("type", [
-  z.object({
-    id: z.string().describe("short snake_case identifier, e.g. timeline"),
-    text: z.string().describe("the question to ask the user"),
-    type: z.literal("choice"),
-    options: z.array(z.string()).min(2).max(6).describe("2–6 concrete answer options"),
-    multiSelect: z.boolean().describe("true if more than one option may apply"),
-  }),
-  z.object({
-    id: z.string(),
-    text: z.string(),
-    type: z.literal("text"),
-  }),
-]);
+const QuestionSchema = z.object({
+  id: z.string().describe("short snake_case identifier, e.g. timeline"),
+  text: z.string().describe("the question to ask the user"),
+  type: z.enum(["choice", "text"]),
+  options: z.array(z.string()).max(6).optional().describe("2–6 concrete options, only for choice type"),
+  multiSelect: z.boolean().optional().describe("true if more than one option may apply, only for choice type"),
+});
 
-const ResponseSchema = z.discriminatedUnion("skip", [
-  z.object({ skip: z.literal(true) }),
-  z.object({
-    skip: z.literal(false),
-    questions: z.array(QuestionSchema).min(1).max(3),
-  }),
-]);
+const ResponseSchema = z.object({
+  needsClarification: z.boolean().describe("true if follow-up questions should be shown"),
+  questions: z.array(QuestionSchema).max(3).describe("1–3 questions when needsClarification is true, empty array otherwise"),
+});
 
-const SYSTEM = `You are a decision-clarification assistant. Your only job is to decide whether a decision statement has enough context for structured analysis, and if not, to ask the minimum number of targeted follow-up questions.
+const SYSTEM = `You are a decision-clarification assistant. Read the user's decision and decide whether asking 1–3 short follow-up questions would meaningfully improve the analysis.
 
-SKIP (return skip: true) when:
-- The decision is specific and well-scoped (a clear trade-off, named alternatives, or a defined situation)
-- More context would not meaningfully change the analysis
-- The user is already describing a concrete situation
+Ask questions (needsClarification: true) when the decision is missing context that would change which analytical approach fits — for example: unclear domain, unknown stakes, missing time horizon, ambiguous alternatives, or unknown relationship between parties.
 
-ASK (return skip: false, 1–3 questions) only when:
-- The decision is so brief or vague that you cannot tell what domain, stakes, or constraints are involved
-- One or two pieces of context would dramatically change which framework fits
-- The user has given almost no information (e.g. "should I do it", "not sure what to do")
+Examples that SHOULD get questions:
+- "I don't know what to do" → what domain? what options?
+- "Should I do it?" → do what? what are the options?
+- "Thinking about a big change" → what kind of change? personal, career, financial?
+- "Help me decide" → decide what?
+- "I'm torn between two things" → what are they?
+- "Should I take the offer?" → what kind of offer? career, financial, partnership?
 
-Questions must be:
-- Focused on what is genuinely missing, not nice-to-have background
-- Worded plainly and directly — no jargon
-- choice type when there are obvious buckets (timeline, stakes, relationship); text type only when no buckets make sense
-- multiSelect: true only when multiple options genuinely co-apply (e.g. stakeholders involved)
+Examples that should skip (needsClarification: false):
+- "Should I leave my $120k engineering job at Google for a 3-person startup paying $90k?" → specific enough
+- "Whether to move closer to family or stay for my career" → clear trade-off
+- "How to prioritize Q3 features: payments, notifications, or analytics" → concrete alternatives
 
-Default to skip. When in doubt, skip.`;
+When you do ask questions, make them:
+- Focused on what genuinely changes the analysis, not nice background detail
+- choice type with 3–5 concrete options when obvious buckets exist; text type when open-ended
+- multiSelect: true only when more than one option realistically applies at once
+
+Return needsClarification: false and questions: [] when the decision is specific enough to analyze directly.`;
 
 export async function POST(req: Request) {
   const body = await req.json() as { decisionText?: string };
@@ -69,13 +63,29 @@ export async function POST(req: Request) {
       schema: ResponseSchema,
       system: SYSTEM,
       prompt: `Decision the user submitted:\n\n"${decisionText.trim()}"`,
-      maxOutputTokens: 600,
+      maxOutputTokens: 800,
     });
-    return NextResponse.json(object);
+
+    if (!object.needsClarification || object.questions.length === 0) {
+      return NextResponse.json({ skip: true });
+    }
+
+    // Normalise: ensure choice questions always have options
+    const questions = object.questions
+      .filter((q) => q.type !== "choice" || (q.options && q.options.length >= 2))
+      .map((q) => ({
+        id: q.id,
+        text: q.text,
+        type: q.type,
+        ...(q.type === "choice" ? { options: q.options ?? [], multiSelect: q.multiSelect ?? false } : {}),
+      }));
+
+    if (questions.length === 0) return NextResponse.json({ skip: true });
+
+    return NextResponse.json({ skip: false, questions });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     console.error("[/api/clarify] failed:", message);
-    // On error, skip clarification so the user isn't blocked
     return NextResponse.json({ skip: true });
   }
 }
