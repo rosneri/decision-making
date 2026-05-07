@@ -171,9 +171,9 @@ export function Composer({ onSubmit, initialText = "", initialResultMode = "easy
 
       {/* Framework + Result style choices */}
       {!recording && (
-        <div className="mt-6 flex items-start justify-between gap-4 flex-wrap">
-          {/* Framework */}
-          <div className="flex items-center gap-3 flex-wrap">
+        <div className="mt-6 flex flex-col gap-3">
+          {/* Framework row: label left, toggle right */}
+          <div className="flex items-center justify-between gap-3">
             <span className="folio">Framework</span>
             <div className="inline-flex border border-rule rounded-sm overflow-hidden">
               <button
@@ -199,27 +199,27 @@ export function Composer({ onSubmit, initialText = "", initialResultMode = "easy
                 Manual
               </button>
             </div>
-
-            {mode === "manual" && (
-              <select
-                value={frameworkId}
-                onChange={(e) => setFrameworkId(e.target.value as FrameworkId)}
-                className="font-serif text-[15px] text-ink bg-transparent border border-rule rounded-sm px-3 py-1.5 cursor-pointer hover:border-ink focus:outline-none focus:border-ink max-w-full"
-              >
-                <option value="" disabled>Choose a framework…</option>
-                {grouped.map(([cat, items]) => (
-                  <optgroup key={cat} label={cat}>
-                    {items.map((f) => (
-                      <option key={f.id} value={f.id}>{f.name}</option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-            )}
           </div>
 
-          {/* Result style */}
-          <div className="flex items-center gap-3 flex-wrap">
+          {mode === "manual" && (
+            <select
+              value={frameworkId}
+              onChange={(e) => setFrameworkId(e.target.value as FrameworkId)}
+              className="w-full font-serif text-[15px] text-ink bg-transparent border border-rule rounded-sm px-3 py-1.5 cursor-pointer hover:border-ink focus:outline-none focus:border-ink"
+            >
+              <option value="" disabled>Choose a framework…</option>
+              {grouped.map(([cat, items]) => (
+                <optgroup key={cat} label={cat}>
+                  {items.map((f) => (
+                    <option key={f.id} value={f.id}>{f.name}</option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+          )}
+
+          {/* Result style row: label left, toggle right */}
+          <div className="flex items-center justify-between gap-3">
             <span className="folio">Result style</span>
             <div className="inline-flex border border-rule rounded-sm overflow-hidden">
               <button
