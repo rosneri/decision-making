@@ -26,7 +26,7 @@ export function View({ data, onUpdate }: { data: Veil; onUpdate?: (d: Veil) => v
           className="block w-full mt-1"
         />
       </div>
-      <div className="grid grid-cols-2 divide-x divide-rule">
+      <div className="grid grid-cols-1 divide-y sm:grid-cols-2 sm:divide-y-0 sm:divide-x divide-rule">
         {s.seats.map((seat, i) => {
           const isWorst = seat === worst;
           return (

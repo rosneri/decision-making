@@ -38,11 +38,11 @@ export default function FrameworksPage() {
     <>
       <LibraryHeader />
 
-      <main className="max-w-[1080px] mx-auto px-10 py-16 pb-32">
+      <main className="w-full max-w-[1080px] mx-auto px-5 sm:px-8 md:px-10 py-10 sm:py-16 pb-32">
         {/* Page head */}
         <div className="mb-16 border-b border-rule pb-10">
           <span className="folio folio-accent">§ Library</span>
-          <h1 className="font-serif text-[52px] leading-[1.06] font-medium tracking-[-0.012em] mt-3.5 text-ink text-balance">
+          <h1 className="font-serif text-[34px] sm:text-[42px] md:text-[52px] leading-[1.06] font-medium tracking-[-0.012em] mt-3.5 text-ink text-balance">
             The frameworks.
           </h1>
           <p className="font-serif italic text-[19px] leading-[30px] text-ink-muted max-w-[56ch] mt-4">
@@ -55,7 +55,7 @@ export default function FrameworksPage() {
           </p>
 
           {/* Search */}
-          <div className="mt-10 flex items-baseline gap-4 max-w-[56ch]">
+          <div className="mt-10 flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-4 max-w-[56ch]">
             <label
               htmlFor="library-search"
               className="folio folio-accent shrink-0"
@@ -84,17 +84,17 @@ export default function FrameworksPage() {
             No frameworks match &ldquo;{query}&rdquo;.
           </p>
         ) : (
-          <div className="space-y-24">
+          <div className="space-y-16 sm:space-y-24">
             {filtered.map((f, idx) => (
               <section key={f.id} id={f.id} className="scroll-mt-8">
                 {/* Section head */}
-                <div className="grid mb-10" style={{ gridTemplateColumns: "auto 1fr", gap: 28, alignItems: "baseline" }}>
-                  <span className="font-serif font-medium text-[64px] leading-[0.9] text-vermilion tracking-[-0.02em]">
+                <div className="flex flex-col sm:grid sm:grid-cols-[auto_1fr] gap-2 sm:gap-7 items-baseline mb-10">
+                  <span className="font-serif font-medium text-[44px] sm:text-[64px] leading-[0.9] text-vermilion tracking-[-0.02em]">
                     {toRoman(idx + 1)}.
                   </span>
                   <div>
                     <span className="folio folio-accent block mb-1">Framework</span>
-                    <h2 className="font-serif text-[40px] font-medium tracking-[-0.008em] leading-[1.1] mt-1.5 text-ink">
+                    <h2 className="font-serif text-[28px] sm:text-[34px] md:text-[40px] font-medium tracking-[-0.008em] leading-[1.1] mt-1.5 text-ink">
                       {f.name}
                     </h2>
                     <p className="font-serif italic text-ink-muted text-[17px] mt-2 max-w-[60ch]">
@@ -112,7 +112,7 @@ export default function FrameworksPage() {
         )}
 
         {/* Footer rule */}
-        <div className="mt-24 pt-8 border-t border-rule flex items-center justify-between">
+        <div className="mt-24 pt-8 border-t border-rule flex flex-wrap items-center justify-between gap-y-2">
           <span className="folio">Decision Making</span>
           <Link
             href="/"

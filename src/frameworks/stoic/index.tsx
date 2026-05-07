@@ -19,7 +19,7 @@ export function View({ data, onUpdate }: { data: Stoic; onUpdate?: (d: Stoic) =>
   };
 
   return (
-    <Card className="grid grid-cols-2 divide-x divide-ink">
+    <Card className="grid grid-cols-1 divide-y sm:grid-cols-2 sm:divide-y-0 sm:divide-x divide-ink">
       <div className="p-4 bg-vermilion/5">
         <MicroLabel accent bold>Yours · act on these</MicroLabel>
         <ul className="mt-3 space-y-1" data-testid="stoic-yours">

@@ -18,7 +18,7 @@ export function View({ data, onUpdate }: { data: CrossValidation; onUpdate?: (d:
 
   return (
     <Card>
-      <table className="w-full" data-testid="cv-table">
+      <div className="overflow-x-auto"><table className="w-full min-w-[480px]" data-testid="cv-table">
         <thead>
           <tr>
             <th className="text-left px-3 py-2 border-b border-rule"><MicroLabel>Model</MicroLabel></th>
@@ -66,7 +66,7 @@ export function View({ data, onUpdate }: { data: CrossValidation; onUpdate?: (d:
             );
           })}
         </tbody>
-      </table>
+      </table></div>
     </Card>
   );
 }

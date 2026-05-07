@@ -36,7 +36,7 @@ export function View({ data, onUpdate }: { data: Odyssey; onUpdate?: (d: Odyssey
                 <circle key={x} cx={x * 40 + 10} cy={30 - y * 3} r={2} fill={isPreferred ? "var(--vermilion)" : "var(--ink)"} />
               ))}
             </svg>
-            <div className="grid grid-cols-3 gap-3 mt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2">
               {(["resources", "likeability", "confidence"] as const).map((k) => (
                 <RangeField
                   key={k}

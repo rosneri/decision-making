@@ -26,7 +26,7 @@ export function View({ data, onUpdate }: { data: Mpt; onUpdate?: (d: Mpt) => voi
         />
         {off && <span className="ml-auto font-code text-[10px] tracking-[0.22em] uppercase text-vermilion" data-testid="mpt-warn">weights sum {(p.totalW * 100).toFixed(0)}%</span>}
       </div>
-      <table className="w-full text-[13px]">
+      <div className="overflow-x-auto"><table className="w-full min-w-[480px] text-[13px]">
         <thead>
           <tr className="border-b border-rule">
             <th className="p-2 text-left font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">Asset</th>
@@ -71,13 +71,13 @@ export function View({ data, onUpdate }: { data: Mpt; onUpdate?: (d: Mpt) => voi
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
       <div className="p-3 border-b border-rule">
         <AddButton onClick={() => upd({ ...s, assets: [...s.assets, { name: "", weight: 0, expectedReturn: 0.05, volatility: 0.1 }] })}>
           + add asset
         </AddButton>
       </div>
-      <div className="p-4 grid grid-cols-3 text-center bg-vermilion/5">
+      <div className="p-4 grid grid-cols-1 sm:grid-cols-3 text-center bg-vermilion/5">
         <div>
           <MicroLabel>Expected</MicroLabel>
           <p className="font-serif font-medium text-[24px] mt-1" data-testid="mpt-expected">{(p.expected * 100).toFixed(2)}%</p>

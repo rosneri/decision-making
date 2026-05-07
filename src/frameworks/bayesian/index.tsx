@@ -29,7 +29,7 @@ export function View({ data, onUpdate }: { data: Bayesian; onUpdate?: (d: Bayesi
           <span className="font-code text-[10px] text-ink-muted">P(H) = {(s.prior * 100).toFixed(0)}%</span>
         </div>
       </div>
-      <table className="w-full text-[13px]">
+      <div className="overflow-x-auto"><table className="w-full min-w-[480px] text-[13px]">
         <thead>
           <tr className="border-b border-rule">
             <th className="p-2 text-left font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">Evidence</th>
@@ -77,7 +77,7 @@ export function View({ data, onUpdate }: { data: Bayesian; onUpdate?: (d: Bayesi
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
       <div className="p-3 border-b border-rule">
         <AddButton onClick={() => upd({ ...s, evidence: [...s.evidence, { name: "", pIfTrue: 0.5, pIfFalse: 0.5, observed: false }] })}>
           + add evidence

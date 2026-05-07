@@ -14,12 +14,12 @@ export function ResultStrip({ label = "Result", metrics }: Props) {
   return (
     <div
       data-testid="framework-result"
-      className="border-t border-vermilion bg-vermilion/5 px-6 py-3 flex items-baseline gap-5"
+      className="border-t border-vermilion bg-vermilion/5 px-4 sm:px-6 py-3 flex flex-wrap items-baseline gap-x-5 gap-y-2"
     >
       <span className="font-code text-[11px] tracking-[0.22em] uppercase text-vermilion font-medium">
         {label}
       </span>
-      <span className="ml-auto flex items-baseline gap-5 flex-wrap justify-end">
+      <span className="sm:ml-auto flex items-baseline gap-5 flex-wrap justify-start sm:justify-end">
         {metrics.map((m) => (
           <span key={m.k} className="inline-flex items-baseline gap-2">
             <span className="font-code text-[11px] tracking-[0.22em] uppercase text-ink-muted">

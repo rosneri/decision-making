@@ -43,7 +43,7 @@ export function View({ data, onUpdate }: { data: Wardley; onUpdate?: (d: Wardley
         ))}
       </div>
       <div className="border-t border-rule">
-        <table className="w-full">
+        <div className="overflow-x-auto"><table className="w-full min-w-[420px]">
           <thead>
             <tr>
               <th className="text-left px-3 py-2"><MicroLabel>Component</MicroLabel></th>
@@ -79,7 +79,7 @@ export function View({ data, onUpdate }: { data: Wardley; onUpdate?: (d: Wardley
               </tr>
             ))}
           </tbody>
-        </table>
+        </table></div>
         <AddButton onClick={add} className="px-3 py-2 border-t border-rule w-full text-left">+ add component</AddButton>
       </div>
     </Card>

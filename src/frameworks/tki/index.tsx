@@ -14,7 +14,7 @@ export function View({ data, onUpdate }: { data: Tki; onUpdate?: (d: Tki) => voi
 
   return (
     <Card>
-      <div className="p-4 grid grid-cols-2 gap-4 border-b border-rule">
+      <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-rule">
         <label>
           <MicroLabel>Assertiveness</MicroLabel>
           <Range

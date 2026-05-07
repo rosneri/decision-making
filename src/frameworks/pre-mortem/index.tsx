@@ -24,7 +24,7 @@ export function View({ data, onUpdate }: { data: PreMortem; onUpdate?: (d: PreMo
           className="block w-full mt-1"
         />
       </HeaderBand>
-      <table className="w-full">
+      <div className="overflow-x-auto"><table className="w-full min-w-[420px]">
         <thead>
           <tr>
             <th className="text-left px-3 py-2 border-b border-rule"><MicroLabel>Postmortem cause</MicroLabel></th>
@@ -73,7 +73,7 @@ export function View({ data, onUpdate }: { data: PreMortem; onUpdate?: (d: PreMo
             );
           })}
         </tbody>
-      </table>
+      </table></div>
       <AddButton onClick={add} className="px-3 py-2 w-full text-left">+ another cause</AddButton>
     </Card>
   );

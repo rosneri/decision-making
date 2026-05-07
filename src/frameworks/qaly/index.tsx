@@ -37,7 +37,7 @@ export function View({ data, onUpdate }: { data: Qaly; onUpdate?: (d: Qaly) => v
           />
         </label>
       </div>
-      <table className="w-full">
+      <div className="overflow-x-auto"><table className="w-full min-w-[480px]">
         <thead>
           <tr>
             <th className={`${head} text-left`}><MicroLabel>Intervention</MicroLabel></th>
@@ -97,7 +97,7 @@ export function View({ data, onUpdate }: { data: Qaly; onUpdate?: (d: Qaly) => v
             );
           })}
         </tbody>
-      </table>
+      </table></div>
       <AddButton onClick={add} className="px-3 py-2 w-full text-left border-t border-rule">+ intervention</AddButton>
       <div className="p-4 border-t border-rule bg-paper-deep">
         <MicroLabel>Funded</MicroLabel>

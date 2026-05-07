@@ -159,7 +159,7 @@ export function View({ data, onUpdate }: Props) {
 
   return (
     <div className="relative pt-6">
-      <div className="relative h-[380px] border-t-2 border-t-ink border-b border-b-ink bg-paper overflow-visible">
+      <div className="relative h-[380px] border-t-2 border-t-ink border-b border-b-ink bg-paper overflow-x-clip overflow-y-visible">
         <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" className="absolute inset-0 w-full h-full pointer-events-none">
           <line x1="40" y1={H - 30} x2={W - 40} y2={H - 30} stroke="var(--rule)" strokeDasharray="2 4" strokeWidth="1" />
           <line x1={cx} y1={beamY} x2={cx} y2={H - 30} stroke="var(--ink)" strokeWidth="2" strokeLinecap="square" />
@@ -221,7 +221,7 @@ export function View({ data, onUpdate }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-8 mt-8 pt-6 border-t border-rule">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mt-8 pt-6 border-t border-rule">
         <div>
           <h4 className="mb-3"><MicroLabel bold className="text-[11px]">Benefit </MicroLabel><span className="font-code text-[11px] tracking-[0.22em] uppercase text-vermilion">— what you&apos;d gain</span></h4>
           <AddRow

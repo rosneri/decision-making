@@ -19,7 +19,7 @@ export function View({ data, onUpdate }: { data: Ria; onUpdate?: (d: Ria) => voi
 
   return (
     <Card>
-      <ul className="divide-y divide-rule">
+      <div className="overflow-x-auto"><ul className="divide-y divide-rule min-w-[480px]">
         {s.stakeholders.map((x, i) => {
           const concern = x.netImpact < 0 && x.power >= 3;
           return (
@@ -65,9 +65,9 @@ export function View({ data, onUpdate }: { data: Ria; onUpdate?: (d: Ria) => voi
             </li>
           );
         })}
-      </ul>
+      </ul></div>
       <AddButton onClick={add} className="px-3 py-2 border-t border-rule w-full text-left">+ stakeholder</AddButton>
-      <div className="grid grid-cols-2 border-t border-rule">
+      <div className="grid grid-cols-1 sm:grid-cols-2 border-t border-rule">
         <div className="p-4">
           <MicroLabel>Net benefit</MicroLabel>
           <div className={`font-serif font-medium text-[24px] mt-1 ${sum >= 0 ? "text-ink" : "text-vermilion"}`} data-testid="ria-net">

@@ -14,7 +14,7 @@ export function View({ data, onUpdate }: { data: Inversion; onUpdate?: (d: Inver
   const rm = (i: number) => upd({ ...s, failureModes: s.failureModes.filter((_, j) => j !== i) });
 
   return (
-    <Card className="grid grid-cols-2">
+    <Card className="grid grid-cols-1 sm:grid-cols-2">
       <div className="p-6 opacity-50 border-r border-rule">
         <MicroLabel>Forward</MicroLabel>
         <p className="font-serif italic text-[15px] text-ink mt-1">how could it succeed?</p>
