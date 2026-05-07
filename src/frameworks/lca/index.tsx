@@ -44,7 +44,7 @@ export function View({ data, onUpdate }: { data: Lca; onUpdate?: (d: Lca) => voi
           ))}
         </div>
       </div>
-      <table className="w-full border-t border-rule">
+      <div className="overflow-x-auto"><table className="w-full min-w-[420px] border-t border-rule">
         <tbody>
           {s.stages.map((st, i) => (
             <tr key={i} className="border-b border-rule">
@@ -69,9 +69,9 @@ export function View({ data, onUpdate }: { data: Lca; onUpdate?: (d: Lca) => voi
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
       <AddButton onClick={add} className="px-3 py-2 border-t border-rule w-full text-left">+ stage</AddButton>
-      <div className="p-4 border-t border-rule grid grid-cols-2">
+      <div className="p-4 border-t border-rule grid grid-cols-1 sm:grid-cols-2">
         <div>
           <MicroLabel>Total</MicroLabel>
           <div className="font-serif font-medium text-[20px] text-ink mt-1" data-testid="lca-total">{total} {s.unit}</div>

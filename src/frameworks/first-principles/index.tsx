@@ -29,7 +29,7 @@ export function View({ data, onUpdate }: { data: FirstPrinciples; onUpdate?: (d:
           className="block w-full mt-1 text-[18px]"
         />
       </div>
-      <div className="grid grid-cols-3 divide-x divide-rule">
+      <div className="grid grid-cols-1 divide-y sm:grid-cols-3 sm:divide-y-0 sm:divide-x divide-rule">
         {s.questions.map((q, i) => (
           <div key={i} className="p-5 group relative">
             <div className="flex items-baseline gap-2 mb-2">

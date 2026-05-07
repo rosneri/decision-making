@@ -21,7 +21,7 @@ export function View({ data, onUpdate }: { data: Batna; onUpdate?: (d: Batna) =>
 
   return (
     <Card>
-      <div className="grid grid-cols-2 divide-x divide-rule border-b border-rule">
+      <div className="grid grid-cols-1 divide-y sm:grid-cols-2 sm:divide-y-0 sm:divide-x divide-rule border-b border-rule">
         {[
           { k: "yourBatna" as const, label: "Your BATNA", val: s.yourBatna },
           { k: "theirBatna" as const, label: "Their BATNA", val: s.theirBatna },
@@ -66,7 +66,7 @@ export function View({ data, onUpdate }: { data: Batna; onUpdate?: (d: Batna) =>
           <span className="absolute -bottom-5 font-code text-[11px] text-ink-muted" style={{ left: `${pct(lo)}%`, transform: "translateX(-50%)" }}>{lo}</span>
           <span className="absolute -bottom-5 font-code text-[11px] text-ink-muted" style={{ left: `${pct(hi)}%`, transform: "translateX(-50%)" }}>{hi}</span>
         </div>
-        <div className="grid grid-cols-2 gap-4 mt-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-10">
           <label>
             <MicroLabel>Anchor first at</MicroLabel>
             <input

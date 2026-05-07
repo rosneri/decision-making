@@ -14,7 +14,7 @@ export function View({ data, onUpdate }: { data: Inversion; onUpdate?: (d: Inver
   const rm = (i: number) => upd({ ...s, failureModes: s.failureModes.filter((_, j) => j !== i) });
 
   return (
-    <Card className="grid grid-cols-2">
+    <Card className="grid grid-cols-1 sm:grid-cols-2">
       <div className="p-6 opacity-50 border-r border-rule">
         <MicroLabel>Forward</MicroLabel>
         <p className="font-serif italic text-[15px] text-ink mt-1">how could it succeed?</p>
@@ -26,7 +26,7 @@ export function View({ data, onUpdate }: { data: Inversion; onUpdate?: (d: Inver
         <p className="font-serif italic text-[12px] text-ink-muted mt-3">(set this aside — flip the question.)</p>
       </div>
       <div className="p-6 relative">
-        <span className="absolute -left-3 top-6 bg-paper px-1 font-code text-[10px] tracking-[0.22em] text-vermilion font-medium">Flip ↺</span>
+        <span className="hidden sm:block absolute -left-3 top-1/2 -translate-y-1/2 bg-paper px-1 font-code text-[10px] tracking-[0.22em] text-vermilion font-medium">Flip ↺</span>
         <MicroLabel accent bold>Invert</MicroLabel>
         <p className="font-serif italic text-[15px] text-ink mt-1">how could it fail?</p>
         <ul className="mt-3 space-y-1">

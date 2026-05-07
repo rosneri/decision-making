@@ -16,7 +16,7 @@ export function View({ data, onUpdate }: { data: Deterrence; onUpdate?: (d: Dete
 
   return (
     <Card>
-      <ul className="divide-y divide-rule">
+      <div className="overflow-x-auto"><ul className="divide-y divide-rule min-w-[380px]">
         {COND.map((c) => {
           const cd = s.conditions[c]!;
           const failing = cd.state !== "yes";
@@ -49,7 +49,7 @@ export function View({ data, onUpdate }: { data: Deterrence; onUpdate?: (d: Dete
             </li>
           );
         })}
-      </ul>
+      </ul></div>
       <VerdictBar alarm={!willHold} testId="deterrence-verdict">
         {willHold ? "Deterrence will hold" : `Will fail · weak link: ${META[weakest!].label}`}
       </VerdictBar>

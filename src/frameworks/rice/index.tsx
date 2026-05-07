@@ -22,7 +22,7 @@ export function View({ data, onUpdate }: { data: Rice; onUpdate?: (d: Rice) => v
 
   return (
     <Card variant="ruled">
-      <table className="w-full border-collapse" data-testid="rice-table">
+      <div className="overflow-x-auto"><table className="w-full min-w-[480px] border-collapse" data-testid="rice-table">
         <thead>
           <tr>
             <th className={`${headCell} text-left`}><MicroLabel>Feature</MicroLabel></th>
@@ -70,7 +70,7 @@ export function View({ data, onUpdate }: { data: Rice; onUpdate?: (d: Rice) => v
             );
           })}
         </tbody>
-      </table>
+      </table></div>
       <div className="px-3 py-3 font-code text-[11px] text-ink-muted border-b border-rule">
         score = (R × I × C) ÷ E
       </div>

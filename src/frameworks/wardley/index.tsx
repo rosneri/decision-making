@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Card, MicroLabel, InlineText, Range, AddButton, RemoveButton } from "@/components/ui";
+import { Card, MicroLabel, InlineText, Range, AddButton, RemoveButton, Checkbox } from "@/components/ui";
 import { meta, schema, sample, type Wardley, STAGES } from "./data";
 export { meta, schema, sample };
 export type { Wardley };
@@ -43,7 +43,7 @@ export function View({ data, onUpdate }: { data: Wardley; onUpdate?: (d: Wardley
         ))}
       </div>
       <div className="border-t border-rule">
-        <table className="w-full">
+        <div className="overflow-x-auto"><table className="w-full min-w-[420px]">
           <thead>
             <tr>
               <th className="text-left px-3 py-2"><MicroLabel>Component</MicroLabel></th>
@@ -66,11 +66,10 @@ export function View({ data, onUpdate }: { data: Wardley; onUpdate?: (d: Wardley
                   <Range value={n.evolution} onChange={(v) => set(i, { evolution: v })} min={0} max={100} ariaLabel={`evolution ${n.name}`} className="w-24" />
                 </td>
                 <td className="px-3 py-2 text-center">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={!!n.invest}
-                    onChange={(e) => set(i, { invest: e.target.checked })}
-                    aria-label={`invest in ${n.name}`}
+                    onChange={(v) => set(i, { invest: v })}
+                    ariaLabel={`invest in ${n.name}`}
                   />
                 </td>
                 <td className="px-3 py-2">
@@ -79,7 +78,7 @@ export function View({ data, onUpdate }: { data: Wardley; onUpdate?: (d: Wardley
               </tr>
             ))}
           </tbody>
-        </table>
+        </table></div>
         <AddButton onClick={add} className="px-3 py-2 border-t border-rule w-full text-left">+ add component</AddButton>
       </div>
     </Card>

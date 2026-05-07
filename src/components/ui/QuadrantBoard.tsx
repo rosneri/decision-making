@@ -23,12 +23,10 @@ export function QuadrantBoard({
   axes,
   quadrants,
   renderBody,
-  minHeight = 220,
 }: {
   axes: { top: string; bottom: string; left: string; right: string };
   quadrants: Quadrant[];
   renderBody: (q: Quadrant) => ReactNode;
-  minHeight?: number;
 }) {
   const labelCls = "absolute bg-paper px-2 whitespace-nowrap";
   return (
@@ -46,8 +44,7 @@ export function QuadrantBoard({
         <div
           key={q.key}
           data-quadrant={q.key}
-          className={`p-6 flex flex-col ${POS_BORDER[q.position]}`}
-          style={{ minHeight }}
+          className={`p-3 sm:p-6 min-h-[140px] sm:min-h-[220px] flex flex-col ${POS_BORDER[q.position]}`}
         >
           <QuadrantHeader roman={q.roman} label={q.label} {...(q.sub ? { sub: q.sub } : {})} />
           {renderBody(q)}
@@ -63,7 +60,7 @@ export function QuadrantHeader({ roman, label, sub }: { roman: string; label: st
       <span className="font-serif font-medium text-[22px] text-vermilion">{roman}.</span>
       <span className="font-code text-[11px] tracking-[0.22em] uppercase font-medium text-ink">{label}</span>
       {sub && (
-        <span className="font-code text-[10px] tracking-[0.18em] uppercase text-ink-muted ml-auto">{sub}</span>
+        <span className="hidden sm:inline font-code text-[10px] tracking-[0.18em] uppercase text-ink-muted ml-auto">{sub}</span>
       )}
     </div>
   );

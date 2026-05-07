@@ -26,7 +26,7 @@ export function View({ data, onUpdate }: { data: Elo; onUpdate?: (d: Elo) => voi
       <div className="grid grid-cols-1 md:grid-cols-2 divide-x divide-rule">
         <div className="p-4">
           <MicroLabel bold>Players</MicroLabel>
-          <table className="w-full mt-2">
+          <div className="overflow-x-auto"><table className="w-full min-w-[380px] mt-2">
             <thead>
               <tr className="border-b border-rule">
                 <th className="p-1 text-left font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">Name</th>
@@ -61,7 +61,7 @@ export function View({ data, onUpdate }: { data: Elo; onUpdate?: (d: Elo) => voi
                 );
               })}
             </tbody>
-          </table>
+          </table></div>
           <div className="mt-2">
             <AddButton onClick={() => upd({ ...s, players: [...s.players, { name: "New", rating: 1500 }] })}>+ player</AddButton>
           </div>

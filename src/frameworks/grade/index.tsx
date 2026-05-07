@@ -15,7 +15,7 @@ export function View({ data, onUpdate }: { data: Grade; onUpdate?: (d: Grade) =>
 
   return (
     <Card>
-      <ul className="divide-y divide-rule">
+      <div className="overflow-x-auto"><ul className="divide-y divide-rule min-w-[420px]">
         {s.studies.map((x, i) => (
           <li
             key={i}
@@ -42,9 +42,9 @@ export function View({ data, onUpdate }: { data: Grade; onUpdate?: (d: Grade) =>
             <RemoveButton onClick={() => rm(i)} ariaLabel="remove" className="text-right" />
           </li>
         ))}
-      </ul>
+      </ul></div>
       <AddButton onClick={add} className="px-3 py-2 border-t border-rule w-full text-left">+ add study</AddButton>
-      <div className="p-4 border-t border-rule grid grid-cols-2 gap-4">
+      <div className="p-4 border-t border-rule grid grid-cols-1 sm:grid-cols-2 gap-4">
         <label>
           <MicroLabel>Strength</MicroLabel>
           <select

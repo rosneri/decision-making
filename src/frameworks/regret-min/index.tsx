@@ -40,7 +40,7 @@ export function View({ data, onUpdate }: { data: RegretMin; onUpdate?: (d: Regre
               size="sm"
               className="block w-full mt-1 text-ink-muted border-b border-rule"
             />
-            <div className="grid grid-cols-2 gap-4 mt-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
               <RangeField
                 label="Regret if taken"
                 min={1}

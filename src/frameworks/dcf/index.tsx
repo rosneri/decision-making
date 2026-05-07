@@ -22,7 +22,7 @@ export function View({ data, onUpdate }: { data: Dcf; onUpdate?: (d: Dcf) => voi
 
   return (
     <Card>
-      <div className="grid grid-cols-3 divide-x divide-rule border-b border-rule">
+      <div className="grid grid-cols-1 divide-y sm:grid-cols-3 sm:divide-y-0 sm:divide-x divide-rule border-b border-rule">
         <label className="p-3">
           <MicroLabel>Discount rate</MicroLabel>
           <BigNumber
@@ -58,7 +58,7 @@ export function View({ data, onUpdate }: { data: Dcf; onUpdate?: (d: Dcf) => voi
           />
         </label>
       </div>
-      <table className="w-full">
+      <div className="overflow-x-auto"><table className="w-full min-w-[420px]">
         <thead>
           <tr>
             <th className="text-left px-3 py-2"><MicroLabel>Year</MicroLabel></th>
@@ -91,12 +91,12 @@ export function View({ data, onUpdate }: { data: Dcf; onUpdate?: (d: Dcf) => voi
             <td className="text-right pr-3 font-code text-[13px] text-vermilion font-medium">{pvTV.toFixed(1)}</td>
           </tr>
         </tbody>
-      </table>
+      </table></div>
       <div className="flex gap-2 px-3 py-2 border-t border-rule">
         <AddButton onClick={addYear}>+ year</AddButton>
         <AddButton onClick={rmYear}>− last year</AddButton>
       </div>
-      <div className="grid grid-cols-2 border-t border-rule">
+      <div className="grid grid-cols-1 sm:grid-cols-2 border-t border-rule">
         <div className="p-4">
           <MicroLabel>Sum PV</MicroLabel>
           <div className="font-serif font-medium text-[28px] text-ink mt-1" data-testid="dcf-sumpv">{s.unit}{sumPV.toFixed(1)}</div>

@@ -16,7 +16,7 @@ export function View({ data, onUpdate }: { data: LearnedHand; onUpdate?: (d: Lea
 
   return (
     <Card>
-      <div className="grid grid-cols-3 divide-x divide-rule items-stretch">
+      <div className="grid grid-cols-1 divide-y sm:grid-cols-3 sm:divide-y-0 sm:divide-x divide-rule items-stretch">
         <div className="p-4">
           <MicroLabel>B · Burden of precaution</MicroLabel>
           <input
@@ -45,7 +45,7 @@ export function View({ data, onUpdate }: { data: LearnedHand; onUpdate?: (d: Lea
           <div className="mt-1 font-serif font-medium text-[28px] text-ink" data-testid="lh-pl">
             {pl.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </div>
-          <div className="mt-2 grid grid-cols-2 gap-2">
+          <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
             <label>
               <MicroLabel className="tracking-[0.18em]">P</MicroLabel>
               <input

@@ -28,7 +28,7 @@ export function View({ data, onUpdate }: { data: CostSensitive; onUpdate?: (d: C
     <Card>
       <div className="p-4 border-b border-rule">
         <MicroLabel>Confusion-matrix payoffs</MicroLabel>
-        <div className="grid grid-cols-3 gap-2 mt-2">
+        <div className="overflow-x-auto mt-2"><div className="grid grid-cols-3 gap-2 min-w-[280px]">
           <div />
           <MicroLabel className="tracking-[0.18em] text-center" as="div">actually positive</MicroLabel>
           <MicroLabel className="tracking-[0.18em] text-center" as="div">actually negative</MicroLabel>
@@ -49,9 +49,9 @@ export function View({ data, onUpdate }: { data: CostSensitive; onUpdate?: (d: C
               ))}
             </div>
           ))}
-        </div>
+        </div></div>
       </div>
-      <div className="p-4 grid grid-cols-2 gap-4 border-b border-rule">
+      <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-rule">
         <label>
           <MicroLabel>Base rate</MicroLabel>
           <Range

@@ -25,7 +25,7 @@ export function View({ data, onUpdate }: { data: Jtbd; onUpdate?: (d: Jtbd) => v
           so I can <input value={s.soThat} onChange={(e) => upd({ ...s, soThat: e.target.value })} data-testid="jtbd-sothat" className={`${fillIn} min-w-[180px]`} />.
         </p>
       </div>
-      <div className="grid grid-cols-3 divide-x divide-rule">
+      <div className="grid grid-cols-1 divide-y sm:grid-cols-3 sm:divide-y-0 sm:divide-x divide-rule">
         {[
           { h: "When", body: "context · trigger", val: s.when },
           { h: "Want", body: "functional outcome", val: s.want },

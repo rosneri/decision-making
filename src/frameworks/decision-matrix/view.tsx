@@ -67,7 +67,7 @@ export function View({ data, onUpdate }: Props) {
         ))}
       </div>
 
-      <table className="w-full border-collapse" style={{ tableLayout: "fixed" }}>
+      <div className="overflow-x-auto"><table className="w-full min-w-[480px] border-collapse" style={{ tableLayout: "fixed" }}>
         <thead>
           <tr>
             <th className={`${head} text-left`}><MicroLabel bold>Option</MicroLabel></th>
@@ -130,7 +130,7 @@ export function View({ data, onUpdate }: Props) {
             );
           })}
         </tbody>
-      </table>
+      </table></div>
       <AddButton onClick={addOption} className="px-3.5 py-3.5 border-t border-rule inline-block text-sm">
         + another option
       </AddButton>

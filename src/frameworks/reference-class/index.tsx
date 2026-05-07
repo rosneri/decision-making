@@ -22,7 +22,7 @@ export function View({ data, onUpdate }: { data: ReferenceClass; onUpdate?: (d: 
 
   return (
     <Card>
-      <table className="w-full">
+      <div className="overflow-x-auto"><table className="w-full min-w-[480px]">
         <thead>
           <tr>
             <th className={`${head} text-left`}><MicroLabel>Past project</MicroLabel></th>
@@ -65,9 +65,9 @@ export function View({ data, onUpdate }: { data: ReferenceClass; onUpdate?: (d: 
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
       <AddButton onClick={add} className="px-3 py-2 w-full text-left border-b border-rule">+ add project</AddButton>
-      <div className="bg-vermilion/5 border-t border-vermilion p-4 grid grid-cols-3 gap-4">
+      <div className="bg-vermilion/5 border-t border-vermilion p-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
           <MicroLabel>Your estimate</MicroLabel>
           <div className="flex items-baseline gap-2 mt-1">

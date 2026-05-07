@@ -21,8 +21,8 @@ export function View({ data, onUpdate }: { data: NineBox; onUpdate?: (d: NineBox
         <span className="ml-auto" />
         <MicroLabel>y: Potential ↑</MicroLabel>
       </div>
-      <div className="p-4">
-        <div className="grid grid-cols-3 grid-rows-3 gap-2">
+      <div className="p-4 overflow-x-auto">
+        <div className="grid grid-cols-3 grid-rows-3 gap-2 min-w-[420px]">
           {[2, 1, 0].map((pot) =>
             [0, 1, 2].map((perf) => {
               const items = cell(perf, pot);

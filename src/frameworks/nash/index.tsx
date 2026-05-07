@@ -25,7 +25,7 @@ export function View({ data, onUpdate }: { data: Nash; onUpdate?: (d: Nash) => v
 
   return (
     <Card>
-      <div className="border-b border-rule p-4 grid grid-cols-2 gap-4">
+      <div className="border-b border-rule p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <MicroLabel>Row player</MicroLabel>
           <InlineText value={s.rowPlayer} onChange={(v) => upd({ ...s, rowPlayer: v })} className="block w-full mt-1 font-medium" />
@@ -35,7 +35,7 @@ export function View({ data, onUpdate }: { data: Nash; onUpdate?: (d: Nash) => v
           <InlineText value={s.colPlayer} onChange={(v) => upd({ ...s, colPlayer: v })} className="block w-full mt-1 font-medium" />
         </div>
       </div>
-      <table className="w-full">
+      <div className="overflow-x-auto"><table className="w-full min-w-[380px]">
         <thead>
           <tr>
             <th />
@@ -98,7 +98,7 @@ export function View({ data, onUpdate }: { data: Nash; onUpdate?: (d: Nash) => v
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
       <div className="p-4 font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted border-t border-rule" data-testid="nash-count">
         {eqs.length === 0 ? "No pure-strategy equilibrium (mixed only)" : `${eqs.length} pure-strategy equilibrium${eqs.length > 1 ? "(s)" : ""}`}
       </div>

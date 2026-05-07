@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Card, MicroLabel, InlineText, RemoveButton, AddButton } from "@/components/ui";
+import { Card, MicroLabel, InlineText, RemoveButton, AddButton, Checkbox } from "@/components/ui";
 import { meta, schema, sample, update, type Bayesian } from "./data";
 export { meta, schema, sample };
 export type { Bayesian };
@@ -29,7 +29,7 @@ export function View({ data, onUpdate }: { data: Bayesian; onUpdate?: (d: Bayesi
           <span className="font-code text-[10px] text-ink-muted">P(H) = {(s.prior * 100).toFixed(0)}%</span>
         </div>
       </div>
-      <table className="w-full text-[13px]">
+      <div className="overflow-x-auto"><table className="w-full min-w-[480px] text-[13px]">
         <thead>
           <tr className="border-b border-rule">
             <th className="p-2 text-left font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">Evidence</th>
@@ -63,11 +63,11 @@ export function View({ data, onUpdate }: { data: Bayesian; onUpdate?: (d: Bayesi
                 />
               </td>
               <td className="p-2 text-center">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={e.observed}
-                  onChange={(ev) => set(i, { observed: ev.target.checked })}
-                  data-testid={`bayes-obs-${i}`}
+                  onChange={(v) => set(i, { observed: v })}
+                  testId={`bayes-obs-${i}`}
+                  ariaLabel={`observed: ${e.name}`}
                 />
               </td>
               <td className="p-2 text-center font-code text-[13px]" data-testid={`bayes-step-${i}`}>
@@ -77,7 +77,7 @@ export function View({ data, onUpdate }: { data: Bayesian; onUpdate?: (d: Bayesi
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
       <div className="p-3 border-b border-rule">
         <AddButton onClick={() => upd({ ...s, evidence: [...s.evidence, { name: "", pIfTrue: 0.5, pIfFalse: 0.5, observed: false }] })}>
           + add evidence

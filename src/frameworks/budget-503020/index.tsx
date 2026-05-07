@@ -43,7 +43,7 @@ export function View({ data, onUpdate }: { data: Budget; onUpdate?: (d: Budget) 
             {pct(s.actuals.save).toFixed(0)}%
           </div>
         </div>
-        <div className="mt-4 grid grid-cols-3 gap-3">
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
           {(["needs", "wants", "save"] as const).map((k, i) => (
             <label key={k} className={`p-3 border ${i === 2 ? "border-vermilion bg-vermilion/5" : "border-rule"}`}>
               <MicroLabel accent={i === 2} bold>

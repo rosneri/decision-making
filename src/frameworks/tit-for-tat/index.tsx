@@ -42,7 +42,7 @@ export function View({ data, onUpdate }: { data: TitForTat; onUpdate?: (d: TitFo
         <AddButton onClick={add}>+ round</AddButton>
         <AddButton onClick={() => s.rounds.length > 1 && rm(s.rounds.length - 1)}>− last round</AddButton>
       </div>
-      <div className="grid grid-cols-2 border-t border-rule">
+      <div className="grid grid-cols-1 sm:grid-cols-2 border-t border-rule">
         <div className="p-4">
           <MicroLabel>Your score</MicroLabel>
           <div className="font-serif font-medium text-[28px] text-ink mt-1" data-testid="tft-your-score">{yourPts}</div>

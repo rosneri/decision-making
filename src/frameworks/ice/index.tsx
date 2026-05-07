@@ -16,7 +16,7 @@ export function View({ data, onUpdate }: { data: Ice; onUpdate?: (d: Ice) => voi
 
   return (
     <Card>
-      <table className="w-full text-[13px]">
+      <div className="overflow-x-auto"><table className="w-full min-w-[480px] text-[13px]">
         <thead>
           <tr className="border-b border-rule">
             <th className="p-2 text-left font-code text-[10px] tracking-[0.22em] uppercase text-ink-muted">Idea</th>
@@ -52,7 +52,7 @@ export function View({ data, onUpdate }: { data: Ice; onUpdate?: (d: Ice) => voi
             );
           })}
         </tbody>
-      </table>
+      </table></div>
       <div className="p-3">
         <AddButton onClick={() => upd({ ...s, ideas: [...s.ideas, { name: "", impact: 5, confidence: 5, ease: 5 }] })}>
           + add idea
