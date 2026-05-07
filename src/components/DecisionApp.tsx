@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChatFiller } from "./ChatFiller";
 import { Composer } from "./Composer";
+import { ClarifyScreen, type ClarifyQuestion } from "./ClarifyScreen";
 import { ReadingInterstitial } from "./ReadingInterstitial";
 import { DecisionProvider } from "./DecisionContext";
 import { RecommendationCard } from "./RecommendationCard";
@@ -16,7 +17,7 @@ import { SiteHeader } from "./SiteHeader";
 import type { AnalysisResult, FrameworkAlternative } from "./analyze-utils";
 import { AnalyzeError, fetchAnalysis } from "./analyze-utils";
 
-type Route = "compose" | "reading" | "result";
+type Route = "compose" | "clarify" | "reading" | "result";
 type Mode = "easy" | "advanced";
 
 // ── Persistence ──────────────────────────────────────────────────────────────
@@ -43,6 +44,16 @@ function persistState(s: SavedState) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch { /* quota exceeded */ }
 }
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function buildEnrichedText(base: string, questions: ClarifyQuestion[], answers: Record<string, string>): string {
+  const lines = questions
+    .filter((q) => answers[q.id]?.trim())
+    .map((q) => `- ${q.text}: ${answers[q.id]}`);
+  if (lines.length === 0) return base;
+  return `${base}\n\nAdditional context:\n${lines.join("\n")}`;
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export function DecisionApp() {
@@ -50,21 +61,30 @@ export function DecisionApp() {
   const searchParams = useSearchParams();
   const viewParam = searchParams?.get("view") ?? null;
 
-  const [route, setRoute]         = useState<Route>("compose");
-  const [decisionText, setText]   = useState("");
-  const [result, setResult]       = useState<AnalysisResult | null>(null);
+  const [route, setRoute]           = useState<Route>("compose");
+  const [decisionText, setText]     = useState("");
+  const [result, setResult]         = useState<AnalysisResult | null>(null);
   const [serverResultKey, setServerResultKey] = useState<string | null>(null);
   const [recLoading, setRecLoading] = useState(false);
   const [analyzeReady, setAnalyzeReady] = useState(false);
   const [analyzeError, setAnalyzeError] = useState<{ message: string; code: string } | null>(null);
-  const [chatOpen, setChatOpen] = useState(false);
+  const [chatOpen, setChatOpen]     = useState(false);
   const [viewVersion, setViewVersion] = useState(0);
-  const [hydrated, setHydrated] = useState(false);
-  const [mode, setMode] = useState<Mode>("easy");
+  const [hydrated, setHydrated]     = useState(false);
+  const [mode, setMode]             = useState<Mode>("easy");
   const [explanation, setExplanation] = useState<string | null>(null);
   const [explanationLoading, setExplanationLoading] = useState(false);
-  const recReqRef = useRef(0);
+
+  // Clarify state — transient, not persisted
+  const [clarifyQuestions, setClarifyQuestions] = useState<ClarifyQuestion[]>([]);
+  const [clarifyLoading, setClarifyLoading] = useState(false);
+  // Stash compose choices while clarify screen is showing
+  const pendingFrameworkId = useRef<FrameworkId | undefined>(undefined);
+  const pendingChosenMode  = useRef<Mode | undefined>(undefined);
+
+  const recReqRef  = useRef(0);
   const explReqRef = useRef(0);
+  const clarReqRef = useRef(0);
 
   // ── Restore from localStorage on mount ──
   useEffect(() => {
@@ -72,7 +92,7 @@ export function DecisionApp() {
     const wantsResult = viewParam === "result";
     if (saved) {
       const baseRoute: Route =
-        saved.route === "reading"
+        saved.route === "reading" || saved.route === "clarify"
           ? (saved.decisionText && saved.result ? "result" : "compose")
           : saved.route;
       const restoredRoute: Route = wantsResult && saved.result ? "result" : baseRoute;
@@ -121,10 +141,9 @@ export function DecisionApp() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result?.framework, result?.title]);
 
-  // ── Submit ──
-  const submit = (text: string, frameworkId?: FrameworkId, chosenMode?: Mode) => {
+  // ── Run analysis (direct — no clarify detour) ──
+  const runAnalysis = (text: string, frameworkId?: FrameworkId) => {
     setText(text);
-    if (chosenMode) setMode(chosenMode);
     setRoute("reading");
     setAnalyzeReady(false);
     setAnalyzeError(null);
@@ -147,13 +166,62 @@ export function DecisionApp() {
         if (err instanceof AnalyzeError) {
           setAnalyzeError({ message: err.message, code: err.code });
         } else {
-          const message = err instanceof Error ? err.message : "Unknown error";
           setAnalyzeError({ message: "Something went wrong. Try again.", code: "DM-UI-000" });
-          void message;
         }
         setRecLoading(false);
         setAnalyzeReady(true);
       });
+  };
+
+  // ── Composer submit: clarify first unless framework was manually chosen ──
+  const onComposerSubmit = (text: string, frameworkId?: FrameworkId, chosenMode?: Mode) => {
+    if (chosenMode) setMode(chosenMode);
+    setText(text);
+
+    // Manual framework selection → skip clarification
+    if (frameworkId) {
+      runAnalysis(text, frameworkId);
+      return;
+    }
+
+    // Call clarify; go to reading immediately if skip, or show questions
+    const id = ++clarReqRef.current;
+    setClarifyLoading(true);
+    pendingFrameworkId.current = frameworkId;
+    pendingChosenMode.current  = chosenMode;
+
+    fetch("/api/clarify", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ decisionText: text }),
+    })
+      .then(async (res) => {
+        if (id !== clarReqRef.current) return;
+        const body = await res.json().catch(() => null) as
+          | { skip: true }
+          | { skip: false; questions: ClarifyQuestion[] }
+          | null;
+        if (!body || body.skip) {
+          runAnalysis(text, frameworkId);
+        } else {
+          setClarifyQuestions(body.questions);
+          setRoute("clarify");
+        }
+      })
+      .catch(() => {
+        if (id !== clarReqRef.current) return;
+        // On error, proceed without clarification
+        runAnalysis(text, frameworkId);
+      })
+      .finally(() => {
+        if (id === clarReqRef.current) setClarifyLoading(false);
+      });
+  };
+
+  // ── Clarify screen: user answered questions ──
+  const onClarifySubmit = (answers: Record<string, string>) => {
+    const enriched = buildEnrichedText(decisionText, clarifyQuestions, answers);
+    runAnalysis(enriched, pendingFrameworkId.current);
   };
 
   // ── Re-recommend ──
@@ -239,7 +307,6 @@ export function DecisionApp() {
         : next as AnalysisResult,
     );
     setViewVersion((v) => v + 1);
-    // Re-fetch explanation after a modification
     setExplanation(null);
   };
 
@@ -281,7 +348,23 @@ export function DecisionApp() {
       />
 
       {/* ── Screens ── */}
-      {route === "compose" && <Composer onSubmit={submit} initialText={decisionText} initialResultMode={mode} />}
+      {route === "compose" && (
+        <Composer
+          onSubmit={onComposerSubmit}
+          initialText={decisionText}
+          initialResultMode={mode}
+          submitting={clarifyLoading}
+        />
+      )}
+
+      {route === "clarify" && (
+        <ClarifyScreen
+          questions={clarifyQuestions}
+          onSubmit={onClarifySubmit}
+          onSkip={() => runAnalysis(decisionText, pendingFrameworkId.current)}
+        />
+      )}
+
       {route === "reading" && <ReadingInterstitial text={decisionText} ready={analyzeReady} onDone={() => setRoute("result")} />}
 
       {route === "result" && result && meta && (() => {
@@ -501,7 +584,7 @@ export function DecisionApp() {
           <div className="flex gap-3 justify-center">
             {decisionText && (
               <button
-                onClick={() => submit(decisionText)}
+                onClick={() => runAnalysis(decisionText)}
                 className="font-serif text-base font-medium px-[22px] py-3 rounded-sm bg-vermilion text-paper hover:bg-vermilion-deep transition-colors duration-200 cursor-pointer"
               >
                 Try again

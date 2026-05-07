@@ -37,9 +37,10 @@ interface Props {
   onSubmit: (text: string, frameworkId?: FrameworkId, resultMode?: ResultMode) => void;
   initialText?: string;
   initialResultMode?: ResultMode;
+  submitting?: boolean;
 }
 
-export function Composer({ onSubmit, initialText = "", initialResultMode = "easy" }: Props) {
+export function Composer({ onSubmit, initialText = "", initialResultMode = "easy", submitting = false }: Props) {
   const [text, setText]           = useState(initialText);
   const [recording, setRecording] = useState(false);
   const [transcript, setTranscript] = useState("");
@@ -123,7 +124,7 @@ export function Composer({ onSubmit, initialText = "", initialResultMode = "easy
     onSubmit(t, mode === "manual" && frameworkId ? frameworkId : undefined, resultMode);
   };
 
-  const canSubmit = !!text.trim() && (mode === "auto" || !!frameworkId);
+  const canSubmit = !!text.trim() && (mode === "auto" || !!frameworkId) && !submitting;
 
   return (
     <main className="max-w-[760px] mx-auto px-4 sm:px-10 py-12 sm:py-24 animate-page-in">
@@ -304,7 +305,7 @@ export function Composer({ onSubmit, initialText = "", initialResultMode = "easy
                 onClick={submit}
                 disabled={!canSubmit}
               >
-                Decide →
+                {submitting ? "Reading…" : "Decide →"}
               </button>
             </>
           )}
