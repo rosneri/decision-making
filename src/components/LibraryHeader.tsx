@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useSyncExternalStore } from "react";
 import { SiteHeader } from "./SiteHeader";
 
 const APP_STATE_KEY = "dm-app-state-v2";
@@ -19,7 +19,11 @@ function readHasResult(): boolean {
 // when there's a saved decision result. Clicking Result navigates back to the
 // app at /, where DecisionApp restores the result from localStorage.
 export function LibraryHeader() {
-  const [hasResult] = useState<boolean>(readHasResult);
+  const hasResult = useSyncExternalStore(
+    () => () => {},
+    readHasResult,
+    () => false,
+  );
 
   return (
     <SiteHeader
