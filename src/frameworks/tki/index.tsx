@@ -53,7 +53,7 @@ export function View({ data, onUpdate }: { data: Tki; onUpdate?: (d: Tki) => voi
               className="absolute -translate-x-1/2 -translate-y-1/2 grid place-items-center"
               style={{ left: `${ANCHORS[m].x * 10}%`, top: `${100 - ANCHORS[m].y * 10}%` }}
             >
-              <span className={`w-14 h-14 rounded-full grid place-items-center font-serif text-[12px] font-medium border-[1.5px] ${isClosest ? "bg-vermilion/10 border-vermilion text-vermilion" : "bg-paper border-ink text-ink"}`}>
+              <span className={`w-14 h-14 rounded-full overflow-hidden grid place-items-center font-serif text-[10px] leading-tight text-center break-all font-medium border-[1.5px] px-1 ${isClosest ? "bg-vermilion/10 border-vermilion text-vermilion" : "bg-paper border-ink text-ink"}`}>
                 {m}
               </span>
             </div>

@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Card, MicroLabel, InlineText, RemoveButton, AddButton } from "@/components/ui";
+import { Card, MicroLabel, InlineText, RemoveButton, AddButton, Checkbox } from "@/components/ui";
 import { meta, schema, sample, update, type Bayesian } from "./data";
 export { meta, schema, sample };
 export type { Bayesian };
@@ -63,11 +63,11 @@ export function View({ data, onUpdate }: { data: Bayesian; onUpdate?: (d: Bayesi
                 />
               </td>
               <td className="p-2 text-center">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={e.observed}
-                  onChange={(ev) => set(i, { observed: ev.target.checked })}
-                  data-testid={`bayes-obs-${i}`}
+                  onChange={(v) => set(i, { observed: v })}
+                  testId={`bayes-obs-${i}`}
+                  ariaLabel={`observed: ${e.name}`}
                 />
               </td>
               <td className="p-2 text-center font-code text-[13px]" data-testid={`bayes-step-${i}`}>

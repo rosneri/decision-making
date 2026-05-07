@@ -13,3 +13,4 @@ export { VerdictBar } from "./VerdictBar";
 export { PhaseTabs, type PhaseItem } from "./PhaseTabs";
 export { SplitPane } from "./SplitPane";
 export { BigNumber } from "./BigNumber";
+export { Checkbox } from "./Checkbox";
