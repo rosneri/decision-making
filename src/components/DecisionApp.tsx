@@ -46,12 +46,11 @@ function persistState(s: SavedState) {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function buildEnrichedText(base: string, questions: ClarifyQuestion[], answers: Record<string, string>): string {
-  const lines = questions
+function buildContextLines(questions: ClarifyQuestion[], answers: Record<string, string>): string {
+  return questions
     .filter((q) => answers[q.id]?.trim())
-    .map((q) => `- ${q.text}: ${answers[q.id]}`);
-  if (lines.length === 0) return base;
-  return `${base}\n\nAdditional context:\n${lines.join("\n")}`;
+    .map((q) => `- ${q.text}: ${answers[q.id]}`)
+    .join("\n");
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -75,9 +74,11 @@ export function DecisionApp() {
   const [explanation, setExplanation] = useState<string | null>(null);
   const [explanationLoading, setExplanationLoading] = useState(false);
 
-  // Clarify state — transient, not persisted
+  // Clarify state
   const [clarifyQuestions, setClarifyQuestions] = useState<ClarifyQuestion[]>([]);
   const [clarifyLoading, setClarifyLoading] = useState(false);
+  // Context collected from clarify answers — kept until compose text changes
+  const [clarifyContext, setClarifyContext] = useState<string | null>(null);
   // Stash compose choices while clarify screen is showing
   const pendingFrameworkId = useRef<FrameworkId | undefined>(undefined);
   const pendingChosenMode  = useRef<Mode | undefined>(undefined);
@@ -142,7 +143,7 @@ export function DecisionApp() {
   }, [result?.framework, result?.title]);
 
   // ── Run analysis (direct — no clarify detour) ──
-  const runAnalysis = (text: string, frameworkId?: FrameworkId) => {
+  const runAnalysis = (text: string, frameworkId?: FrameworkId, context?: string) => {
     setText(text);
     setRoute("reading");
     setAnalyzeReady(false);
@@ -150,9 +151,12 @@ export function DecisionApp() {
     setResult(null);
     setServerResultKey(null);
     setExplanation(null);
+    const promptText = context?.trim()
+      ? `${text}\n\nAdditional context:\n${context}`
+      : text;
     const id = ++recReqRef.current;
     setRecLoading(true);
-    fetchAnalysis(text, frameworkId ? { frameworkId } : undefined)
+    fetchAnalysis(promptText, frameworkId ? { frameworkId } : undefined)
       .then((r: AnalysisResult) => {
         if (id !== recReqRef.current) return;
         setResult(r);
@@ -176,15 +180,24 @@ export function DecisionApp() {
   // ── Composer submit: clarify first unless framework was manually chosen ──
   const onComposerSubmit = (text: string, frameworkId?: FrameworkId, chosenMode?: Mode) => {
     if (chosenMode) setMode(chosenMode);
-    setText(text);
 
-    // Manual framework selection → skip clarification
+    // If compose text changed, discard any stored clarify context
+    const textChanged = text !== decisionText;
+    if (textChanged) setClarifyContext(null);
+
+    // Manual framework selection → skip clarification entirely
     if (frameworkId) {
-      runAnalysis(text, frameworkId);
+      runAnalysis(text, frameworkId, textChanged ? undefined : (clarifyContext ?? undefined));
       return;
     }
 
-    // Call clarify; go to reading immediately if skip, or show questions
+    // If text is unchanged and we already have context, reuse it — no re-clarify
+    if (!textChanged && clarifyContext) {
+      runAnalysis(text, undefined, clarifyContext);
+      return;
+    }
+
+    // Call clarify; proceed immediately if skip, or show questions
     const id = ++clarReqRef.current;
     setClarifyLoading(true);
     pendingFrameworkId.current = frameworkId;
@@ -210,7 +223,6 @@ export function DecisionApp() {
       })
       .catch(() => {
         if (id !== clarReqRef.current) return;
-        // On error, proceed without clarification
         runAnalysis(text, frameworkId);
       })
       .finally(() => {
@@ -220,8 +232,9 @@ export function DecisionApp() {
 
   // ── Clarify screen: user answered questions ──
   const onClarifySubmit = (answers: Record<string, string>) => {
-    const enriched = buildEnrichedText(decisionText, clarifyQuestions, answers);
-    runAnalysis(enriched, pendingFrameworkId.current);
+    const context = buildContextLines(clarifyQuestions, answers);
+    setClarifyContext(context || null);
+    runAnalysis(decisionText, pendingFrameworkId.current, context || undefined);
   };
 
   // ── Re-recommend ──
