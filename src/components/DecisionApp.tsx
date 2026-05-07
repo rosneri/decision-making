@@ -323,28 +323,7 @@ export function DecisionApp() {
               })()}
             </div>
 
-            {/* ── Alt frameworks ── */}
-            {result.altFrameworks && result.altFrameworks.length > 0 && (
-              <div className="mb-10 -mt-4">
-                <span className="folio block mb-2">Or try a different angle</span>
-                <div className="flex gap-2 flex-wrap">
-                  {result.altFrameworks.map((alt) => (
-                    <button
-                      key={alt.id}
-                      // eslint-disable-next-line react-hooks/refs -- switchFramework reads a ref but only at click time
-                      onClick={() => switchFramework(alt)}
-                      title={alt.reason}
-                      className="font-serif text-sm text-ink hover:text-paper hover:bg-ink border border-rule hover:border-ink rounded-sm px-3 py-1.5 cursor-pointer transition-colors duration-200 bg-transparent text-left"
-                    >
-                      <span className="font-medium">{alt.name}</span>
-                      <span className="italic text-ink-muted ml-1.5">— {alt.reason}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* ── Easy mode: result strip → explanation → recommendation → modify ── */}
+            {/* ── Easy mode: result strip → explanation → recommendation → alt frameworks → modify ── */}
             {mode === "easy" && (
               <>
                 {metrics.length > 0 && (
@@ -382,6 +361,26 @@ export function DecisionApp() {
                   onRerecommend={rerecommend}
                 />
 
+                {result.altFrameworks && result.altFrameworks.length > 0 && (
+                  <div className="mt-10">
+                    <span className="folio block mb-2">Or try a different angle</span>
+                    <div className="flex gap-2 flex-wrap">
+                      {result.altFrameworks.map((alt) => (
+                        <button
+                          key={alt.id}
+                          // eslint-disable-next-line react-hooks/refs -- switchFramework reads a ref but only at click time
+                          onClick={() => switchFramework(alt)}
+                          title={alt.reason}
+                          className="font-serif text-sm text-ink hover:text-paper hover:bg-ink border border-rule hover:border-ink rounded-sm px-3 py-1.5 cursor-pointer transition-colors duration-200 bg-transparent text-left"
+                        >
+                          <span className="font-medium">{alt.name}</span>
+                          <span className="italic text-ink-muted ml-1.5">— {alt.reason}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <ModifyInput
                   decisionText={decisionText}
                   currentData={result}
@@ -390,7 +389,7 @@ export function DecisionApp() {
               </>
             )}
 
-            {/* ── Advanced mode: framework view → result strip → recommendation → modify ── */}
+            {/* ── Advanced mode: framework view → result strip → recommendation → alt frameworks → modify ── */}
             {mode === "advanced" && (
               <>
                 <DecisionProvider
@@ -423,6 +422,26 @@ export function DecisionApp() {
                   dataChanged={serverResultKey !== null && JSON.stringify(result) !== serverResultKey}
                   onRerecommend={rerecommend}
                 />
+
+                {result.altFrameworks && result.altFrameworks.length > 0 && (
+                  <div className="mt-10">
+                    <span className="folio block mb-2">Or try a different angle</span>
+                    <div className="flex gap-2 flex-wrap">
+                      {result.altFrameworks.map((alt) => (
+                        <button
+                          key={alt.id}
+                           
+                          onClick={() => switchFramework(alt)}
+                          title={alt.reason}
+                          className="font-serif text-sm text-ink hover:text-paper hover:bg-ink border border-rule hover:border-ink rounded-sm px-3 py-1.5 cursor-pointer transition-colors duration-200 bg-transparent text-left"
+                        >
+                          <span className="font-medium">{alt.name}</span>
+                          <span className="italic text-ink-muted ml-1.5">— {alt.reason}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <ModifyInput
                   decisionText={decisionText}
