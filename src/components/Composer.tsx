@@ -169,6 +169,65 @@ export function Composer({ onSubmit, initialText = "", initialResultMode = "easy
         </div>
       )}
 
+      {/* Controls */}
+      <div className="flex items-center gap-[18px] mt-7 flex-wrap">
+        {/* Mic button — only shown when SR is supported */}
+        {srSupported && (
+          <button
+            className={[
+              "w-14 h-14 rounded-full border flex items-center justify-center flex-shrink-0 transition-all duration-200 cursor-pointer",
+              recording
+                ? "bg-vermilion border-vermilion text-paper animate-mic-pulse"
+                : "border-rule text-ink-muted hover:border-ink hover:text-ink",
+            ].join(" ")}
+            onClick={recording ? stopRecord : startRecord}
+            aria-label={recording ? "Stop dictation" : "Dictate"}
+          >
+            {recording ? (
+              <span className="flex items-center gap-[3px] h-6">
+                {[8, 16, 22, 14, 18, 10, 14].map((h, i) => (
+                  <span key={i} className="dm-wave-bar" style={{ height: h, animationDelay: `${i * 0.1}s` }} />
+                ))}
+              </span>
+            ) : (
+              <MicIcon />
+            )}
+          </button>
+        )}
+
+        <span className="hidden sm:inline font-serif italic text-[15px]" style={{ color: recording ? "var(--vermilion)" : "var(--ink-muted)" }}>
+          {recording ? "Tap to finish." : srSupported ? "Or tap to dictate." : ""}
+        </span>
+
+        <div className="ml-auto flex gap-3">
+          {recording ? (
+            <button
+              className="font-serif text-base font-medium px-[22px] py-3 rounded-sm border border-rule text-ink hover:border-ink transition-colors duration-200 cursor-pointer bg-transparent"
+              onClick={cancelRecord}
+            >
+              Cancel
+            </button>
+          ) : (
+            <>
+              <button
+                className="font-serif text-base font-medium px-[22px] py-3 rounded-sm border border-rule text-ink hover:border-ink transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer bg-transparent"
+                onClick={() => setText("")}
+                disabled={!text}
+              >
+                Clear
+              </button>
+              <button
+                className="font-serif text-base font-medium px-[22px] py-3 rounded-sm bg-vermilion text-paper hover:bg-vermilion-deep transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.99] cursor-pointer"
+                onClick={submit}
+                disabled={!canSubmit}
+              >
+                {submitting ? "Reading…" : "Decide →"}
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
       {/* Framework + Result style choices */}
       {!recording && (
         <div className="mt-6 flex flex-col gap-3">
@@ -248,65 +307,6 @@ export function Composer({ onSubmit, initialText = "", initialResultMode = "easy
           </div>
         </div>
       )}
-
-      {/* Controls */}
-      <div className="flex items-center gap-[18px] mt-7 flex-wrap">
-        {/* Mic button — only shown when SR is supported */}
-        {srSupported && (
-          <button
-            className={[
-              "w-14 h-14 rounded-full border flex items-center justify-center flex-shrink-0 transition-all duration-200 cursor-pointer",
-              recording
-                ? "bg-vermilion border-vermilion text-paper animate-mic-pulse"
-                : "border-rule text-ink-muted hover:border-ink hover:text-ink",
-            ].join(" ")}
-            onClick={recording ? stopRecord : startRecord}
-            aria-label={recording ? "Stop dictation" : "Dictate"}
-          >
-            {recording ? (
-              <span className="flex items-center gap-[3px] h-6">
-                {[8, 16, 22, 14, 18, 10, 14].map((h, i) => (
-                  <span key={i} className="dm-wave-bar" style={{ height: h, animationDelay: `${i * 0.1}s` }} />
-                ))}
-              </span>
-            ) : (
-              <MicIcon />
-            )}
-          </button>
-        )}
-
-        <span className="hidden sm:inline font-serif italic text-[15px]" style={{ color: recording ? "var(--vermilion)" : "var(--ink-muted)" }}>
-          {recording ? "Tap to finish." : srSupported ? "Or tap to dictate." : ""}
-        </span>
-
-        <div className="ml-auto flex gap-3">
-          {recording ? (
-            <button
-              className="font-serif text-base font-medium px-[22px] py-3 rounded-sm border border-rule text-ink hover:border-ink transition-colors duration-200 cursor-pointer bg-transparent"
-              onClick={cancelRecord}
-            >
-              Cancel
-            </button>
-          ) : (
-            <>
-              <button
-                className="font-serif text-base font-medium px-[22px] py-3 rounded-sm border border-rule text-ink hover:border-ink transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer bg-transparent"
-                onClick={() => setText("")}
-                disabled={!text}
-              >
-                Clear
-              </button>
-              <button
-                className="font-serif text-base font-medium px-[22px] py-3 rounded-sm bg-vermilion text-paper hover:bg-vermilion-deep transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.99] cursor-pointer"
-                onClick={submit}
-                disabled={!canSubmit}
-              >
-                {submitting ? "Reading…" : "Decide →"}
-              </button>
-            </>
-          )}
-        </div>
-      </div>
 
       {/* Examples */}
       <div className="mt-20">
