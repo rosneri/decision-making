@@ -55,7 +55,7 @@ export function ModifyInput({ decisionText, currentData, onUpdate }: Props) {
   return (
     <div className="mt-10 border-t border-rule pt-8">
       <div className="font-code text-[11px] tracking-[0.22em] uppercase text-ink-muted mb-3">
-        Adjust in one shot
+        Adjust
       </div>
       <div className="flex gap-2 items-end">
         <textarea

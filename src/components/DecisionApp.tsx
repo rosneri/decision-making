@@ -323,7 +323,7 @@ export function DecisionApp() {
               })()}
             </div>
 
-            {/* ── Easy mode: result strip → explanation → recommendation → alt frameworks → modify ── */}
+            {/* ── Easy mode: result strip → modify → explanation → recommendation → alt frameworks ── */}
             {mode === "easy" && (
               <>
                 {metrics.length > 0 && (
@@ -331,6 +331,12 @@ export function DecisionApp() {
                     <ResultStrip metrics={metrics} />
                   </div>
                 )}
+
+                <ModifyInput
+                  decisionText={decisionText}
+                  currentData={result}
+                  onUpdate={handleModify}
+                />
 
                 {/* Plain-language explanation */}
                 <div className="border border-rule rounded-sm px-4 sm:px-[52px] py-8 sm:py-10 mb-10" style={{ boxShadow: "var(--shadow-letter)" }}>
@@ -380,16 +386,10 @@ export function DecisionApp() {
                     </div>
                   </div>
                 )}
-
-                <ModifyInput
-                  decisionText={decisionText}
-                  currentData={result}
-                  onUpdate={handleModify}
-                />
               </>
             )}
 
-            {/* ── Advanced mode: framework view → result strip → recommendation → alt frameworks → modify ── */}
+            {/* ── Advanced mode: framework view → result strip → modify → recommendation → alt frameworks ── */}
             {mode === "advanced" && (
               <>
                 <DecisionProvider
@@ -413,6 +413,12 @@ export function DecisionApp() {
                 </DecisionProvider>
 
                 <ResultStrip metrics={metrics} />
+
+                <ModifyInput
+                  decisionText={decisionText}
+                  currentData={result}
+                  onUpdate={handleModify}
+                />
 
                 <RecommendationCard
                   key={decisionText}
@@ -442,12 +448,6 @@ export function DecisionApp() {
                     </div>
                   </div>
                 )}
-
-                <ModifyInput
-                  decisionText={decisionText}
-                  currentData={result}
-                  onUpdate={handleModify}
-                />
               </>
             )}
 
