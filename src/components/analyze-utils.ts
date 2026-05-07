@@ -2,7 +2,10 @@ import type { FrameworkId, FrameworkResult } from "@/frameworks";
 import { ANALYZE_ERRORS, type ApiErrorBody } from "@/lib/errors";
 
 export type FrameworkAlternative = { id: FrameworkId; name: string; reason: string };
-export type AnalysisResult = FrameworkResult & { altFrameworks?: FrameworkAlternative[] };
+export type AnalysisResult = FrameworkResult & {
+  altFrameworks?: FrameworkAlternative[];
+  explanation?: string;
+};
 
 function safeStringify(v: unknown): string {
   if (v == null) return "";
