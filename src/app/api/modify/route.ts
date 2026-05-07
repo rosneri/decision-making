@@ -9,7 +9,7 @@ const anthropic = createAnthropic(apiKey ? { apiKey } : {});
 
 export const maxDuration = 60;
 
-const SYSTEM = `You are applying a user's modification request to an existing decision-framework dataset. Apply exactly what the user asks — nothing more, nothing less. Preserve every field the user did not mention, including "framework", "category", "title", and "recommendation". Return the complete framework JSON with only the requested changes made.`;
+const SYSTEM = `You are an expert decision-analysis tool. The user has reviewed their framework data and wants a targeted adjustment. Apply exactly what the user asks to the current data and return the complete updated framework JSON. Preserve every field that is not affected by the adjustment, including "framework", "category", "title", and "recommendation".`;
 
 function classify(err: unknown): { status: number } {
   const msg = err instanceof Error ? err.message.toLowerCase() : String(err).toLowerCase();
@@ -48,17 +48,19 @@ export async function POST(req: Request) {
   const schema = SCHEMAS[frameworkId];
   const sample = SAMPLES[frameworkId];
 
-  const prompt = `Decision: "${decisionText}"
+  const prompt = (extraGuidance = "") =>
+    `Decision the user is working through:
+"${decisionText}"
+
 Framework: ${meta.name} (id: "${frameworkId}", category: "${meta.category}")
 
-Current data:
+Current framework data (all fields — copy every field you are not changing exactly as-is):
 ${JSON.stringify(currentData, null, 2)}
 
-User's modification request: "${instruction.trim()}"
+User's adjustment: "${instruction.trim()}"
 
-Apply the modification and return the complete updated framework JSON. The "framework" field must remain "${frameworkId}" and "category" must remain "${meta.category}". Preserve "recommendation" exactly as-is. Here is a valid schema example for shape reference (different decision):
-
-${JSON.stringify(sample, null, 2)}`;
+Return the complete updated framework JSON with only the fields affected by the adjustment changed. The "framework" field must remain "${frameworkId}", "category" must remain "${meta.category}", and "recommendation" must remain unchanged. Schema shape reference:
+${JSON.stringify(sample, null, 2)}${extraGuidance}`;
 
   const MAX_ATTEMPTS = 2;
   const errors: string[] = [];
@@ -70,7 +72,7 @@ ${JSON.stringify(sample, null, 2)}`;
         model: anthropic("claude-haiku-4-5"),
         schema,
         system: SYSTEM,
-        prompt: prompt + extra,
+        prompt: prompt(extra),
         maxOutputTokens: 8000,
       });
       return NextResponse.json({ updatedData: generated.object });
