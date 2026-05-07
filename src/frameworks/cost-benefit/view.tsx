@@ -158,7 +158,7 @@ export function View({ data, onUpdate }: Props) {
   };
 
   return (
-    <div className="relative pt-6">
+    <div className="relative pt-6 max-w-full overflow-x-hidden">
       <div className="relative h-[380px] border-t-2 border-t-ink border-b border-b-ink bg-paper overflow-x-clip overflow-y-visible">
         <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" className="absolute inset-0 w-full h-full pointer-events-none">
           <line x1="40" y1={H - 30} x2={W - 40} y2={H - 30} stroke="var(--rule)" strokeDasharray="2 4" strokeWidth="1" />

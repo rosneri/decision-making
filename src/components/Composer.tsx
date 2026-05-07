@@ -169,87 +169,83 @@ export function Composer({ onSubmit, initialText = "", initialResultMode = "easy
         </div>
       )}
 
-      {/* Framework choice */}
+      {/* Framework + Result style choices */}
       {!recording && (
-        <div className="mt-6 flex items-center gap-3 flex-wrap">
-          <span className="folio">Framework</span>
-          <div className="inline-flex border border-rule rounded-sm overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setMode("auto")}
-              aria-pressed={mode === "auto"}
-              className={[
-                "font-serif text-sm px-3 py-1.5 cursor-pointer transition-colors duration-200",
-                mode === "auto" ? "bg-ink text-paper" : "bg-transparent text-ink hover:bg-rule/40",
-              ].join(" ")}
-            >
-              Auto
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode("manual")}
-              aria-pressed={mode === "manual"}
-              className={[
-                "font-serif text-sm px-3 py-1.5 cursor-pointer border-l border-rule transition-colors duration-200",
-                mode === "manual" ? "bg-ink text-paper" : "bg-transparent text-ink hover:bg-rule/40",
-              ].join(" ")}
-            >
-              Manual
-            </button>
+        <div className="mt-6 flex items-start justify-between gap-4 flex-wrap">
+          {/* Framework */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="folio">Framework</span>
+            <div className="inline-flex border border-rule rounded-sm overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setMode("auto")}
+                aria-pressed={mode === "auto"}
+                className={[
+                  "font-serif text-sm px-3 py-1.5 cursor-pointer transition-colors duration-200",
+                  mode === "auto" ? "bg-ink text-paper" : "bg-transparent text-ink hover:bg-rule/40",
+                ].join(" ")}
+              >
+                Auto
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode("manual")}
+                aria-pressed={mode === "manual"}
+                className={[
+                  "font-serif text-sm px-3 py-1.5 cursor-pointer border-l border-rule transition-colors duration-200",
+                  mode === "manual" ? "bg-ink text-paper" : "bg-transparent text-ink hover:bg-rule/40",
+                ].join(" ")}
+              >
+                Manual
+              </button>
+            </div>
+
+            {mode === "manual" && (
+              <select
+                value={frameworkId}
+                onChange={(e) => setFrameworkId(e.target.value as FrameworkId)}
+                className="font-serif text-[15px] text-ink bg-transparent border border-rule rounded-sm px-3 py-1.5 cursor-pointer hover:border-ink focus:outline-none focus:border-ink max-w-full"
+              >
+                <option value="" disabled>Choose a framework…</option>
+                {grouped.map(([cat, items]) => (
+                  <optgroup key={cat} label={cat}>
+                    {items.map((f) => (
+                      <option key={f.id} value={f.id}>{f.name}</option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+            )}
           </div>
 
-          {mode === "manual" && (
-            <select
-              value={frameworkId}
-              onChange={(e) => setFrameworkId(e.target.value as FrameworkId)}
-              className="font-serif text-[15px] text-ink bg-transparent border border-rule rounded-sm px-3 py-1.5 cursor-pointer hover:border-ink focus:outline-none focus:border-ink max-w-full"
-            >
-              <option value="" disabled>Choose a framework…</option>
-              {grouped.map(([cat, items]) => (
-                <optgroup key={cat} label={cat}>
-                  {items.map((f) => (
-                    <option key={f.id} value={f.id}>{f.name}</option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
-          )}
-        </div>
-      )}
-
-      {/* Result mode choice */}
-      {!recording && (
-        <div className="mt-4 flex items-center gap-3 flex-wrap">
-          <span className="folio">Result style</span>
-          <div className="inline-flex border border-rule rounded-sm overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setResultMode("easy")}
-              aria-pressed={resultMode === "easy"}
-              className={[
-                "font-serif text-sm px-3 py-1.5 cursor-pointer transition-colors duration-200",
-                resultMode === "easy" ? "bg-ink text-paper" : "bg-transparent text-ink hover:bg-rule/40",
-              ].join(" ")}
-            >
-              Simple
-            </button>
-            <button
-              type="button"
-              onClick={() => setResultMode("advanced")}
-              aria-pressed={resultMode === "advanced"}
-              className={[
-                "font-serif text-sm px-3 py-1.5 cursor-pointer border-l border-rule transition-colors duration-200",
-                resultMode === "advanced" ? "bg-ink text-paper" : "bg-transparent text-ink hover:bg-rule/40",
-              ].join(" ")}
-            >
-              Advanced
-            </button>
+          {/* Result style */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="folio">Result style</span>
+            <div className="inline-flex border border-rule rounded-sm overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setResultMode("easy")}
+                aria-pressed={resultMode === "easy"}
+                className={[
+                  "font-serif text-sm px-3 py-1.5 cursor-pointer transition-colors duration-200",
+                  resultMode === "easy" ? "bg-ink text-paper" : "bg-transparent text-ink hover:bg-rule/40",
+                ].join(" ")}
+              >
+                Simple
+              </button>
+              <button
+                type="button"
+                onClick={() => setResultMode("advanced")}
+                aria-pressed={resultMode === "advanced"}
+                className={[
+                  "font-serif text-sm px-3 py-1.5 cursor-pointer border-l border-rule transition-colors duration-200",
+                  resultMode === "advanced" ? "bg-ink text-paper" : "bg-transparent text-ink hover:bg-rule/40",
+                ].join(" ")}
+              >
+                Advanced
+              </button>
+            </div>
           </div>
-          <span className="font-serif italic text-[13px] text-ink-muted">
-            {resultMode === "easy"
-              ? "Shows the result and a plain explanation."
-              : "Shows the full framework with all its fields."}
-          </span>
         </div>
       )}
 
