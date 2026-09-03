@@ -35,8 +35,8 @@ export async function POST(req: Request) {
   }
 
   // Strip advisory fields so the model focuses on structural data
-  const { recommendation: _r, altFrameworks: _a, ...data } = result;
-  void _r; void _a;
+  const { recommendation: _r, altFrameworks: _a, biasFindings: _b, explanation: _e, ...data } = result;
+  void _r; void _a; void _b; void _e;
 
   try {
     const { text } = await generateText({

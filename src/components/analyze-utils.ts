@@ -1,11 +1,27 @@
 import type { FrameworkId, FrameworkResult } from "@/frameworks";
+import type { BiasFinding } from "@/biases";
 import { ANALYZE_ERRORS, type ApiErrorBody } from "@/lib/errors";
 
 export type FrameworkAlternative = { id: FrameworkId; name: string; reason: string };
 export type AnalysisResult = FrameworkResult & {
   altFrameworks?: FrameworkAlternative[];
+  biasFindings?: BiasFinding[];
   explanation?: string;
 };
+
+// Framework views, modify and chat-fill all hand back a bare framework object
+// (the schema strips advisory fields). Re-attach the note, the alternative
+// frameworks and the bias findings from the previous result so they survive
+// every edit path.
+export function keepAdvisory(prev: AnalysisResult | null, next: FrameworkResult): AnalysisResult {
+  if (!prev) return next;
+  return {
+    ...next,
+    recommendation: prev.recommendation,
+    ...(prev.altFrameworks ? { altFrameworks: prev.altFrameworks } : {}),
+    ...(prev.biasFindings ? { biasFindings: prev.biasFindings } : {}),
+  };
+}
 
 function safeStringify(v: unknown): string {
   if (v == null) return "";

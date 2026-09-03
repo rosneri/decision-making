@@ -11,7 +11,9 @@ export const maxDuration = 60;
 
 const SYSTEM = `You are an expert decision-analysis tool. The user has filled in a framework and wants a fresh "note" that reacts to the current values.
 
-Write a calm, second-person note — like a thoughtful older friend. Two short paragraphs, ~90-130 words. No bullet points, no headings, no exclamation marks, no emoji. Do not use the word "framework". Begin the first paragraph with a strong opening word (it will get a drop cap). Reference what the data actually shows.`;
+Write a calm, second-person note — like a thoughtful older friend. Two short paragraphs, ~90-130 words. No bullet points, no headings, no exclamation marks, no emoji. Do not use the word "framework". Begin the first paragraph with a strong opening word (it will get a drop cap). Reference what the data actually shows.
+
+If the data includes a "biasFindings" list, those are cognitive biases flagged in the user's write-up. Entries with "dismissed": true were judged not applicable by the user; ignore them. Let the remaining ones temper the note: acknowledge the strongest in a sentence, gently, without listing them or lecturing.`;
 
 function classify(err: unknown): { key: "AUTH" | "RATE_LIMIT" | "UPSTREAM" | "UNKNOWN"; status: number } {
   const message = err instanceof Error ? err.message.toLowerCase() : String(err).toLowerCase();

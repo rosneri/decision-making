@@ -68,8 +68,19 @@ Optional: `frameworkId` to skip framework selection and force a specific one
 (see `frameworkIds` in the help object for valid values).
 
 Response `data` contains the framework analysis (shape depends on the chosen
-framework) plus an `altFrameworks` array of other applicable frameworks the
-client can offer for re-analysis.
+framework) plus:
+
+- `altFrameworks` — other applicable frameworks the client can offer for re-analysis.
+- `biasFindings` — 0–4 cognitive biases the model found evidence for in the
+  write-up, strongest first. Each is
+  `{ id, name, family, severity (1–5), evidence, effect, counter }`. The
+  recommendation already takes them into account. Valid ids are listed under
+  `biasIds` in the help object; the catalog is documented in
+  [biases.md](./biases.md).
+
+When feeding `data` back as `currentData` to `modify`, you may set
+`dismissed: true` on a bias the user rejected; the field is preserved by the
+client and ignored by the model.
 
 ### `modify` — the back-and-forth
 

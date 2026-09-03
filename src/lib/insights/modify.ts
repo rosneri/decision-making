@@ -56,6 +56,10 @@ export async function runModify(input: {
 
   const schema = SCHEMAS[frameworkId];
   const sample = SAMPLES[frameworkId];
+  // Advisory fields ride along on the client result but are not part of the
+  // framework schema; the client re-attaches them after modify.
+  const { altFrameworks: _alts, biasFindings: _biases, explanation: _expl, ...frameworkData } = data;
+  void _alts; void _biases; void _expl;
 
   const prompt = (extraGuidance = "") =>
     `Decision the user is working through:
@@ -64,7 +68,7 @@ export async function runModify(input: {
 Framework: ${meta.name} (id: "${frameworkId}", category: "${meta.category}")
 
 Current framework data (all fields — copy every field you are not changing exactly as-is):
-${JSON.stringify(data, null, 2)}
+${JSON.stringify(frameworkData, null, 2)}
 
 User's adjustment: "${instruction.trim()}"
 

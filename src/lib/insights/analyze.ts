@@ -1,6 +1,8 @@
 import { generateObject, generateText, NoObjectGeneratedError } from "ai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { FRAMEWORKS, SAMPLES, SCHEMAS, type FrameworkId } from "@/frameworks";
+import type { BiasFinding } from "@/biases";
+import { describeBiasFindings, runDetectBiases } from "./detect-biases";
 
 const apiKey = process.env["ANTHROPIC_API_KEY"] ?? process.env["AI_GATEWAY_API_KEY"];
 const anthropic = createAnthropic(apiKey ? { apiKey } : {});
@@ -45,7 +47,8 @@ const GENERATOR_SYSTEM = `You are an expert decision-analysis tool. Generate rea
 - Set "category" to the framework's category string (provided in the prompt).
 - Set "title" to a short summary of the user's decision.
 - Set "framework" to the exact id provided.
-- Write "recommendation" as a calm, second-person note — like a thoughtful older friend. Two short paragraphs, ~90-130 words. No bullet points, no headings, no exclamation marks, no emoji. Do not use the word "framework". Begin the first paragraph with a strong opening word (it will get a drop cap).`;
+- Write "recommendation" as a calm, second-person note — like a thoughtful older friend. Two short paragraphs, ~90-130 words. No bullet points, no headings, no exclamation marks, no emoji. Do not use the word "framework". Begin the first paragraph with a strong opening word (it will get a drop cap).
+- If a bias check is provided, let it shape the analysis: weigh the evidence with those distortions in mind, and let the recommendation acknowledge the strongest one in a sentence, gently, without lecturing or listing them.`;
 
 export type AnalyzeErrorCode =
   | "INVALID_INPUT"
@@ -62,7 +65,7 @@ export type AnalyzeErrorCode =
 export type AnalyzeAltFramework = { id: FrameworkId; name: string; reason: string };
 
 export type AnalyzeResult =
-  | { ok: true; data: Record<string, unknown> & { altFrameworks: AnalyzeAltFramework[] } }
+  | { ok: true; data: Record<string, unknown> & { altFrameworks: AnalyzeAltFramework[]; biasFindings: BiasFinding[] } }
   | { ok: false; code: AnalyzeErrorCode; status: number; detail: string };
 
 function classify(err: unknown): { key: "AUTH" | "RATE_LIMIT" | "UPSTREAM" | "UNKNOWN"; status: number } {
@@ -120,6 +123,10 @@ export async function runAnalyze(input: {
   let primary: Pick;
   let alternatives: AnalyzeAltFramework[] = [];
 
+  // Bias detection depends only on the decision text, so it runs alongside
+  // framework selection and is awaited before generation, which uses it.
+  const biasesPromise = runDetectBiases({ decisionText, model });
+
   if (typeof frameworkId === "string" && validIdSet.has(frameworkId)) {
     primary = { id: frameworkId as FrameworkId, reason: "selected by the user" };
   } else {
@@ -156,13 +163,16 @@ export async function runAnalyze(input: {
     return { ok: false, code: "UNKNOWN_FRAMEWORK", status: 500, detail: `id=${id}` };
   }
 
+  const biases = await biasesPromise;
+  const biasBlock = describeBiasFindings(biases);
+
   try {
     const schema = SCHEMAS[id];
     const sample = SAMPLES[id];
     const sampleJson = JSON.stringify(sample, null, 2);
 
     const stage2Prompt = (extraGuidance = "") =>
-      `Decision:\n\n"${decisionText}"\n\nFramework: ${meta.name} (id: "${id}", category: "${meta.category}")\nWhy this fits: ${primary.reason}\n\nHere is a worked example of a VALID response in this exact schema (different decision, same shape — match this structure precisely):\n\n${sampleJson}\n\nNow produce the structured analysis for the user's decision. The "framework" field MUST equal "${id}" and "category" MUST equal "${meta.category}". Match the example's shape exactly: same keys, same array lengths where the schema requires fixed lengths, same value ranges. Replace the example's contents with insightful, specific content drawn from the user's decision.${extraGuidance}`;
+      `Decision:\n\n"${decisionText}"\n\nFramework: ${meta.name} (id: "${id}", category: "${meta.category}")\nWhy this fits: ${primary.reason}\n\n${biasBlock ? biasBlock + "\n\n" : ""}Here is a worked example of a VALID response in this exact schema (different decision, same shape — match this structure precisely):\n\n${sampleJson}\n\nNow produce the structured analysis for the user's decision. The "framework" field MUST equal "${id}" and "category" MUST equal "${meta.category}". Match the example's shape exactly: same keys, same array lengths where the schema requires fixed lengths, same value ranges. Replace the example's contents with insightful, specific content drawn from the user's decision.${extraGuidance}`;
 
     const MAX_ATTEMPTS = 3;
     const errors: string[] = [];
@@ -178,7 +188,7 @@ export async function runAnalyze(input: {
           prompt: stage2Prompt(extra),
           maxOutputTokens: 8000,
         });
-        return { ok: true, data: { ...(generated.object as object), altFrameworks: alternatives } as Record<string, unknown> & { altFrameworks: AnalyzeAltFramework[] } };
+        return { ok: true, data: { ...(generated.object as object), altFrameworks: alternatives, biasFindings: biases } as Record<string, unknown> & { altFrameworks: AnalyzeAltFramework[]; biasFindings: BiasFinding[] } };
       } catch (err) {
         let detail = err instanceof Error ? err.message : "Unknown error";
         if (NoObjectGeneratedError.isInstance(err)) {

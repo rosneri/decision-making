@@ -18,7 +18,7 @@ function readHasResult(): boolean {
 // Wrapper around SiteHeader that surfaces the Result item on the Library page
 // when there's a saved decision result. Clicking Result navigates back to the
 // app at /, where DecisionApp restores the result from localStorage.
-export function LibraryHeader() {
+export function LibraryHeader({ active = "frameworks" }: { active?: "frameworks" | "biases" } = {}) {
   const hasResult = useSyncExternalStore(
     () => () => {},
     readHasResult,
@@ -30,7 +30,8 @@ export function LibraryHeader() {
       items={[
         ...(hasResult ? [{ label: "Result", href: "/?view=result" }] : []),
         { label: "Compose", href: "/" },
-        { label: "Library", href: "/frameworks", active: true },
+        { label: "Library", href: "/frameworks", active: active === "frameworks" },
+        { label: "Biases", href: "/biases", active: active === "biases" },
       ]}
     />
   );

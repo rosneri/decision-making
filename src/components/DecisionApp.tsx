@@ -15,7 +15,9 @@ import { HELP } from "@/frameworks/help";
 import { FrameworkHelpPanel } from "./FrameworkHelpPanel";
 import { SiteHeader } from "./SiteHeader";
 import type { AnalysisResult, FrameworkAlternative } from "./analyze-utils";
-import { AnalyzeError, fetchAnalysis } from "./analyze-utils";
+import { AnalyzeError, fetchAnalysis, keepAdvisory } from "./analyze-utils";
+import { BiasPanel } from "./BiasPanel";
+import type { BiasFinding } from "@/biases";
 
 type Route = "compose" | "clarify" | "reading" | "result";
 type Mode = "easy" | "advanced";
@@ -312,15 +314,16 @@ export function DecisionApp() {
 
   // ── Handle modify-input updates ──
   const handleModify = (next: FrameworkResult) => {
-    const merged: AnalysisResult = {
-      ...next,
-      recommendation: (result?.recommendation) ?? (next as AnalysisResult).recommendation,
-      ...(result?.altFrameworks ? { altFrameworks: result.altFrameworks } : {}),
-    };
+    const merged: AnalysisResult = keepAdvisory(result, next);
     resultRef.current = merged;
     setResult(merged);
     setViewVersion((v) => v + 1);
     setExplanationKey((k) => k + 1);
+  };
+
+  // ── User strikes out / restores a bias finding ──
+  const handleBiasesChange = (biases: BiasFinding[]) => {
+    setResult((prev) => (prev ? { ...prev, biasFindings: biases } : prev));
   };
 
   const meta = result ? FRAMEWORKS.find((f) => f.id === result.framework) : undefined;
@@ -359,6 +362,7 @@ export function DecisionApp() {
           ...(result ? [{ label: "Result", onClick: () => setRoute("result"), active: route === "result" }] : []),
           { label: "Compose", onClick: () => setRoute("compose"), active: route !== "result" },
           { label: "Library", href: "/frameworks" },
+          { label: "Biases", href: "/biases" },
         ]}
       />
 
@@ -429,20 +433,13 @@ export function DecisionApp() {
                   <DecisionProvider
                     value={{
                       result,
-                      updateResult: (d) =>
-                        setResult((prev) =>
-                          prev ? { ...d, recommendation: prev.recommendation, ...(prev.altFrameworks ? { altFrameworks: prev.altFrameworks } : {}) } : d,
-                        ),
+                      updateResult: (d) => setResult((prev) => keepAdvisory(prev, d)),
                     }}
                   >
                     <ActiveView
                       key={`print-${result.framework}:${viewVersion}`}
                       data={result}
-                      onUpdate={(d: FrameworkResult) =>
-                        setResult((prev) =>
-                          prev ? { ...d, recommendation: prev.recommendation, ...(prev.altFrameworks ? { altFrameworks: prev.altFrameworks } : {}) } : d,
-                        )
-                      }
+                      onUpdate={(d: FrameworkResult) => setResult((prev) => keepAdvisory(prev, d))}
                     />
                   </DecisionProvider>
                   {metrics.length > 0 && <ResultStrip metrics={metrics} />}
@@ -482,6 +479,15 @@ export function DecisionApp() {
                   )}
                 </div>
 
+                {result.biasFindings && result.biasFindings.length > 0 && (
+                  <BiasPanel
+                    findings={result.biasFindings}
+                    currentFramework={result.framework}
+                    onChange={handleBiasesChange}
+                    onTryFramework={switchFramework}
+                  />
+                )}
+
                 <RecommendationCard
                   key={decisionText}
                   note={result.recommendation ?? null}
@@ -498,7 +504,6 @@ export function DecisionApp() {
                       {result.altFrameworks.map((alt) => (
                         <button
                           key={alt.id}
-                          // eslint-disable-next-line react-hooks/refs -- switchFramework reads a ref but only at click time
                           onClick={() => switchFramework(alt)}
                           title={alt.reason}
                           className="font-serif text-sm text-ink hover:text-paper hover:bg-ink border border-rule hover:border-ink rounded-sm px-3 py-1.5 cursor-pointer transition-colors duration-200 bg-transparent text-left"
@@ -519,20 +524,13 @@ export function DecisionApp() {
                 <DecisionProvider
                   value={{
                     result,
-                    updateResult: (d) =>
-                      setResult((prev) =>
-                        prev ? { ...d, recommendation: prev.recommendation, ...(prev.altFrameworks ? { altFrameworks: prev.altFrameworks } : {}) } : d,
-                      ),
+                    updateResult: (d) => setResult((prev) => keepAdvisory(prev, d)),
                   }}
                 >
                   <ActiveView
                     key={`${result.framework}:${viewVersion}`}
                     data={result}
-                    onUpdate={(d: FrameworkResult) =>
-                      setResult((prev) =>
-                        prev ? { ...d, recommendation: prev.recommendation, ...(prev.altFrameworks ? { altFrameworks: prev.altFrameworks } : {}) } : d,
-                      )
-                    }
+                    onUpdate={(d: FrameworkResult) => setResult((prev) => keepAdvisory(prev, d))}
                   />
                 </DecisionProvider>
 
@@ -558,6 +556,15 @@ export function DecisionApp() {
                       ))}
                     </div>
                   </div>
+                )}
+
+                {result.biasFindings && result.biasFindings.length > 0 && (
+                  <BiasPanel
+                    findings={result.biasFindings}
+                    currentFramework={result.framework}
+                    onChange={handleBiasesChange}
+                    onTryFramework={switchFramework}
+                  />
                 )}
 
                 <RecommendationCard
@@ -621,7 +628,7 @@ export function DecisionApp() {
           decisionText={decisionText}
           data={result}
           onUpdate={(next) => {
-            setResult(next);
+            setResult((prev) => keepAdvisory(prev, next));
             setViewVersion((v) => v + 1);
           }}
           onClose={() => setChatOpen(false)}

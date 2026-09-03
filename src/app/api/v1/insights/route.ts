@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { runAnalyze, runClarify, runModify } from "@/lib/insights";
 import { FRAMEWORKS } from "@/frameworks";
+import { BIAS_IDS } from "@/biases";
 
 export const maxDuration = 60;
 
@@ -25,8 +26,9 @@ function helpObject() {
       },
       analyze: {
         body: { action: "analyze", decisionText: "string (required)", frameworkId: "string (optional — skips selection)" },
-        returns: "framework analysis object including { framework, category, title, recommendation, ...framework-specific fields, altFrameworks }",
-        purpose: "Main inference. Picks a framework and generates structured analysis.",
+        returns: "framework analysis object including { framework, category, title, recommendation, ...framework-specific fields, altFrameworks, biasFindings }",
+        purpose: "Main inference. Picks a framework, runs a cognitive-bias check on the write-up, and generates structured analysis that takes the flagged biases into account.",
+        biasFindings: "array of { id, name, family, severity (1-5), evidence, effect, counter, dismissed? } — see biasIds. Empty when nothing is suggested by the text.",
       },
       modify: {
         body: { action: "modify", decisionText: "string (required)", currentData: "object (required, from prior analyze response)", instruction: "string (required, natural-language adjustment)" },
@@ -40,6 +42,7 @@ function helpObject() {
       "3. POST {action:'modify', decisionText, currentData, instruction}  (repeat as needed)",
     ],
     frameworkIds: FRAMEWORKS.map((f) => f.id),
+    biasIds: BIAS_IDS,
   };
 }
 
